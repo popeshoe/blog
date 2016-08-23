@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="generator" content="Hugo 0.15-DEV" />
+
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title> Oh hi there! &middot; Jonathan Stahlhacke </title>
+
+  
+  <link rel="stylesheet" href="http://porkcullis.com//css/poole.css">
+  <link rel="stylesheet" href="http://porkcullis.com//css/syntax.css">
+  <link rel="stylesheet" href="http://porkcullis.com//css/hyde.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abel">
+
+  
+  <link rel="shortcut icon" href="http://porkcullis.com/favicon.ico">
+
+  
+  <link href="" rel="alternate" type="application/rss+xml" title="Jonathan Stahlhacke" />
+
+<script>
+var last = "";
+function rotate(notransition){
+  if (typeof notransition === 'undefined') {
+    notransition = false;
+  }
+  var body = document.querySelector("body");
+  var list = ["08","09","0a","0b","0c","0d","0e","0f"];
+
+  
+  var index = list.indexOf(last);
+  if (index > -1) {
+    list.splice(index, 1);
+  }
+
+  var rand = list[Math.floor(Math.random() * list.length)];
+  body.className = "layout-reverse theme-base-" + rand + (notransition ? " notransition" : "");
+  last = rand;
+  console.log(rand);
+  if (notransition) {
+    body.offsetHeight;
+  }
+
+  if (notransition) {
+    body.classList.remove("notransition");
+  }
+}
+
+document.addEventListener("DOMContentLoaded", function(event) {
+  var timer = setInterval(rotate, 1000*70);
+  rotate(true);
+  rotate();
+});
+
+</script>
+
+  
+  <script>
+    (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+    function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+    e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+    e.src='//www.google-analytics.com/analytics.js';
+    r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+    ga('create','UA-4689291-1');ga('send','pageview');
+  </script>
+</head>
+
+<body class="theme-base-0f layout-reverse">
+	<div class="sidebar">
+  <div class="container sidebar-sticky">
+    <div class="sidebar-about">
+      <a href="http://porkcullis.com/"><h1>Jonathan Stahlhacke</h1></a>
+      <p class="lead">
+       Semioccasional scientist, incessant procrastinator, frequent eater 
+      </p>
+    </div>
+
+    <ul class="sidebar-nav">
+      <li><a href="http://porkcullis.com/about">About</a></li>
+      <li><a href="http://porkcullis.com/post">Blog</a></li>
+      <li><a href="http://www.twitter.com/popeshoe" target="_blank">Twitter</a></li>
+      <li><a href="http://www.youtube.com/popeshoe" target="_blank">YouTube</a></li>
+      <li><a href="http://www.github.com/popeshoe" target="_blank">GitHub</a></li>
+    </ul>
+
+    <p>&copy; 2015 </p>
+  </div>
+</div>
+
+
+	<div class="content container">
+		<div class="post">
+			<h1>Oh hi there!</h1>
+			
+			<span class="post-date">Friday, April 25, 2014</span>
+			
+			<p>Hello, this is the first post of my new blog what I made, for ages my <a href="http://porkcullis.com/old_site">old site</a> was an ironic (and hilarious) faux terrible &lsquo;my first website&rsquo; affair, complete with proud html 4 strict compliance banner and animated gifs. My friends insisted that this was terrible, completely unprofessional, and that having it on my CV was a mistake and bound to get me put in the discard pile. They&rsquo;re probably right (although I did get two webdev jobs with it) so I&rsquo;ve decided to put up this blog.</p>
+
+<p>I&rsquo;m not entirely sure what I plan to put up here, but over the last few weeks I&rsquo;ve had some ideas p (mainly for the amusement of myself and my friends), and I figure it&rsquo;d be an interesting opportunity to brush up on my writing skills. Here are some of the things you might see if you decide to stick around:</p>
+
+<ul>
+<li>Short stories I&rsquo;ve written in conjunction with my friend Andy J</li>
+<li>Exciting new business ideas!</li>
+<li>Shit musings about my boring life</li>
+<li>Videogame related waffle</li>
+<li>Any interesting tech shit I come across</li>
+<li>Comedy I find amusing</li>
+</ul>
+
+<p>So thanks</p>
+
+		</div>
+
+		
+			<h2>Comments</h2>
+			<div id="disqus_thread"></div>
+<script type="text/javascript">
+     
+    var disqus_shortname = 'porkcullis'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+		
+	</div>
+
+</body>
+</html>

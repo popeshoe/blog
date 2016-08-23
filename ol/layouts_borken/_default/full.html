@@ -1,0 +1,28 @@
+<article class="post full">
+    <header>
+        <h2><a href="{{ .Permalink }}">{{ .Title }}</a></h2>
+        <time datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}"><a href="'{{ .Permalink }}">{{ .Date.Format "January 2, 2006" }}</a></time>
+    </header>
+    <div class="content">
+        {{ .Content }}
+    </div>
+
+     <!-- AddThis Button BEGIN -->
+    <div class="addthis_toolbox addthis_default_style addthis_32x32_style" addthis:url="{{ .Permalink }}">
+        <a class="addthis_button_preferred_1"></a>
+        <a class="addthis_button_preferred_2"></a>
+        <a class="addthis_button_preferred_3"></a>
+        <a class="addthis_button_preferred_4"></a>
+        <a class="addthis_button_compact"></a>
+        <a class="addthis_counter addthis_bubble_style"></a>
+    </div>
+    <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-535bcc9539593660"></script>
+    <!-- AddThis Button END -->
+
+    {{ if .Params.tags }}
+    <ul class="tags">
+        <li>Tags: </li>
+        {{ range .Params.tags }}<li><a href="/tags/{{ . | urlize }}">{{ . }}</a></li> {{ end }}
+    </ul>
+    {{ end }}
+</article>

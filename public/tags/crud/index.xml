@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Crud on Jonathan Stahlhacke</title>
+    <link>http://porkcullis.com/tags/crud/</link>
+    <description>Recent content in Crud on Jonathan Stahlhacke</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <lastBuildDate>Fri, 25 Apr 2014 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://porkcullis.com/tags/crud/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Oh hi there!</title>
+      <link>http://porkcullis.com/post/firstpost/</link>
+      <pubDate>Fri, 25 Apr 2014 00:00:00 +0000</pubDate>
+      
+      <guid>http://porkcullis.com/post/firstpost/</guid>
+      <description>&lt;p&gt;Hello, this is the first post of my new blog what I made, for ages my &lt;a href=&#34;http://porkcullis.com/old_site&#34;&gt;old site&lt;/a&gt; was an ironic (and hilarious) faux terrible &amp;lsquo;my first website&amp;rsquo; affair, complete with proud html 4 strict compliance banner and animated gifs. My friends insisted that this was terrible, completely unprofessional, and that having it on my CV was a mistake and bound to get me put in the discard pile. They&amp;rsquo;re probably right (although I did get two webdev jobs with it) so I&amp;rsquo;ve decided to put up this blog.&lt;/p&gt;
+
+&lt;p&gt;I&amp;rsquo;m not entirely sure what I plan to put up here, but over the last few weeks I&amp;rsquo;ve had some ideas p (mainly for the amusement of myself and my friends), and I figure it&amp;rsquo;d be an interesting opportunity to brush up on my writing skills. Here are some of the things you might see if you decide to stick around:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Short stories I&amp;rsquo;ve written in conjunction with my friend Andy J&lt;/li&gt;
+&lt;li&gt;Exciting new business ideas!&lt;/li&gt;
+&lt;li&gt;Shit musings about my boring life&lt;/li&gt;
+&lt;li&gt;Videogame related waffle&lt;/li&gt;
+&lt;li&gt;Any interesting tech shit I come across&lt;/li&gt;
+&lt;li&gt;Comedy I find amusing&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;So thanks&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

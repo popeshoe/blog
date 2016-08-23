@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  
+  <url>
+    <loc>http://porkcullis.com/</loc>
+    <lastmod>2015-08-02T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://porkcullis.com/post/on-the-menu/</loc>
+    <lastmod>2015-08-02T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://porkcullis.com/post/megapriz/</loc>
+    <lastmod>2014-04-26T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://porkcullis.com/post/firstpost/</loc>
+    <lastmod>2014-04-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://porkcullis.com/about/</loc>
+    <lastmod>2014-04-24T00:00:00+00:00</lastmod>
+  </url>
+  
+</urlset>

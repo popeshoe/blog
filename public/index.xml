@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Jonathan Stahlhacke</title>
+    <link>http://porkcullis.com/</link>
+    <description>Recent content on Jonathan Stahlhacke</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <lastBuildDate>Sun, 02 Aug 2015 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://porkcullis.com/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>On Todays Menu</title>
+      <link>http://porkcullis.com/post/on-the-menu/</link>
+      <pubDate>Sun, 02 Aug 2015 00:00:00 +0000</pubDate>
+      
+      <guid>http://porkcullis.com/post/on-the-menu/</guid>
+      <description>
+
+&lt;p&gt;Back in my &lt;a href=&#34;http://bioinformatics.bris.ac.uk/&#34;&gt;science&lt;/a&gt; days we would occasionally eat lunch at the cool university canteen/study lounge place, who would kindly update the menu on their &lt;a href=&#34;http://www.bristol.ac.uk/conferences-hospitality/hospitality/cafes/studylounge.html&#34;&gt;website&lt;/a&gt; each week. Being a cool/lazy programmingman I wrote a quick hacky script+cron job that would download &amp;amp; parse the menu file, then email me and my friend the food for that day. Neato!&lt;/p&gt;
+
+&lt;p&gt;This worked for approximately two weeks, then it broke because whoever was responsible for uploading the menu would do it late, or set the link incorrectly or randomly change format from .pdf to .doc and back again. This prompted me to think about how my menu script handled failure (not at all), and I thought instead of some boring &amp;lsquo;GERROR: NO MENU FOUND :[&amp;rsquo; message in the email, it would be funny to use some RNG and come up with some ridiculous food instead.&lt;/p&gt;
+
+&lt;p&gt;So I did, and wasted the rest of the day giggling at what I&amp;rsquo;d done, so much so that I whacked it up as a website with a fancy free template I found on the internet, and shoved the whole thing up on Heroku for all to see:&lt;/p&gt;
+
+&lt;h2 id=&#34;menu-porkcullis-com-http-menu-porkcullis-com:76a957477ed02a49781358e79380848e&#34;&gt;&lt;a href=&#34;http://menu.porkcullis.com&#34;&gt;menu.porkcullis.com&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;Tell your friends! Now they too can enjoy such delicacies as:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Cauliflower gazpacho, served on milk&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;or&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Beef and artisinal broccoli flatbread, served on garbage&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;or how about some&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Mouth-watering dog stroganov, stuffed with goose&lt;/p&gt;
+&lt;/blockquote&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Megapriz X design doc</title>
+      <link>http://porkcullis.com/post/megapriz/</link>
+      <pubDate>Sat, 26 Apr 2014 00:00:00 +0000</pubDate>
+      
+      <guid>http://porkcullis.com/post/megapriz/</guid>
+      <description>
+
+&lt;p&gt;Early this year, my friend &lt;a href=&#34;https://twitter.com/dinosaur_ghost&#34;&gt;Andy J&lt;/a&gt; and I undertook the design of a new prison MMO we had just thought up. As it was late at night we quickly put our ideas into a google doc and went to bed. The following is what we awoke to the next morning.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;h1 id=&#34;megapriz-2-0-the-next-generation-of-prison-fun:cc95d1e55a9be42412f550390c4a274e&#34;&gt;MEGAPRIZ 2.0: THE NEXT GENERATION OF PRISON FUN!&lt;/h1&gt;
+
+&lt;p&gt;Players play a priz in megapriz X, the biggest priz in the world!&lt;/p&gt;
+
+&lt;p&gt;Megapriz X 2.0 was set up in 2029 in response to the megacrime wave of 203X (they can see into the future) in which 49 billion people were killed in a global riot started after the megapolice bashed in some kids while doing a routine wallet inspection.&lt;/p&gt;
+
+&lt;p&gt;Basically think of a prison in the comic book Judge Dredd it’s like that. Also Escape From New York starring Kurt Roosell. The player is unjustly thrown into megapriz after escaping literally every other prison on earth (within which he was justly imprisoned), so as a last resort they build megapriz 2.0: the reckoning in response.&lt;/p&gt;
+
+&lt;p&gt;In response to the culture of extreme badassness, the police (a bunch of nerds) got all scared and set up an area of the city to be a prison. They forgot to evacuate it first so it was totally awkward when the prisoners murdered/raped/murdaped the good citizens. They weren’t that good though because this place was already a hive of scum and hellholish to behold. Like basically they all should have been in prison anyway so it was actually a pretty good timesaver. That’s a joke made by police chief Hans McHannerhands because he is beholden to no man and he says what he likes and his dad is the president so noone can do anything about it. Even though everyone thinks hes pretty much a dick and it’s like roll your eyes oh no what’s he going to do next this McHannerhands is crazy and irresponsible!! Anyway this prison was all his idea and his dad (prez) was like OK son do whatever because the meeting was at lunch time and he wanted to eat a sandwich he’d made up himself (alternating molecule thin turkey and ham slices encased in a mayonnaise scent). It was really just a normal mayonnaise sandwich but it saved the presidential chef time so he didn’t say anything. The presidential chef, Corbin Brooooobles, usually prepared 3 meals a day for the president, mostly stuff that the president had ‘made up’ himself. For instance, in the morning the president liked to have an egg with an invisible shell. Then he might have bread ingredients and mix the bread in his mouth. Then for his main meal he might have meat vegetables that tasted like normal vegetables but they werent green. Anyway, basically after the mega priz was setup a bunch of terrorists attacked so everyone forgot about mega priz even McHannerhands and so the prisoners were forced to fend for themselves. Luckily there was a lot of stores in this area of the city so food wasn’t too much of a problem. When the prison was first erected, the gangs that rose to power would have people go out to forage for food. They called these people ‘Forangers’ and they foraged for tinned goods, beans for e.g. And also frozen goods (they still had power). But generally fresh goods were gone off or noone liked them (sprouts). Even frozen sprouts were left alone. These gangs then stored their food in large warehouses (foodhouses) and used the food to strengthen their ranks, that means they got more members. One by one the smaller gangs were killed using prison tactics such as shivvles, the gentlemanly game of shivs. Or they were assimilated into a bigger gang. The biggest gang are The Platypi, so called because they use poison shivs like the poison barb of a platypus’ beak. And also the gang leader was a platypus but that is the secondary reason. Since the prison has been forgotten the guards have become just another gang trying to survive. Since they were pretty well equipped with riot shields and deagles, they have managed to survive pretty good. For instance, a foranger might find a nice cache of food and go back to tell his or her gang. Then suddenly a guy shows up with a riot shield and a deagle. he’s in the doorway. What are you going to do? You try and jump over him but he’s not crouching, then he shoots you with a 50 cal bullet, your dead mate. The police gang is known as The Forgotten Guardians because they were the guards and now they’ve been forgotten. But The Forgot Guards wasn’t as catchy. Now they proudly wear their gang colours, a shitty light blue with dark blue trim. Anyone can join as long as they do not have a phd and they can do a wise guy Brooklyn accent. These guards cannot be picky if they are to survive in……. MEGA PRIZ X: THE ENGUARDENING. Other gangs include: Los Hermanos Pollos, The Crimson Nips, Corky and Co., Cannibal Steve and Steve Cannibal (No Relation), Get Me A Tarp!, Los Hobos Gigantes, Burn, Burn &amp;amp; Burn Lawyers At Large, Wallace Crudmeier and The Crudleys, Grow Me The Honey, The Naturists, Complete Bastards Only&lt;/p&gt;
+
+&lt;p&gt;Within megapriz 2.0 : Cloud city prison, players find themselves in a battle to survive from the evil government (The galactic senate of grody dudes), the for-profit prison system that just wants to imprison them to get their filthy mitts on more bitcoins, and other players who are trying to shiv them up just so they can get a fresh pair of sneakz. The game features over 200 different abilities including, sneak, dodge, roll, stealth, evade, jump, and even crouch!&lt;/p&gt;
+
+&lt;p&gt;On starting a new character in the game, you are thrust into central processing of megapriz X: The beginning of time, and you have to fight your way to your cell, which is kinda weird because they want you to go there, and nobody is really resisting, you’re just punching the fuck out of a bunch of dudes to make a point, because the tutorial tells you that you need to make a scary first impression incase some inmate no-do-gooder wants to make you his hot tamale supreme with extra ball sauce. Then you get locked in and you have to spend like 14 game hours whittling your soap into a shiv to begin leveling up to kill spiders.&lt;/p&gt;
+
+&lt;p&gt;Also there is like a metagame where you gotta spy on your wife back at home because you think she’s gonna cheat on Frederick Wicklestein next door and he’s probably gonna trample on all your carpets and shit, anyway that can’t happen, so you need to like spy on her and earn fat wads to hire PI’s, local college kids, mexican workmen, owls, wizards, spirits and some sort of haunted envelope to scare her into goin’ all nuts so she won’t two time you with that no good son of a butcher.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Activision haven&amp;rsquo;t got back to us.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Oh hi there!</title>
+      <link>http://porkcullis.com/post/firstpost/</link>
+      <pubDate>Fri, 25 Apr 2014 00:00:00 +0000</pubDate>
+      
+      <guid>http://porkcullis.com/post/firstpost/</guid>
+      <description>&lt;p&gt;Hello, this is the first post of my new blog what I made, for ages my &lt;a href=&#34;http://porkcullis.com/old_site&#34;&gt;old site&lt;/a&gt; was an ironic (and hilarious) faux terrible &amp;lsquo;my first website&amp;rsquo; affair, complete with proud html 4 strict compliance banner and animated gifs. My friends insisted that this was terrible, completely unprofessional, and that having it on my CV was a mistake and bound to get me put in the discard pile. They&amp;rsquo;re probably right (although I did get two webdev jobs with it) so I&amp;rsquo;ve decided to put up this blog.&lt;/p&gt;
+
+&lt;p&gt;I&amp;rsquo;m not entirely sure what I plan to put up here, but over the last few weeks I&amp;rsquo;ve had some ideas p (mainly for the amusement of myself and my friends), and I figure it&amp;rsquo;d be an interesting opportunity to brush up on my writing skills. Here are some of the things you might see if you decide to stick around:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Short stories I&amp;rsquo;ve written in conjunction with my friend Andy J&lt;/li&gt;
+&lt;li&gt;Exciting new business ideas!&lt;/li&gt;
+&lt;li&gt;Shit musings about my boring life&lt;/li&gt;
+&lt;li&gt;Videogame related waffle&lt;/li&gt;
+&lt;li&gt;Any interesting tech shit I come across&lt;/li&gt;
+&lt;li&gt;Comedy I find amusing&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;So thanks&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>About me</title>
+      <link>http://porkcullis.com/about/</link>
+      <pubDate>Thu, 24 Apr 2014 00:00:00 +0000</pubDate>
+      
+      <guid>http://porkcullis.com/about/</guid>
+      <description>&lt;p&gt;Hello, I&amp;rsquo;m Jonathan Stahlhacke. I live in Cambridge. I work at &lt;a href=&#34;http://www.congenica.com/&#34;&gt;Congenica&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;I like videogames, programming, alternative comedy and paintball.&lt;/p&gt;
+
+&lt;p&gt;I&amp;rsquo;m on &lt;a href=&#34;http://www.twitter.com/popeshoe&#34;&gt;Twitter&lt;/a&gt; and also &lt;a href=&#34;https://github.com/popeshoe&#34;&gt;GitHub&lt;/a&gt; (sometimes)&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

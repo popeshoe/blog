@@ -1,0 +1,15 @@
+<article class="post summary">
+    <header>
+        <h2><a href="{{ .Permalink }}">{{ .Title }}</a></h2>
+        <time datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}"><a href="'{{ .Permalink }}">{{ .Date.Format "January 2, 2006" }}</a></time>
+    </header>
+    <div class="content">
+        {{ .Summary }} <a href="{{ .Permalink }}">Full post &raquo;</a>
+    </div>
+    {{ if .Params.tags }}
+    <ul class="tags">
+        <li>Tags: </li>
+        {{ range .Params.tags }}<li><a href="/tags/{{ . | urlize }}">{{ . }}</a></li> {{ end }}
+    </ul>
+    {{ end }}
+</article>

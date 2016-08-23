@@ -1,0 +1,18 @@
+{
+	"title": "Jonathan Stahlhacke",
+    "contentdir": "content",
+    "layoutdir": "layouts",
+    "publishdir": "public",
+    "builddrafts": false,
+    "indexes": {
+       "tag": "tags"
+    },
+    "baseurl": "http://porkcullis.com/",
+    "canonifyurls": true,
+    "theme": "hyde",
+    "params": {
+        "themeColor": "theme-base-0f layout-reverse",
+        "description": "Semioccasional scientist, incessant procrastinator, frequent eater",
+        "disqusShortname": "porkcullis"
+    }
+}
