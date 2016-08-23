@@ -13,7 +13,7 @@ This worked for approximately two weeks, then it broke because whoever was respo
 
 So I did, and wasted the rest of the day giggling at what I'd done, so much so that I whacked it up as a website with a fancy free template I found on the internet, and shoved the whole thing up on Heroku for all to see:
 
-## [menu.porkcullis.com](http://menu.porkcullis.com)
+## [http://menu.porkcullis.com](http://menu.porkcullis.com)
 
 Tell your friends! Now they too can enjoy such delicacies as:
 
