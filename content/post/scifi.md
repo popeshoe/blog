@@ -1,4 +1,5 @@
 {
+    "title": "Collaborative Trash Science Fiction",
     "description": "Me and AndyJ wrote some incredible, exciting science fiction",
     "date": "2016-08-24",
     "tags": [
@@ -31,3 +32,4 @@ Then it struck him like a bolt of lightning right into his brain pipes, he was a
 
 > "Ughh I'm blacking out" Ed slurred before he remembered he was a robot. "Oh, hm" he thought as the beam pulled him up extremely slowly. 3 hours later, Ed was sucked into the ship's garbage chute and dumped unceremoniouisly into a fetid pool of water, mud and trash. As he looked around to get his bearings, a loud rumble began that seemed to come from all around him. Creaking and clanking, the solid metal walls slowly began to move in on Ed! He frantically looked around with his robo-eyes for a way out. "Can a robot get an exit??" he quipped before he again admonished himself. "All these quips are really crushing my sp;irit. FUCpfffffffftthbtbthhh" The walls had smooshed all the garbage into Ed's mouth and eyes and ears, it was freakin gross. "NOOOOaaaaagargle" he shouted with his last breath. Just as the walls touched either side of his head, they stopped and a voice came over the PA system. "JK guy, you totally thought we were gonna, like, crush you, dude! Haha, you idiot this is the freakin future, man... we got like a million sensors up here to detect stupid assholes" Ed gave the most sarcastic look you can as you're spitting garbage out of your mouth
 
+Feel free to contact me for the film,tv,book or podcast rights.
