@@ -40,7 +40,7 @@ function rotate(notransition){
   var rand = list[Math.floor(Math.random() * list.length)];
   body.className = "layout-reverse theme-base-" + rand + (notransition ? " notransition" : "");
   last = rand;
-  console.log(rand);
+  
   if (notransition) {
     body.offsetHeight;
   }
@@ -54,6 +54,22 @@ document.addEventListener("DOMContentLoaded", function(event) {
   var timer = setInterval(rotate, 1000*70);
   rotate(true);
   rotate();
+
+  // Set the lead text
+  var leads = [
+    "Semioccasional scientist, incessant procrastinator, frequent eater",
+    "Imagine terrible memes, but a human",
+    "Kind of like Skeletor, but fat",
+    "Once startled by the shadow of a girl on a bike",
+    "Watched every single episode of The West Wing at least 3 times",
+    "Probably can't tell time",
+    "Sponsored by Tesco Metro",
+    "Prefers Diet Coke!",
+    "Easily convinced of bullshit",
+    "Probably listening to a podcast right now",
+    "Getting worse at videogames every day",
+  ];
+  document.querySelector(".sidebar .lead").textContent = leads[Math.floor(Math.random() * leads.length)];
 });
 
 </script>
