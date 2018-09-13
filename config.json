@@ -7,7 +7,7 @@
     "indexes": {
        "tag": "tags"
     },
-    "baseurl": "http://porkcullis.com/",
+    "baseurl": "https://porkcullis.com/",
     "canonifyurls": true,
     "theme": "hyde",
     "params": {
