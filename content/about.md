@@ -4,7 +4,7 @@
 "date": "2014-04-24"
 }
 
-Hello, I'm Jonathan Stahlhacke. I live in Cambridge. I work at [Congenica](http://www.congenica.com/).
+Hello, I'm Jonathan Stahlhacke. I live in Birmingham. I once worked at [Made Media](http://www.congenica.com/), [Congenica](http://www.congenica.com/) and [Future](https://www.futureplc.com/).
 
 I like videogames, programming, alternative comedy and paintball.
 
