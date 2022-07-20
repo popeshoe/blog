@@ -6,7 +6,7 @@
     <div class="content container">
 <div class="posts">
 
-      {{ range first 3 (where .Data.Pages "Section" "post") }}
+      {{ range first 3 (where site.RegularPages "Type" "in" site.Params.mainSections) }}
   <div class="post">
     <h1 class="post-title">
       <a href="{{ .Permalink }}">

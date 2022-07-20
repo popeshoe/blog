@@ -13,6 +13,11 @@
     "params": {
         "themeColor": "theme-base-0f layout-reverse",
         "description": "Semioccasional scientist, incessant procrastinator, frequent eater",
-        "disqusShortname": "porkcullis"
+        "disqusShortname": "porkcullis",
+        "params": {
+            "mainSections": [
+               "post"
+            ]
+         }
     }
 }
