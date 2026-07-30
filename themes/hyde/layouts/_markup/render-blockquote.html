@@ -1,0 +1,36 @@
+{{ if eq .Type "alert" }}
+  {{ $labels := dict
+    "caution" "Caution"
+    "important" "Important"
+    "note" "Note"
+    "tip" "Tip"
+    "warning" "Warning"
+    "wat" "wat"
+  }}
+  {{ $icons := dict
+    "caution" "🛑"
+    "important" "!"
+    "note" "ⓘ"
+    "tip" "💡"
+    "warning" "⚠️"
+    "wat" "😐"
+  }}
+  <blockquote class="alert alert-{{ .AlertType }}">
+    <p class="alert-heading">
+      <span class="alert-icon" aria-hidden="true">{{ index $icons .AlertType }}</span>
+      {{ with .AlertTitle }}{{ . }}{{ else }}{{ index $labels .AlertType }}{{ end }}
+    </p>
+    {{ .Text }}
+  </blockquote>
+{{ else }}
+  <figure>
+    <blockquote {{ with .Attributes.cite }}cite="{{ . }}"{{ end }}>
+      {{ .Text }}
+    </blockquote>
+    {{ with .Attributes.caption }}
+      <figcaption class="blockquote-caption">
+        {{ . | safeHTML }}
+      </figcaption>
+    {{ end }}
+  </figure>
+{{ end }}

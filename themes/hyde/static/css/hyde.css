@@ -61,17 +61,6 @@ body {
   animation-fill-mode: forwards;
 }
 
-test {
-  color: #ac4142;
-  color: #d28445;
-  color: #f4bf75;
-  color: #90a959;
-  color: #75b5aa;
-  color: #6a9fb5;
-  color: #aa759f;
-  color: #8f5536;
-}
-
 /*
  * Global resets
  *
@@ -247,6 +236,14 @@ a.sidebar-nav-item:focus {
   color: var(--theme-color);
 }
 
+/* :visited can't be styled with a custom property (browsers block var()
+   there for history-sniffing privacy reasons), so it gets a static,
+   neutral color instead of tracking the cycling theme color. */
+.content a:visited {
+  color: #8b8b8b;
+}
+
+
 .content h1,
 .content h2,
 .content h3,
@@ -255,3 +252,34 @@ a.sidebar-nav-item:focus {
 .content h6 {
   color: var(--theme-color);
 }
+
+blockquote.alert {
+  padding: .5rem 1rem;
+}
+
+blockquote.alert .alert-heading {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  margin-top: 0;
+  margin-bottom: .25rem;
+  font-weight: bold;
+}
+
+blockquote.alert .alert-icon {
+  line-height: 1;
+}
+
+blockquote.alert-note      { border-color: #0969da; }
+blockquote.alert-tip       { border-color: #1a7f37; }
+blockquote.alert-important { border-color: #8250df; }
+blockquote.alert-warning   { border-color: #9a6700; }
+blockquote.alert-caution   { border-color: #cf222e; }
+blockquote.alert-wat       { border-color: #ff1f8f; }
+
+.alert-note .alert-heading      { color: #0969da; }
+.alert-tip .alert-heading       { color: #1a7f37; }
+.alert-important .alert-heading { color: #8250df; }
+.alert-warning .alert-heading   { color: #9a6700; }
+.alert-caution .alert-heading   { color: #cf222e; }
+.alert-wat .alert-heading       { color: #ff1f8f; }
