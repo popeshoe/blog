@@ -24,26 +24,52 @@
  * Themes
  */
 
-/* Custom colour changing*/
+/* Custom colour changing
+ *
+ * A single CSS animation on <body> drives one registered, inheritable colour
+ * custom property (--theme-color). The sidebar and link colours just read
+ * that variable, so one animation covers every link in the page instead of
+ * needing to be restarted per-element. On page load, JS points the animation
+ * at the current/next colour (by rewriting the @keyframes rule directly, see
+ * colours.html) and gives it a negative animation-delay based on wall-clock
+ * time, seeking it straight to where it'd already be rather than jumping
+ * straight to the target colour.
+ */
 
-.notransition .sidebar,
-.notransition .content a,
-.notransition .related-posts li a:hover
-{
-  -webkit-transition: none !important;
-  -moz-transition: none !important;
-  -o-transition: none !important;
-  -ms-transition: none !important;
-  transition: none !important;
+@property --theme-color {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #fff;
 }
 
-.sidebar
-{
-  transition: background-color 55s ease;
+/* The from/to colours here are placeholders, rewritten directly on this rule
+   (via CSSOM, see colours.html) before each restart. Firefox only animates a
+   registered custom property smoothly when its keyframe values are literal
+   colours - if a keyframe instead reads them indirectly through var(), it
+   falls back to a discrete jump partway through instead of easing. Chrome
+   doesn't have this limitation, but literal values work identically there. */
+@keyframes theme-cycle {
+  from { --theme-color: #fff; }
+  to   { --theme-color: #fff; }
 }
-.content a,
-.related-posts li a:hover {
-  transition: color 55s ease;
+
+body {
+  animation-name: theme-cycle;
+  animation-duration: var(--theme-anim-duration, 55s);
+  animation-delay: var(--theme-anim-delay, 0s);
+  animation-timing-function: ease;
+  animation-fill-mode: forwards;
+}
+
+test {
+  color: #ac4142;
+  color: #d28445;
+  color: #f4bf75;
+  color: #90a959;
+  color: #75b5aa;
+  color: #6a9fb5;
+  color: #aa759f;
+  color: #8f5536;
 }
 
 /*
@@ -77,9 +103,10 @@ html {
 .sidebar {
   text-align: center;
   padding: 2rem 1rem;
-  color: rgba(255,255,255,.5);
-  background-color: #202020;
+  color: color-mix(in oklab, var(--theme-color) 50%, white);
+  background-color: var(--theme-color);
 }
+
 @media (min-width: 48em) {
   .sidebar {
     position: fixed;
@@ -88,6 +115,23 @@ html {
     bottom: 0;
     width: 18rem;
     text-align: left;
+  }
+}
+
+@media (max-width: 47.999em) {
+  .content::before {
+    content: "";
+    display: block;
+    position: sticky;
+    top: 0px;
+    margin-left: -16px;
+    margin-right: -16px;
+    height: 3.5rem;
+    margin-top: -7rem;
+    margin-bottom: 2rem;
+    background-image: linear-gradient(var(--theme-color) 15%, transparent);
+    pointer-events: none;
+    z-index: 99999;
   }
 }
 
@@ -192,80 +236,22 @@ a.sidebar-nav-item:focus {
 /*
  * Themes
  *
- * As of v1.1, Hyde includes optional themes to color the sidebar and links
- * within blog posts. To use, add the class of your choosing to the `body`.
+ * Colour values now live in the JS COLOURS array and are fed into the
+ * --theme-color animation above; the "theme-base-XX" class from head.html is
+ * kept only as a semantic label (which colour is currently targeted) and no
+ * longer carries its own CSS, so it can't fight the animation on specificity.
  */
 
-/* Base16 (http://chriskempson.github.io/base16/#default) */
-
-/* Red */
-.theme-base-08 .sidebar {
-  background-color: #ac4142;
-}
-.theme-base-08 .content a,
-.theme-base-08 .related-posts li a:hover {
-  color: #ac4142;
+.content a,
+.related-posts li a:hover {
+  color: var(--theme-color);
 }
 
-/* Orange */
-.theme-base-09 .sidebar {
-  background-color: #d28445;
-}
-.theme-base-09 .content a,
-.theme-base-09 .related-posts li a:hover {
-  color: #d28445;
-}
-
-/* Yellow */
-.theme-base-0a .sidebar {
-  background-color: #f4bf75;
-}
-.theme-base-0a .content a,
-.theme-base-0a .related-posts li a:hover {
-  color: #f4bf75;
-}
-
-/* Green */
-.theme-base-0b .sidebar {
-  background-color: #90a959;
-}
-.theme-base-0b .content a,
-.theme-base-0b .related-posts li a:hover {
-  color: #90a959;
-}
-
-/* Cyan */
-.theme-base-0c .sidebar {
-  background-color: #75b5aa;
-}
-.theme-base-0c .content a,
-.theme-base-0c .related-posts li a:hover {
-  color: #75b5aa;
-}
-
-/* Blue */
-.theme-base-0d .sidebar {
-  background-color: #6a9fb5;
-}
-.theme-base-0d .content a,
-.theme-base-0d .related-posts li a:hover {
-  color: #6a9fb5;
-}
-
-/* Magenta */
-.theme-base-0e .sidebar {
-  background-color: #aa759f;
-}
-.theme-base-0e .content a,
-.theme-base-0e .related-posts li a:hover {
-  color: #aa759f;
-}
-
-/* Brown */
-.theme-base-0f .sidebar {
-  background-color: #8f5536;
-}
-.theme-base-0f .content a,
-.theme-base-0f .related-posts li a:hover {
-  color: #8f5536;
+.content h1,
+.content h2,
+.content h3,
+.content h4,
+.content h5,
+.content h6 {
+  color: var(--theme-color);
 }

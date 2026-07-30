@@ -56,6 +56,9 @@ html {
   html {
     font-size: 20px;
   }
+  html .content {
+    font-size: 18px;
+  }
 }
 
 body {

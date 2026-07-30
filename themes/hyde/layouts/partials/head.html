@@ -26,6 +26,19 @@
   <link rel="stylesheet" href="{{ .Site.BaseURL }}/css/hyde.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abel">
 
+  <!-- Without JS, colours.html never runs, so the theme-cycle keyframes stay
+       at their #fff placeholders and --theme-color would just be white for
+       the whole page. Turn the animation off and pin a single static colour
+       instead. -->
+  <noscript>
+    <style>
+      body {
+        animation: none !important;
+        --theme-color: #6a9fb5;
+      }
+    </style>
+  </noscript>
+
   <!-- Icons -->
   <link rel="shortcut icon" href="/favicon.ico">
 
@@ -33,39 +46,7 @@
   <link href='{{ with .OutputFormats.Get "RSS" }}{{ .RelPermalink }}{{ end }}' rel="alternate" type="application/rss+xml" title="{{ .Site.Title }}" />
 
 <script>
-var last = "";
-function rotate(notransition){
-  if (typeof notransition === 'undefined') {
-    notransition = false;
-  }
-  var body = document.querySelector("body");
-  var list = ["08","09","0a","0b","0c","0d","0e","0f"];
-
-  // remove the last colour
-  var index = list.indexOf(last);
-  if (index > -1) {
-    list.splice(index, 1);
-  }
-
-  var rand = list[Math.floor(Math.random() * list.length)];
-  body.className = "layout-reverse theme-base-" + rand + (notransition ? " notransition" : "");
-  last = rand;
-  
-  if (notransition) {
-    body.offsetHeight;
-  }
-
-  if (notransition) {
-    body.classList.remove("notransition");
-  }
-}
-
 document.addEventListener("DOMContentLoaded", function(event) {
-  var timer = setInterval(rotate, 1000*70);
-  rotate(true);
-  rotate();
-
-  // Set the lead text
   var leads = [
     "Semioccasional scientist, incessant procrastinator, frequent eater",
     "Imagine terrible memes, but a human",
@@ -74,10 +55,14 @@ document.addEventListener("DOMContentLoaded", function(event) {
     "Watched every single episode of The West Wing at least 3 times",
     "Probably can't tell time",
     "Sponsored by Tesco Metro",
-    "Prefers Diet Coke!",
+    "Prefers Pepsi Max!",
     "Easily convinced of bullshit",
     "Probably listening to a podcast right now",
     "Getting worse at videogames every day",
+    "Too proud of the stupid colours on this page",
+    "is scared of AI",
+    "Hell yeah!",
+    "🦆🦆🦆🦆🦆🦆🦀"
   ];
   document.querySelector(".sidebar .lead").textContent = leads[Math.floor(Math.random() * leads.length)];
 });
