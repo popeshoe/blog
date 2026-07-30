@@ -153,6 +153,17 @@ a.sidebar-nav-item:focus {
   font-weight: bold;
 }
 
+/* Bigger tap targets on touch-sized screens - the sidebar sits above the
+   content and doubles as the mobile nav, so its links need to be easy to
+   hit with a thumb, not just readable. */
+@media (max-width: 47.999em) {
+  .sidebar-nav a {
+    display: block;
+    padding: .5rem 0;
+    font-size: 1.15rem;
+  }
+}
+
 /* Sticky sidebar
  *
  * Add the `sidebar-sticky` class to the sidebar's container to affix it the
@@ -220,8 +231,6 @@ a.sidebar-nav-item:focus {
   }
 }
 
-
-
 /*
  * Themes
  *
@@ -240,9 +249,165 @@ a.sidebar-nav-item:focus {
    there for history-sniffing privacy reasons), so it gets a static,
    neutral color instead of tracking the cycling theme color. */
 .content a:visited {
-  color: #8b8b8b;
+  color: inherit;
 }
 
+/* Projects list */
+.project-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 280px));
+  justify-content: center;
+  gap: 2.5rem;
+  margin: 2rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.project-card {
+  overflow: hidden;
+  border: 1px solid #333;
+  border-radius: 6px;
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, .15);
+  transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease;
+}
+
+/* A little scatter so the cards feel hand-placed rather than gridded. */
+.project-card:nth-child(3n+1) {
+  transform: rotate(-2deg);
+}
+
+.project-card:nth-child(3n+2) {
+  transform: rotate(1.5deg);
+}
+
+.project-card:nth-child(3n) {
+  transform: rotate(-1deg);
+}
+
+.project-card:hover {
+  border-color: var(--theme-color);
+  transform: rotate(0deg) translateY(-4px);
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, .2);
+}
+
+.project-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: 1rem 1.25rem;
+  background-color: var(--theme-color);
+  border-radius: 5px 5px 0 0;
+}
+
+.project-card-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.project-card .project-card-header a {
+  color: #fff;
+}
+
+.project-card-links {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  flex-shrink: 0;
+}
+
+.project-card-links a {
+  display: inline-flex;
+  align-items: center;
+  padding: .2rem;
+  opacity: .8;
+  transition: opacity .15s ease;
+}
+
+.project-card-links a:hover,
+.project-card-links a:focus {
+  opacity: 1;
+  text-decoration: none;
+}
+
+.project-card-links svg {
+  width: 1.4rem;
+  height: 1.4rem;
+  flex-shrink: 0;
+}
+
+.icon-label {
+  display: none;
+}
+
+.icon-popover[popover] {
+  inset: auto;
+  margin: 0;
+  border: none;
+  border-radius: 4px;
+  padding: .35rem .6rem;
+  background: #222;
+  color: #fff;
+  font-size: .8rem;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translateX(-50%);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .2);
+}
+
+.project-card-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3.5rem;
+  line-height: 1;
+  padding: 1.5rem;
+  background: color-mix(in oklab, var(--theme-color) 12%, white);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .08);
+  text-decoration: none;
+  transition: background-color .15s ease;
+}
+
+.project-card-art:hover {
+  background: color-mix(in oklab, var(--theme-color) 22%, white);
+}
+
+.project-card a:hover {
+  text-decoration: none;
+}
+
+.project-card-body {
+  padding: 1.25rem;
+}
+
+.project-card-body p {
+  margin-bottom: 0;
+}
+
+/* On touch-sized screens there's no hover to reveal the popover labels, so
+   show them as plain text next to the icons instead, and give everything
+   more room to breathe as a bigger tap target. */
+@media (max-width: 47.999em) {
+  .project-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .6rem;
+  }
+
+  .project-card-links {
+    gap: 1.25rem;
+  }
+
+  .project-card-links a {
+    padding: .4rem .5rem;
+  }
+
+  .icon-label {
+    display: inline;
+    margin-left: .4rem;
+    font-size: .9rem;
+  }
+}
 
 .content h1,
 .content h2,

@@ -2,8 +2,14 @@
     "title": "On Todays Menu",
     "description": "On Today's Menu, a silly menu generator",
     "date": "2015-08-02",
+    "project": {
+        "name": "On the Menu",
+        "url": "http://menu.porkcullis.com",
+        "description": "A silly restaurant menu generator. Endless combinations of absurd dishes",
+        "icon": "🍝"
+    },
     "tags": [
-        "Silly", "Side Project"
+        "Project", "Silly", "Side Project"
     ]
 }
 

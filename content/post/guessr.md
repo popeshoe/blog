@@ -2,6 +2,13 @@
     "title": "Claude gave my party game the same bug that almost broke Apollo 11",
     "description": "I built a charades/heads up game you can play in your browser!",
     "date": "2026-04-10",
+    "project": {
+        "name": "Guessr",
+        "url": "http://guessr.porkcullis.com",
+        "description": "A charades/heads up style guessing game you can play in your browser.",
+        "repo": "https://github.com/popeshoe/guessr",
+        "icon": "📱"
+    },
     "tags": [
         "Project", "Code", "AI"
     ]
