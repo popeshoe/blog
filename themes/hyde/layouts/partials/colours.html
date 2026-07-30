@@ -176,4 +176,40 @@ function scheduleRotation() {
 
 applyInitialColour();
 scheduleRotation();
+
+{{ if hugo.IsServer }}
+// Dev-server only: Hugo's LiveReload hot-swaps just the <link
+// rel="stylesheet"> tag on CSS-only changes, without reloading the page or
+// re-running this script. The freshly-swapped-in stylesheet's @keyframes
+// theme-cycle rule starts back at its literal #fff placeholders (see the
+// comment above findThemeCycleKeyframesRule), so --theme-color goes white
+// until something repopulates them. Watch for stylesheet swaps and redo
+// that work each time one lands, instead of waiting for a real navigation.
+var styleSwapObserver = new MutationObserver(function (mutations) {
+  mutations.forEach(function (mutation) {
+    mutation.addedNodes.forEach(function (node) {
+      if (node.tagName === "LINK" && node.rel === "stylesheet") {
+        node.addEventListener("load", function () {
+          // Reach into this specific, just-loaded stylesheet rather than
+          // re-running the generic document.styleSheets search: LiveReload
+          // keeps the old <link> (and its stylesheet) in the document for a
+          // moment after the new one's `load` fires, only removing it
+          // slightly later, so a generic search would still find the old,
+          // about-to-be-removed rule instead of the new one.
+          var rules = node.sheet && node.sheet.cssRules;
+          if (!rules) return;
+          for (var i = 0; i < rules.length; i++) {
+            if (rules[i] instanceof CSSKeyframesRule && rules[i].name === "theme-cycle") {
+              themeCycleKeyframesRule = rules[i];
+              applyInitialColour();
+              break;
+            }
+          }
+        });
+      }
+    });
+  });
+});
+styleSwapObserver.observe(document.head, { childList: true });
+{{ end }}
 </script>
