@@ -21,9 +21,9 @@
   <title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} &middot; {{ .Site.Title }}{{ end }}</title>
 
   <!-- CSS -->
-  <link rel="stylesheet" href="{{ .Site.BaseURL }}/css/poole.css">
-  <link rel="stylesheet" href="{{ .Site.BaseURL }}/css/syntax.css">
-  <link rel="stylesheet" href="{{ .Site.BaseURL }}/css/hyde.css">
+  <link rel="stylesheet" href="{{ .Site.BaseURL }}/css/poole.css?{{ now.Unix }}">
+  <link rel="stylesheet" href="{{ .Site.BaseURL }}/css/syntax.css?{{ now.Unix }}">
+  <link rel="stylesheet" href="{{ .Site.BaseURL }}/css/hyde.css?{{ now.Unix }}">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abel">
 
   <!-- Without JS, colours.html never runs, so the theme-cycle keyframes stay
@@ -53,7 +53,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
     "Kind of like Skeletor, but fat",
     "Once startled by the shadow of a girl on a bike",
     "Watched every single episode of The West Wing at least 3 times",
-    "Probably can't tell time",
     "Sponsored by Tesco Metro",
     "Prefers Pepsi Max!",
     "Easily convinced of bullshit",
@@ -63,7 +62,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
     "is scared of AI",
     "Hell yeah!",
     "🦆🦆🦆🦆🦆🦆🦀",
-    "is a physicalist according to DeekSeek"
+    "is a physicalist according to DeekSeek",
+    "now with ADHD"
   ];
   document.querySelector(".sidebar .lead").textContent = leads[Math.floor(Math.random() * leads.length)];
 });
