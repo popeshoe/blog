@@ -1,32 +1,27 @@
 {
 	"title": "Jonathan Stahlhacke",
-   "contentdir": "content",
-   "layoutdir": "layouts",
-   "publishdir": "public",
-   "builddrafts": false,
-   "indexes": {
-      "tag": "tags"
-   },
-   "baseurl": "https://porkcullis.com/",
-   "canonifyurls": true,
-   "theme": "hyde",
-   "params": {
-      "themeColor": "theme-base-0f layout-reverse",
-      "description": "Semioccasional scientist, incessant procrastinator, frequent eater",
-      "disqusShortname": "porkcullis",
-      "params": {
-         "mainSections": [
-            "post"
-         ]
-      }
-   },
-   "markup":{
-      "goldmark": {
-         "parser": {
-            "attribute": {
-               "block": true
-            }
-         }
-      }
-   }
+	"baseURL": "https://porkcullis.com/",
+	"canonifyURLs": true,
+	"buildDrafts": false,
+	"//": "Replaces the legacy `indexes` key. Hugo still honours `indexes` as an alias for `taxonomies`, and it was doing real work: restricting taxonomies to tags only. Dropping it silently re-enabled the default `categories` taxonomy and generated a set of empty /categories/ pages.",
+	"taxonomies": {
+		"tag": "tags"
+	},
+	"params": {
+		"themeColor": "theme-base-0f layout-reverse",
+		"description": "Semioccasional scientist, incessant procrastinator, frequent eater",
+		"disqusShortname": "porkcullis",
+		"mainSections": [
+			"post"
+		]
+	},
+	"markup": {
+		"goldmark": {
+			"parser": {
+				"attribute": {
+					"block": true
+				}
+			}
+		}
+	}
 }

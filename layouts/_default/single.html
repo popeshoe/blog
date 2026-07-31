@@ -1,8 +1,4 @@
-{{ partial "head.html" . }}
-<body class="{{ .Site.Params.themeColor }}">
-{{ partial "colours.html" . }}
-	{{ partial "sidebar.html" . }}
-
+{{ define "main" }}
 	<div class="content container">
 		<div class="post">
 			<h1>{{ .Title }}</h1>
@@ -17,6 +13,4 @@
 			{{ partial "disqus" . }}
 		{{ end }}
 	</div>
-
-</body>
-</html>
+{{ end }}

@@ -1,9 +1,4 @@
-{{ partial "head.html" . }}
-<body class="{{ .Site.Params.themeColor }}">
-{{ partial "colours.html" . }}
-
-	{{ partial "sidebar.html" . }}
-
+{{ define "main" }}
 	<div class="content container full">
 		<h1>{{ .Title }}</h1>
 		<div class="post-body">{{ .Content }}</div>
@@ -38,7 +33,9 @@
 			{{ end }}
 		</ul>
 	</div>
+{{ end }}
 
+{{ define "scripts" }}
 	<script>
 	var isMobileView = window.matchMedia('(max-width: 47.999em)');
 	document.querySelectorAll('.project-card-links a').forEach(function (link) {
@@ -60,5 +57,4 @@
 		link.addEventListener('blur', hide);
 	});
 	</script>
-</body>
-</html>
+{{ end }}

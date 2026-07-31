@@ -1,9 +1,4 @@
-{{ partial "head.html" . }}
-<body class="{{ .Site.Params.themeColor }}">
-{{ partial "colours.html" . }}
-
-	{{ partial "sidebar.html" . }}
-
+{{ define "main" }}
 	<div class="content container">
 		<ul class="posts">
 			{{ range .Data.Pages }}
@@ -13,5 +8,4 @@
 			{{ end }}
 		</ul>
 	</div>
-</body>
-</html>
+{{ end }}

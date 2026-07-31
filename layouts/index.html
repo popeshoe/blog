@@ -1,9 +1,4 @@
-{{ partial "head.html" . }}
-<body class="{{ .Site.Params.themeColor }}">
-{{ partial "colours.html" . }}
-
-{{ partial "sidebar.html" . }}
-
+{{ define "main" }}
     <div class="content container">
 <div class="posts">
 
@@ -24,6 +19,4 @@
 
 		<a href="/post">More posts&hellip;</a>
 </div>
-
-  </body>
-</html>
+{{ end }}

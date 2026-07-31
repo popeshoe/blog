@@ -1,0 +1,1047 @@
+/* =============================================================================
+ * main.css
+ *
+ * Merged from the three stylesheets this site used to load separately:
+ *   poole.css  -> base/reset layer (upstream Poole)
+ *   syntax.css -> Pygments/Chroma token colours
+ *   hyde.css   -> layout, theme-colour engine, components
+ *
+ * PHASE 1 NOTE: this is a straight concatenation in the original <link> order.
+ * Rule order is load-bearing here - hyde.css deliberately overrides poole.css
+ * on `html` font-size and font-family - so the sections are NOT yet reordered.
+ * Reordering happens in phase 3, once those cascade conflicts are resolved.
+ * =============================================================================
+ */
+
+
+/* ==== BEGIN poole.css =================================================== */
+
+/*
+ *                        ___
+ *                       /\_ \
+ *  _____     ___     ___\//\ \      __
+ * /\ '__`\  / __`\  / __`\\ \ \   /'__`\
+ * \ \ \_\ \/\ \_\ \/\ \_\ \\_\ \_/\  __/
+ *  \ \ ,__/\ \____/\ \____//\____\ \____\
+ *   \ \ \/  \/___/  \/___/ \/____/\/____/
+ *    \ \_\
+ *     \/_/
+ *
+ * Designed, built, and released under MIT license by @mdo. Learn more at
+ * https://github.com/poole/poole.
+ */
+
+
+/*
+ * Contents
+ *
+ * Body resets
+ * Custom type
+ * Messages
+ * Container
+ * Masthead
+ * Posts and pages
+ * Pagination
+ * Reverse layout
+ * Themes
+ */
+
+
+/*
+ * Body resets
+ *
+ * Update the foundational and global aspects of the page.
+ */
+
+* {
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+@media (min-width: 38em) {
+  html {
+    font-size: 20px;
+  }
+  html .content {
+    font-size: 18px;
+  }
+}
+
+body {
+  color: #515151;
+  background-color: #fff;
+  -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+}
+
+/* No `:visited` state is required by default (browsers will use `a`) */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+/* `:focus` is linked to `:hover` for basic accessibility */
+a:hover,
+a:focus {
+  text-decoration: underline;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  margin-bottom: .5rem;
+  font-weight: bold;
+  line-height: 1.25;
+  color: #313131;
+  text-rendering: optimizeLegibility;
+}
+h1 {
+  font-size: 2rem;
+}
+h2 {
+  margin-top: 1rem;
+  font-size: 1.5rem;
+}
+h3 {
+  margin-top: 1.5rem;
+  font-size: 1.25rem;
+}
+h4, h5, h6 {
+  margin-top: 1rem;
+  font-size: 1rem;
+}
+
+/* Body text */
+p {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+strong {
+  color: #303030;
+}
+
+
+/* Lists */
+ul, ol, dl {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+dt {
+  font-weight: bold;
+}
+dd {
+  margin-bottom: .5rem;
+}
+
+/* Misc */
+hr {
+  position: relative;
+  margin: 1.5rem 0;
+  border: 0;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #fff;
+}
+
+abbr {
+  font-size: 85%;
+  font-weight: bold;
+  color: #555;
+  text-transform: uppercase;
+}
+abbr[title] {
+  cursor: help;
+  border-bottom: 1px dotted #e5e5e5;
+}
+
+/* Code */
+code,
+pre {
+  font-family: Menlo, Monaco, "Courier New", monospace;
+}
+code {
+  padding: .25em .5em;
+  font-size: 85%;
+  color: #bf616a;
+  background-color: #f9f9f9;
+  border-radius: 3px;
+}
+pre {
+  display: block;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  font-size: .8rem;
+  line-height: 1.4;
+  white-space: pre;
+  white-space: pre-wrap;
+  word-break: break-all;
+  word-wrap: break-word;
+  background-color: #f9f9f9;
+}
+pre code {
+  padding: 0;
+  font-size: 100%;
+  color: inherit;
+  background-color: transparent;
+}
+.highlight {
+  margin-bottom: 1rem;
+  border-radius: 4px;
+}
+.highlight pre {
+  margin-bottom: 0;
+}
+
+/* Quotes */
+blockquote {
+  padding: .5rem 1rem;
+  margin: .8rem 0;
+  color: #7a7a7a;
+  border-left: .25rem solid #e5e5e5;
+}
+blockquote p:last-child {
+  margin-bottom: 0;
+}
+@media (min-width: 30em) {
+  blockquote {
+    padding-right: 5rem;
+    padding-left: 1.25rem;
+  }
+}
+
+img {
+  display: block;
+  margin: 0 0 1rem;
+  border-radius: 5px;
+  max-width: 100%;
+}
+
+/* Tables */
+table {
+  margin-bottom: 1rem;
+  width: 100%;
+  border: 1px solid #e5e5e5;
+  border-collapse: collapse;
+}
+td,
+th {
+  padding: .25rem .5rem;
+  border: 1px solid #e5e5e5;
+}
+tbody tr:nth-child(odd) td,
+tbody tr:nth-child(odd) th {
+  background-color: #f9f9f9;
+}
+
+
+/*
+ * Custom type
+ *
+ * Extend paragraphs with `.lead` for larger introductory text.
+ */
+
+.lead {
+  font-size: 1.25rem;
+  font-weight: 300;
+}
+
+
+/*
+ * Messages
+ *
+ * Show alert messages to users. You may add it to single elements like a `<p>`,
+ * or to a parent if there are multiple elements to show.
+ */
+
+.message {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  color: #717171;
+  background-color: #f9f9f9;
+}
+
+
+/*
+ * Container
+ *
+ * Center the page content.
+ */
+
+.container {
+  max-width: 38rem;
+  padding-left:  1rem;
+  padding-right: 1rem;
+  margin-left:  auto;
+  margin-right: auto;
+}
+
+
+/*
+ * Masthead
+ *
+ * Super small header above the content for site name and short description.
+ */
+
+.masthead {
+  padding-top:    1rem;
+  padding-bottom: 1rem;
+  margin-bottom: 3rem;
+}
+.masthead-title {
+  margin-top: 0;
+  margin-bottom: 0;
+  color: #505050;
+}
+.masthead-title a {
+  color: #505050;
+}
+.masthead-title small {
+  font-size: 75%;
+  font-weight: 400;
+  color: #c0c0c0;
+  letter-spacing: 0;
+}
+
+
+/*
+ * Posts and pages
+ *
+ * Each post is wrapped in `.post` and is used on default and post layouts. Each
+ * page is wrapped in `.page` and is only used on the page layout.
+ */
+
+.page,
+.post {
+  margin-bottom: 3em;
+}
+
+/* Blog post or page title */
+.page-title,
+.post-title,
+.post-title a {
+  color: #303030;
+}
+.page-title,
+.post-title {
+  margin-top: 0;
+}
+
+/* Meta data line below post title */
+.post-date {
+  display: block;
+  margin-top: -.5rem;
+  margin-bottom: 1rem;
+  color: #9a9a9a;
+}
+
+/* Related posts */
+.related {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  border-top: 1px solid #eee;
+}
+.related-posts {
+  padding-left: 0;
+  list-style: none;
+}
+.related-posts h3 {
+  margin-top: 0;
+}
+.related-posts li small {
+  font-size: 75%;
+  color: #999;
+}
+.related-posts li a:hover {
+  color: #268bd2;
+  text-decoration: none;
+}
+.related-posts li a:hover small {
+  color: inherit;
+}
+
+
+/*
+ * Pagination
+ *
+ * Super lightweight (HTML-wise) blog pagination. `span`s are provide for when
+ * there are no more previous or next posts to show.
+ */
+
+.pagination {
+  overflow: hidden; /* clearfix */
+  margin-left: -1rem;
+  margin-right: -1rem;
+  font-family: "PT Sans", Helvetica, Arial, sans-serif;
+  color: #ccc;
+  text-align: center;
+}
+
+/* Pagination items can be `span`s or `a`s */
+.pagination-item {
+  display: block;
+  padding: 1rem;
+  border: 1px solid #eee;
+}
+.pagination-item:first-child {
+  margin-bottom: -1px;
+}
+
+/* Only provide a hover state for linked pagination items */
+a.pagination-item:hover {
+  background-color: #f5f5f5;
+}
+
+@media (min-width: 30em) {
+  .pagination {
+    margin: 3rem 0;
+  }
+  .pagination-item {
+    float: left;
+    width: 50%;
+  }
+  .pagination-item:first-child {
+    margin-bottom: 0;
+    border-top-left-radius:    4px;
+    border-bottom-left-radius: 4px;
+  }
+  .pagination-item:last-child {
+    margin-left: -1px;
+    border-top-right-radius:    4px;
+    border-bottom-right-radius: 4px;
+  }
+}
+
+/* ==== BEGIN syntax.css ================================================== */
+
+.hll { background-color: #ffffcc }
+ /*{ background: #f0f3f3; }*/
+.c { color: #999; } /* Comment */
+.err { color: #AA0000; background-color: #FFAAAA } /* Error */
+.k { color: #006699; } /* Keyword */
+.o { color: #555555 } /* Operator */
+.cm { color: #0099FF; font-style: italic } /* Comment.Multiline */
+.cp { color: #009999 } /* Comment.Preproc */
+.c1 { color: #999; } /* Comment.Single */
+.cs { color: #999; } /* Comment.Special */
+.gd { background-color: #FFCCCC; border: 1px solid #CC0000 } /* Generic.Deleted */
+.ge { font-style: italic } /* Generic.Emph */
+.gr { color: #FF0000 } /* Generic.Error */
+.gh { color: #003300; } /* Generic.Heading */
+.gi { background-color: #CCFFCC; border: 1px solid #00CC00 } /* Generic.Inserted */
+.go { color: #AAAAAA } /* Generic.Output */
+.gp { color: #000099; } /* Generic.Prompt */
+.gs { } /* Generic.Strong */
+.gu { color: #003300; } /* Generic.Subheading */
+.gt { color: #99CC66 } /* Generic.Traceback */
+.kc { color: #006699; } /* Keyword.Constant */
+.kd { color: #006699; } /* Keyword.Declaration */
+.kn { color: #006699; } /* Keyword.Namespace */
+.kp { color: #006699 } /* Keyword.Pseudo */
+.kr { color: #006699; } /* Keyword.Reserved */
+.kt { color: #007788; } /* Keyword.Type */
+.m { color: #FF6600 } /* Literal.Number */
+.s { color: #d44950 } /* Literal.String */
+.na { color: #4f9fcf } /* Name.Attribute */
+.nb { color: #336666 } /* Name.Builtin */
+.nc { color: #00AA88; } /* Name.Class */
+.no { color: #336600 } /* Name.Constant */
+.nd { color: #9999FF } /* Name.Decorator */
+.ni { color: #999999; } /* Name.Entity */
+.ne { color: #CC0000; } /* Name.Exception */
+.nf { color: #CC00FF } /* Name.Function */
+.nl { color: #9999FF } /* Name.Label */
+.nn { color: #00CCFF; } /* Name.Namespace */
+.nt { color: #2f6f9f; } /* Name.Tag */
+.nv { color: #003333 } /* Name.Variable */
+.ow { color: #000000; } /* Operator.Word */
+.w { color: #bbbbbb } /* Text.Whitespace */
+.mf { color: #FF6600 } /* Literal.Number.Float */
+.mh { color: #FF6600 } /* Literal.Number.Hex */
+.mi { color: #FF6600 } /* Literal.Number.Integer */
+.mo { color: #FF6600 } /* Literal.Number.Oct */
+.sb { color: #CC3300 } /* Literal.String.Backtick */
+.sc { color: #CC3300 } /* Literal.String.Char */
+.sd { color: #CC3300; font-style: italic } /* Literal.String.Doc */
+.s2 { color: #CC3300 } /* Literal.String.Double */
+.se { color: #CC3300; } /* Literal.String.Escape */
+.sh { color: #CC3300 } /* Literal.String.Heredoc */
+.si { color: #AA0000 } /* Literal.String.Interpol */
+.sx { color: #CC3300 } /* Literal.String.Other */
+.sr { color: #33AAAA } /* Literal.String.Regex */
+.s1 { color: #CC3300 } /* Literal.String.Single */
+.ss { color: #FFCC33 } /* Literal.String.Symbol */
+.bp { color: #336666 } /* Name.Builtin.Pseudo */
+.vc { color: #003333 } /* Name.Variable.Class */
+.vg { color: #003333 } /* Name.Variable.Global */
+.vi { color: #003333 } /* Name.Variable.Instance */
+.il { color: #FF6600 } /* Literal.Number.Integer.Long */
+
+.css .o,
+.css .o + .nt,
+.css .nt + .nt { color: #999; }
+
+/* ==== BEGIN hyde.css =================================================== */
+
+/*
+ *  __                  __
+ * /\ \                /\ \
+ * \ \ \___   __  __   \_\ \     __
+ *  \ \  _ `\/\ \/\ \  /'_` \  /'__`\
+ *   \ \ \ \ \ \ \_\ \/\ \_\ \/\  __/
+ *    \ \_\ \_\/`____ \ \___,_\ \____\
+ *     \/_/\/_/`/___/> \/__,_ /\/____/
+ *                /\___/
+ *                \/__/
+ *
+ * Designed, built, and released under MIT license by @mdo. Learn more at
+ * https://github.com/poole/hyde.
+ */
+
+
+/*
+ * Contents
+ *
+ * Global resets
+ * Sidebar
+ * Container
+ * Reverse layout
+ * Themes
+ */
+
+/* Custom colour changing
+ *
+ * A single CSS animation on <body> drives one registered, inheritable colour
+ * custom property (--theme-color). The sidebar and link colours just read
+ * that variable, so one animation covers every link in the page instead of
+ * needing to be restarted per-element. On page load, JS points the animation
+ * at the current/next colour (by rewriting the @keyframes rule directly, see
+ * colours.html) and gives it a negative animation-delay based on wall-clock
+ * time, seeking it straight to where it'd already be rather than jumping
+ * straight to the target colour.
+ */
+
+@property --theme-color {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #fff;
+}
+
+/* The from/to colours here are placeholders, rewritten directly on this rule
+   (via CSSOM, see colours.html) before each restart. Firefox only animates a
+   registered custom property smoothly when its keyframe values are literal
+   colours - if a keyframe instead reads them indirectly through var(), it
+   falls back to a discrete jump partway through instead of easing. Chrome
+   doesn't have this limitation, but literal values work identically there. */
+@keyframes theme-cycle {
+  from { --theme-color: #fff; }
+  to   { --theme-color: #fff; }
+}
+
+body {
+  animation-name: theme-cycle;
+  animation-duration: var(--theme-anim-duration, 55s);
+  animation-delay: var(--theme-anim-delay, 0s);
+  animation-timing-function: ease;
+  animation-fill-mode: forwards;
+}
+
+/*
+ * Global resets
+ *
+ * Update the foundational and global aspects of the page.
+ */
+
+html {
+  font-family: "PT Sans", Helvetica, Arial, sans-serif;
+}
+@media (min-width: 48em) {
+  html {
+    font-size: 16px;
+  }
+}
+@media (min-width: 58em) {
+  html {
+    font-size: 20px;
+  }
+}
+
+
+/*
+ * Sidebar
+ *
+ * Flexible banner for housing site name, intro, and "footer" content. Starts
+ * out above content in mobile and later moves to the side with wider viewports.
+ */
+
+.sidebar {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  padding: 2rem 1rem;
+  color: color-mix(in oklab, var(--theme-color) 50%, white);
+  background-color: var(--theme-color);
+  overflow-wrap: break-word;
+}
+
+@media (min-width: 48em) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 18rem;
+    text-align: left;
+    padding: 1rem 0rem;
+  }
+}
+
+@media (max-width: 47.999em) {
+  .content::before {
+    content: "";
+    display: block;
+    position: sticky;
+    top: 0px;
+    margin-left: -16px;
+    margin-right: -16px;
+    height: 3.5rem;
+    margin-top: -7rem;
+    margin-bottom: 2rem;
+    background-image: linear-gradient(var(--theme-color) 15%, transparent);
+    pointer-events: none;
+    /* Above ordinary page content it's fading out (z-index: auto/0), but
+       below .sidebar (z-index: 10) so it never paints over the header. */
+    z-index: 5;
+  }
+}
+
+/* Sidebar links */
+.sidebar a {
+  color: #fff;
+}
+
+/* About section */
+.sidebar-about a {
+  text-decoration: none;
+}
+
+.sidebar-about h1 {
+  color: #fff;
+  margin-top: 0;
+  font-family: 'Abel', sans-serif;
+  font-size: 3rem;
+}
+
+/* Sidebar nav */
+.sidebar-nav {
+  padding-left: 0;
+  list-style: none;
+}
+.sidebar-nav-item {
+  display: block;
+}
+a.sidebar-nav-item:hover,
+a.sidebar-nav-item:focus {
+  text-decoration: underline;
+}
+.sidebar-nav-item.active {
+  font-weight: bold;
+}
+
+/* Same growing-underline effect as .post-body a (see below), but the
+   sidebar's text is white on the solid --theme-color background instead of
+   dark text on a white page, so the highlight has to stay lighter than the
+   background to read as a highlight at all - and can't go anywhere near as
+   pale as the post-body version or the white link text would disappear
+   into it once the highlight grows to fill the full line height. */
+.sidebar-nav a {
+  text-decoration: none;
+  --link-highlight: color-mix(in oklab, var(--theme-color) 80%, white);
+  background-image: linear-gradient(var(--link-highlight), var(--link-highlight));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 3px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  transition: --link-highlight 0.16s ease-in-out, background-size 0.16s ease-in-out;
+}
+
+.sidebar-nav a:hover {
+  --link-highlight: color-mix(in oklab, var(--theme-color) 80%, white);
+  background-size: 100% 100%;
+}
+
+/* Bigger tap targets on touch-sized screens - the sidebar sits above the
+   content and doubles as the mobile nav, so its links need to be easy to
+   hit with a thumb, not just readable. */
+@media (max-width: 47.999em) {
+  .sidebar-nav a {
+    display: inline-block;
+    margin: .5rem 0;
+    font-size: 1.15rem;
+  }
+
+  /* Two columns (site links, then social links) instead of one tall
+     stack - on a phone the single-column nav pushed the page content
+     almost entirely off screen. */
+  .sidebar-nav {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(3, auto);
+    column-gap: 1rem;
+  }
+
+  .sidebar-nav .sidebar-nav-remote {
+    margin-top: 0;
+  }
+
+  /* Pin the copyright line to the header's own corner instead of
+     letting it add another row of vertical height. .sidebar is already
+     position: relative unconditionally (see above). */
+  .sidebar-copyright {
+    position: absolute;
+    right: .5rem;
+    bottom: .5rem;
+    margin: 0;
+    font-size: .75rem;
+  }
+}
+
+.sidebar-nav-remote {
+  margin-top: .75rem;
+}
+
+
+
+@media (min-width: 48em) {
+  .sidebar-sticky {
+    position: absolute;
+    right:  1rem;
+    bottom: 1rem;
+    left:   1rem;
+  }
+}
+
+
+/* Container
+ *
+ * Align the contents of the site above the proper threshold with some margin-fu
+ * with a 25%-wide `.sidebar`.
+ */
+
+.content {
+  padding-top:    4rem;
+  padding-bottom: 4rem;
+  /* Long unbroken tokens (URLs as link text, long code identifiers) don't
+     wrap by default and force real horizontal overflow at narrow widths -
+     <pre> already handles this (see poole.css) but inline text/code/links
+     don't. */
+  overflow-wrap: break-word;
+}
+
+.content.full {
+  max-width: inherit;
+  container-type: inline-size;
+}
+
+@media (min-width: 48em) {
+  .content {
+    max-width: 38rem;
+    margin-left: 20rem;
+    margin-right: 2rem;
+  }
+}
+
+@media (min-width: 64em) {
+  .content {
+    margin-left: 22rem;
+    margin-right: 4rem;
+  }
+}
+
+
+/*
+ * Reverse layout
+ *
+ * Flip the orientation of the page by placing the `.sidebar` on the right.
+ */
+
+@media (min-width: 48em) {
+  .layout-reverse .sidebar {
+    left: auto;
+    right: 0;
+  }
+  .layout-reverse .content {
+    margin-left: 2rem;
+    margin-right: 20rem;
+  }
+}
+
+@media (min-width: 64em) {
+  .layout-reverse .content {
+    margin-left: 4rem;
+    margin-right: 22rem;
+  }
+}
+
+/*
+ * Themes
+ *
+ * Colour values now live in the JS COLOURS array and are fed into the
+ * --theme-color animation above; the "theme-base-XX" class from head.html is
+ * kept only as a semantic label (which colour is currently targeted) and no
+ * longer carries its own CSS, so it can't fight the animation on specificity.
+ */
+
+.content a,
+.related-posts li a:hover {
+  color: var(--theme-color);
+}
+
+.content a:visited {
+  color: inherit;
+}
+
+/* Projects list */
+.project-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(clamp(160px, 22cqw, 200px), clamp(220px, 28cqw, 260px)));
+  justify-content: center;
+  gap: 2.5rem;
+  margin: 2rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.project-card {
+  overflow: hidden;
+  border: 1px solid #888;
+  border-radius: 6px;
+  box-shadow: 6px 6px 4px rgba(0, 0, 0, .15);
+  scale: 1;
+  transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease, scale .2s ease;
+}
+
+/* A little scatter so the cards feel hand-placed rather than gridded. */
+.project-card:nth-child(3n+1) {
+  transform: rotate(-2deg);
+}
+
+.project-card:nth-child(3n+2) {
+  transform: rotate(1.5deg);
+}
+
+.project-card:nth-child(3n) {
+  transform: rotate(-1deg);
+}
+
+.project-card:hover {
+  scale: 1.1;
+  transform: rotate(0deg) translateY(-4px);
+  box-shadow: 8px 8px 6px rgba(0, 0, 0, .2);
+}
+
+.project-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: 1rem 1.25rem;
+  background-color: var(--theme-color);
+  border-radius: 5px 5px 0 0;
+}
+
+.project-card-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  text-wrap-mode: nowrap;
+}
+
+.project-card .project-card-header a {
+  color: #fff;
+}
+
+.project-card-links {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  flex-shrink: 0;
+}
+
+.project-card-links a {
+  display: inline-flex;
+  align-items: center;
+  padding: .2rem;
+  opacity: .8;
+  transition: opacity .15s ease;
+}
+
+.project-card-links a:hover,
+.project-card-links a:focus {
+  opacity: 1;
+  text-decoration: none;
+}
+
+.project-card-links svg {
+  width: 1.4rem;
+  height: 1.4rem;
+  flex-shrink: 0;
+}
+
+.icon-label {
+  display: none;
+}
+
+.icon-popover[popover] {
+  inset: auto;
+  margin: 0;
+  border: none;
+  border-radius: 4px;
+  padding: .35rem .6rem;
+  background: #222;
+  color: #fff;
+  font-size: .8rem;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translateX(-50%);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .2);
+}
+
+.project-card-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3.5rem;
+  line-height: 1;
+  padding: 1.5rem;
+  background: color-mix(in oklab, var(--theme-color) 12%, white);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .08);
+  text-decoration: none;
+  transition: background-color .15s ease;
+  text-wrap-mode: nowrap;
+}
+
+.project-card-art:hover {
+  background: color-mix(in oklab, var(--theme-color) 22%, white);
+}
+
+.project-card a:hover {
+  text-decoration: none;
+}
+
+.project-card-body {
+  padding: 1.25rem;
+}
+
+.project-card-body p {
+  margin-bottom: 0;
+}
+
+@media (max-width: 47.999em) {
+  .project-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .6rem;
+  }
+
+  .project-card-links {
+    flex-wrap: wrap;
+    gap: .5rem 1.25rem;
+  }
+
+  .project-card-links a {
+    padding: .4rem .5rem;
+  }
+
+  .icon-label {
+    display: inline;
+    margin-left: .4rem;
+    font-size: .9rem;
+  }
+}
+
+.content h1,
+.content h2,
+.content h3,
+.content h4,
+.content h5,
+.content h6 {
+  color: var(--theme-color);
+}
+
+blockquote.alert {
+  padding: .5rem 1rem;
+}
+
+blockquote.alert .alert-heading {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  margin-top: 0;
+  margin-bottom: .25rem;
+  font-weight: bold;
+}
+
+blockquote.alert .alert-icon {
+  line-height: 1;
+}
+
+blockquote.alert-note      { border-color: #0969da; }
+blockquote.alert-tip       { border-color: #1a7f37; }
+blockquote.alert-important { border-color: #8250df; }
+blockquote.alert-warning   { border-color: #9a6700; }
+blockquote.alert-caution   { border-color: #cf222e; }
+blockquote.alert-wat       { border-color: #ff1f8f; }
+
+.alert-note .alert-heading      { color: #0969da; }
+.alert-tip .alert-heading       { color: #1a7f37; }
+.alert-important .alert-heading { color: #8250df; }
+.alert-warning .alert-heading   { color: #9a6700; }
+.alert-caution .alert-heading   { color: #cf222e; }
+
+.post + .post::before {
+  content: "";
+  display: block;
+  width: 70%;
+  margin: 1.25rem auto;
+  border-top: 2px solid color-mix(in oklab, var(--theme-color) 50%, white);
+  margin-bottom: 3rem;
+}
+
+.alert-wat .alert-heading       { color: #ff1f8f; }
+
+
+@property --link-highlight {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
+.post a {
+  text-decoration: none;
+  font-weight: 700;
+  --link-highlight: color-mix(in oklab, var(--theme-color) 50%, white);
+  background-image: linear-gradient(var(--link-highlight), var(--link-highlight));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 3px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  transition: --link-highlight 0.16s ease-out, background-size 0.16s ease-in-out;
+}
+
+.post a:hover {
+  --link-highlight: color-mix(in oklab, var(--theme-color) 15%, white);
+  background-size: 100% 100%;
+}
