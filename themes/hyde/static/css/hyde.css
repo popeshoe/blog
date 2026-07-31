@@ -497,26 +497,27 @@ blockquote.alert-wat       { border-color: #ff1f8f; }
 
 .alert-wat .alert-heading       { color: #ff1f8f; }
 
-.post-body a {
+
+@property --link-highlight {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
+.post a {
   text-decoration: none;
   font-weight: 700;
-  position: relative;
+  --link-highlight: color-mix(in oklab, var(--theme-color) 50%, white);
+  background-image: linear-gradient(var(--link-highlight), var(--link-highlight));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 3px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  transition: --link-highlight 0.16s ease-out, background-size 0.16s ease-in-out;
 }
 
-.post-body a::before {
-  content: "";
-  background-color: color-mix(in oklab, var(--theme-color) 30%, white);
-  position: absolute;
-  left: 0px;
-  bottom: -1px;
-  width: 100%;
-  height: 3px;
-  z-index: -1;
-  transition: 0.16s ease-in-out;
-}
-
-.post-body a:hover::before {
-  bottom: -1px;
-  height: 100%;
-  background-color: color-mix(in oklab, var(--theme-color) 15%, white);
+.post a:hover {
+  --link-highlight: color-mix(in oklab, var(--theme-color) 15%, white);
+  background-size: 100% 100%;
 }
