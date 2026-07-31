@@ -60,20 +60,7 @@ body {
   padding: 0;
 }
 
-/* font-family lives in the hyde section below (PT Sans), which overrode this
-   rule's "Helvetica Neue" stack unconditionally. */
-html {
-  font-size: 16px;
-  line-height: 1.5;
-}
-@media (min-width: 38em) {
-  html {
-    font-size: 20px;
-  }
-  html .content {
-    font-size: 18px;
-  }
-}
+/* Root type now lives in one place, in the hyde section below. */
 
 body {
   color: #515151;
@@ -210,11 +197,18 @@ blockquote {
 blockquote p:last-child {
   margin-bottom: 0;
 }
-@media (min-width: 30em) {
-  blockquote {
-    padding-right: 5rem;
-    padding-left: 1.25rem;
-  }
+
+/* The blockquote render hook wraps every non-alert quote in <figure> (so it
+   can carry a cite/caption). Nothing styled `figure`, so the UA default of
+   `margin: 1em 40px` was silently indenting every quote on the site. */
+figure {
+  margin: 0;
+}
+
+.blockquote-caption {
+  margin-top: .4rem;
+  color: #9a9a9a;
+  font-size: .9em;
 }
 
 img {
@@ -298,6 +292,39 @@ tbody tr:nth-child(odd) th {
   margin-top: -.5rem;
   margin-bottom: 1rem;
   color: #9a9a9a;
+}
+
+/* Post index (/post). Previously a bare <ul> with a .pull-right class that no
+   stylesheet defined, so the dates simply sat inline and never aligned. */
+.post-index {
+  padding-left: 0;
+  list-style: none;
+}
+
+.post-index li {
+  display: flex;
+  align-items: baseline;
+  gap: 0 1rem;
+  padding: .6rem 0;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.post-index li:first-child {
+  border-top: 1px solid #e5e5e5;
+}
+
+/* Long titles wrap inside their own box rather than pushing the date onto a
+   new line; margin-left keeps the date hard right either way. */
+.post-index li a {
+  flex: 1 1 auto;
+}
+
+.post-index time {
+  flex: 0 0 auto;
+  margin-left: auto;
+  color: #9a9a9a;
+  font-size: .85em;
+  white-space: nowrap;
 }
 
 
@@ -384,17 +411,29 @@ body {
  * Update the foundational and global aspects of the page.
  */
 
+/* Root type. Previously this was split across two stylesheets that disagreed:
+   poole stepped html to 20px at 38em, hyde stepped it to 16px at 48em and back
+   to 20px at 58em. hyde loaded last and won, so the root size actually SHRANK
+   by 20% crossing 48em - exactly where the sidebar becomes a fixed column -
+   dragging every rem-based dimension down with it. Separately, a specificity
+   (0,0,2) `html .content { font-size: 18px }` pinned body copy to an absolute
+   18px, so the text never scaled at all; only the chrome did.
+
+   Now: the root honours the reader's browser setting (no px override at all),
+   and body copy takes a single step up at the desktop breakpoint. */
 html {
   font-family: "PT Sans", Helvetica, Arial, sans-serif;
+  font-size: 100%;
+  line-height: 1.5;
 }
+
+body {
+  font-size: 1rem;
+}
+
 @media (min-width: 48em) {
-  html {
-    font-size: 16px;
-  }
-}
-@media (min-width: 58em) {
-  html {
-    font-size: 20px;
+  body {
+    font-size: 1.125rem;
   }
 }
 
@@ -416,6 +455,25 @@ html {
   overflow-wrap: break-word;
 }
 
+/* Mobile: the sidebar is the page header, so fade the content in underneath
+   it instead of ending the colour block on a hard edge. */
+.content::before {
+  content: "";
+  display: block;
+  position: sticky;
+  top: 0px;
+  margin-left: -16px;
+  margin-right: -16px;
+  height: 3.5rem;
+  margin-top: -7rem;
+  margin-bottom: 2rem;
+  background-image: linear-gradient(var(--theme-color) 15%, transparent);
+  pointer-events: none;
+  /* Above ordinary page content it's fading out (z-index: auto/0), but
+     below .sidebar (z-index: 10) so it never paints over the header. */
+  z-index: 5;
+}
+
 @media (min-width: 48em) {
   .sidebar {
     position: fixed;
@@ -426,24 +484,16 @@ html {
     text-align: left;
     padding: 1rem 0rem;
   }
+
+  /* Sidebar is a column now, not a header - nothing to fade into. */
+  .content::before {
+    display: none;
+  }
 }
 
-@media (max-width: 47.999em) {
-  .content::before {
-    content: "";
-    display: block;
-    position: sticky;
-    top: 0px;
-    margin-left: -16px;
-    margin-right: -16px;
-    height: 3.5rem;
-    margin-top: -7rem;
-    margin-bottom: 2rem;
-    background-image: linear-gradient(var(--theme-color) 15%, transparent);
-    pointer-events: none;
-    /* Above ordinary page content it's fading out (z-index: auto/0), but
-       below .sidebar (z-index: 10) so it never paints over the header. */
-    z-index: 5;
+@media (min-width: 64em) {
+  .sidebar {
+    width: 20rem;
   }
 }
 
@@ -464,10 +514,17 @@ html {
   font-size: 3rem;
 }
 
-/* Sidebar nav */
+/* Sidebar nav.
+   Mobile-first: on a phone the sidebar doubles as the header, so the six
+   links sit in two columns (site links, then social) rather than one tall
+   stack that pushed the page content almost entirely off screen. */
 .sidebar-nav {
   padding-left: 0;
   list-style: none;
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(3, auto);
+  column-gap: 1rem;
 }
 /* Same growing-underline effect as .post-body a (see below), but the
    sidebar's text is white on the solid --theme-color background instead of
@@ -492,49 +549,50 @@ html {
   background-size: 100% 100%;
 }
 
-/* Bigger tap targets on touch-sized screens - the sidebar sits above the
-   content and doubles as the mobile nav, so its links need to be easy to
-   hit with a thumb, not just readable. */
-@media (max-width: 47.999em) {
-  .sidebar-nav a {
-    display: inline-block;
-    margin: .5rem 0;
-    font-size: 1.15rem;
-  }
-
-  /* Two columns (site links, then social links) instead of one tall
-     stack - on a phone the single-column nav pushed the page content
-     almost entirely off screen. */
-  .sidebar-nav {
-    display: grid;
-    grid-auto-flow: column;
-    grid-template-rows: repeat(3, auto);
-    column-gap: 1rem;
-  }
-
-  .sidebar-nav .sidebar-nav-remote {
-    margin-top: 0;
-  }
-
-  /* Pin the copyright line to the header's own corner instead of
-     letting it add another row of vertical height. .sidebar is already
-     position: relative unconditionally (see above). */
-  .sidebar-copyright {
-    position: absolute;
-    right: .5rem;
-    bottom: .5rem;
-    margin: 0;
-    font-size: .75rem;
-  }
+/* Bigger tap targets on touch-sized screens - the sidebar doubles as the
+   mobile nav, so its links need to be easy to hit with a thumb. */
+.sidebar-nav a {
+  display: inline-block;
+  margin: .5rem 0;
+  font-size: 1.15rem;
 }
 
 .sidebar-nav-remote {
-  margin-top: .75rem;
+  margin-top: 0;
 }
 
-
+/* Pin the copyright to the header's own corner rather than letting it add
+   another row of height. .sidebar is position: relative unconditionally. */
+.sidebar-copyright {
+  position: absolute;
+  right: .5rem;
+  bottom: .5rem;
+  margin: 0;
+  font-size: .75rem;
+}
 
 @media (min-width: 48em) {
+  /* Back to a single vertical stack in the fixed column. */
+  .sidebar-nav {
+    display: block;
+  }
+
+  .sidebar-nav a {
+    display: inline;
+    margin: 0;
+    font-size: inherit;
+  }
+
+  .sidebar-nav-remote {
+    margin-top: .75rem;
+  }
+
+  .sidebar-copyright {
+    position: static;
+    margin: 0 0 1rem;
+    font-size: inherit;
+  }
+
   .sidebar-sticky {
     position: absolute;
     right:  1rem;
@@ -544,39 +602,58 @@ html {
 }
 
 
-/* Container
+/* Content column
  *
- * Align the contents of the site above the proper threshold with some margin-fu
- * with a 25%-wide `.sidebar`.
+ * Was `class="content container"` on every page, with .content and .container
+ * both setting max-width: 38rem and disagreeing about margins (auto vs 20rem).
+ * .container is still used on its own by .sidebar-sticky, so it stays - but
+ * the content column no longer doubles up on it.
  */
 
 .content {
-  padding-top:    4rem;
-  padding-bottom: 4rem;
+  max-width: 38rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 4rem 1rem;
   /* Long unbroken tokens (URLs as link text, long code identifiers) don't
      wrap by default and force real horizontal overflow at narrow widths -
-     <pre> already handles this (see poole.css) but inline text/code/links
-     don't. */
+     <pre> already handles this, but inline text/code/links don't. */
   overflow-wrap: break-word;
 }
 
 .content.full {
-  max-width: inherit;
+  max-width: none;
   container-type: inline-size;
 }
 
+/* The sidebar is position: fixed, so it's out of flow. Reserve its width as
+   padding on <body> and let the content column centre itself in what's left.
+   The old approach hard-coded margin-left/right per breakpoint (20rem/2rem,
+   then 22rem/4rem), which pinned the column to one side and left a widening
+   dead gap beside it as the viewport grew. */
 @media (min-width: 48em) {
+  body {
+    padding-left: 18rem;
+  }
+
+  .layout-reverse {
+    padding-left: 0;
+    padding-right: 18rem;
+  }
+
   .content {
-    max-width: 38rem;
-    margin-left: 20rem;
-    margin-right: 2rem;
+    padding: 4rem 2rem;
   }
 }
 
 @media (min-width: 64em) {
-  .content {
-    margin-left: 22rem;
-    margin-right: 4rem;
+  body {
+    padding-left: 20rem;
+  }
+
+  .layout-reverse {
+    padding-left: 0;
+    padding-right: 20rem;
   }
 }
 
@@ -591,17 +668,6 @@ html {
   .layout-reverse .sidebar {
     left: auto;
     right: 0;
-  }
-  .layout-reverse .content {
-    margin-left: 2rem;
-    margin-right: 20rem;
-  }
-}
-
-@media (min-width: 64em) {
-  .layout-reverse .content {
-    margin-left: 4rem;
-    margin-right: 22rem;
   }
 }
 
@@ -661,11 +727,14 @@ html {
   box-shadow: 8px 8px 6px rgba(0, 0, 0, .2);
 }
 
+/* Mobile-first: title stacks above the icon row, which needs room to breathe
+   for touch. The 48em block below puts them back on one line. */
 .project-card-header {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: .75rem;
+  gap: .6rem;
   padding: 1rem 1.25rem;
   background-color: var(--theme-color);
   border-radius: 5px 5px 0 0;
@@ -684,14 +753,15 @@ html {
 .project-card-links {
   display: flex;
   align-items: center;
-  gap: .6rem;
+  flex-wrap: wrap;
+  gap: .5rem 1.25rem;
   flex-shrink: 0;
 }
 
 .project-card-links a {
   display: inline-flex;
   align-items: center;
-  padding: .2rem;
+  padding: .4rem .5rem;
   opacity: .8;
   transition: opacity .15s ease;
 }
@@ -708,8 +778,12 @@ html {
   flex-shrink: 0;
 }
 
+/* Touch has no hover, so the popover tooltips never fire - the icons carry a
+   visible text label instead. Hidden again at 48em where the popover works. */
 .icon-label {
-  display: none;
+  display: inline;
+  margin-left: .4rem;
+  font-size: .9rem;
 }
 
 .icon-popover[popover] {
@@ -757,26 +831,31 @@ html {
   margin-bottom: 0;
 }
 
-@media (max-width: 47.999em) {
+@media (min-width: 48em) {
   .project-card-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: .6rem;
+    flex-direction: row;
+    align-items: center;
+    gap: .75rem;
   }
 
   .project-card-links {
-    flex-wrap: wrap;
-    gap: .5rem 1.25rem;
+    flex-wrap: nowrap;
+    gap: .6rem;
   }
 
   .project-card-links a {
-    padding: .4rem .5rem;
+    padding: .2rem;
   }
 
+  /* Popover tooltips take over from here. */
   .icon-label {
-    display: inline;
-    margin-left: .4rem;
-    font-size: .9rem;
+    display: none;
+  }
+
+  /* Roomier quotes once there's width to spare. Was its own 30em breakpoint. */
+  blockquote {
+    padding-right: 5rem;
+    padding-left: 1.25rem;
   }
 }
 

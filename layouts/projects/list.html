@@ -1,5 +1,5 @@
 {{ define "main" }}
-	<div class="content container full">
+	<div class="content full">
 		<h1>{{ .Title }}</h1>
 		<div class="post-body">{{ .Content }}</div>
 		<ul class="project-list">
@@ -37,12 +37,14 @@
 
 {{ define "scripts" }}
 	<script>
-	var isMobileView = window.matchMedia('(max-width: 47.999em)');
+	// Matches the CSS desktop breakpoint. Below it the icons carry a visible
+	// text label instead, since touch has no hover to trigger a popover.
+	var isDesktop = window.matchMedia('(min-width: 48em)');
 	document.querySelectorAll('.project-card-links a').forEach(function (link) {
 		var pop = link.querySelector('[popover]');
 		if (!pop) return;
 		function show() {
-			if (isMobileView.matches) return;
+			if (!isDesktop.matches) return;
 			pop.showPopover();
 			var rect = link.getBoundingClientRect();
 			pop.style.left = (rect.left + rect.width / 2) + 'px';
