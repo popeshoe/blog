@@ -14,6 +14,25 @@
  */
 
 
+/* ==== Design tokens ===================================================== */
+
+:root {
+  /* Spacing scale. Replaces the ad-hoc .2/.25/.35/.4/.6/.8/1.25/2.5rem values
+     that were scattered across the components. */
+  --space-1: .25rem;
+  --space-2: .5rem;
+  --space-3: .75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  /* Reading measure. See the .measure-* toggles at the end of this file. */
+  --measure: 38rem;
+}
+
+
 /* ==== BEGIN poole.css =================================================== */
 
 /*
@@ -80,34 +99,47 @@ a:focus {
   text-decoration: underline;
 }
 
-/* Headings */
+/* Headings.
+   Top margins previously ran h2: 1rem, h3: 1.5rem, h4-6: 1rem - so an h3 got
+   MORE space above it than the h2 it sits under. Now they descend properly. */
 h1, h2, h3, h4, h5, h6 {
-  margin-bottom: .5rem;
+  margin-bottom: var(--space-2);
   font-weight: bold;
   line-height: 1.25;
   color: #313131;
   text-rendering: optimizeLegibility;
 }
 h1 {
+  margin-top: var(--space-7);
   font-size: 2rem;
 }
 h2 {
-  margin-top: 1rem;
+  margin-top: var(--space-6);
   font-size: 1.5rem;
 }
 h3 {
-  margin-top: 1.5rem;
+  margin-top: var(--space-5);
   font-size: 1.25rem;
 }
 h4, h5, h6 {
-  margin-top: 1rem;
+  margin-top: var(--space-4);
   font-size: 1rem;
+}
+
+/* Heading top margins are for separating sections, never for pushing the
+   first thing on a page away from the top of its container. Page titles are
+   a bare <h1> in most templates, so without this they'd inherit the section
+   spacing on top of .content's own padding. */
+.content > :first-child,
+.post > :first-child,
+.post-body > :first-child {
+  margin-top: 0;
 }
 
 /* Body text */
 p {
   margin-top: 0;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
 }
 
 strong {
@@ -118,20 +150,20 @@ strong {
 /* Lists */
 ul, ol, dl {
   margin-top: 0;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
 }
 
 dt {
   font-weight: bold;
 }
 dd {
-  margin-bottom: .5rem;
+  margin-bottom: var(--space-2);
 }
 
 /* Misc */
 hr {
   position: relative;
-  margin: 1.5rem 0;
+  margin: var(--space-5) 0;
   border: 0;
   border-top: 1px solid #eee;
   border-bottom: 1px solid #fff;
@@ -163,8 +195,8 @@ code {
 pre {
   display: block;
   margin-top: 0;
-  margin-bottom: 1rem;
-  padding: 1rem;
+  margin-bottom: var(--space-4);
+  padding: var(--space-4);
   font-size: .8rem;
   line-height: 1.4;
   white-space: pre;
@@ -180,7 +212,7 @@ pre code {
   background-color: transparent;
 }
 .highlight {
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
   border-radius: 4px;
 }
 .highlight pre {
@@ -189,8 +221,8 @@ pre code {
 
 /* Quotes */
 blockquote {
-  padding: .5rem 1rem;
-  margin: .8rem 0;
+  padding: var(--space-2) var(--space-4);
+  margin: var(--space-3) 0;
   color: #7a7a7a;
   border-left: .25rem solid #e5e5e5;
 }
@@ -206,28 +238,28 @@ figure {
 }
 
 .blockquote-caption {
-  margin-top: .4rem;
+  margin-top: var(--space-2);
   color: #9a9a9a;
   font-size: .9em;
 }
 
 img {
   display: block;
-  margin: 0 0 1rem;
+  margin: 0 0 var(--space-4);
   border-radius: 5px;
   max-width: 100%;
 }
 
 /* Tables */
 table {
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
   width: 100%;
   border: 1px solid #e5e5e5;
   border-collapse: collapse;
 }
 td,
 th {
-  padding: .25rem .5rem;
+  padding: var(--space-1) var(--space-2);
   border: 1px solid #e5e5e5;
 }
 tbody tr:nth-child(odd) td,
@@ -256,8 +288,8 @@ tbody tr:nth-child(odd) th {
 
 .container {
   max-width: 38rem;
-  padding-left:  1rem;
-  padding-right: 1rem;
+  padding-left:  var(--space-4);
+  padding-right: var(--space-4);
   margin-left:  auto;
   margin-right: auto;
 }
@@ -272,7 +304,7 @@ tbody tr:nth-child(odd) th {
 
 .page,
 .post {
-  margin-bottom: 3em;
+  margin-bottom: var(--space-7);
 }
 
 /* Blog post or page title */
@@ -289,8 +321,8 @@ tbody tr:nth-child(odd) th {
 /* Meta data line below post title */
 .post-date {
   display: block;
-  margin-top: -.5rem;
-  margin-bottom: 1rem;
+  margin-top: calc(var(--space-2) * -1);
+  margin-bottom: var(--space-4);
   color: #9a9a9a;
 }
 
@@ -304,8 +336,8 @@ tbody tr:nth-child(odd) th {
 .post-index li {
   display: flex;
   align-items: baseline;
-  gap: 0 1rem;
-  padding: .6rem 0;
+  gap: 0 var(--space-4);
+  padding: var(--space-2) 0;
   border-bottom: 1px solid #e5e5e5;
 }
 
@@ -424,7 +456,7 @@ body {
 html {
   font-family: "PT Sans", Helvetica, Arial, sans-serif;
   font-size: 100%;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 body {
@@ -449,7 +481,7 @@ body {
   position: relative;
   z-index: 10;
   text-align: center;
-  padding: 2rem 1rem;
+  padding: var(--space-6) var(--space-4);
   color: color-mix(in oklab, var(--theme-color) 50%, white);
   background-color: var(--theme-color);
   overflow-wrap: break-word;
@@ -482,7 +514,7 @@ body {
     bottom: 0;
     width: 18rem;
     text-align: left;
-    padding: 1rem 0rem;
+    padding: var(--space-4) 0;
   }
 
   /* Sidebar is a column now, not a header - nothing to fade into. */
@@ -524,7 +556,7 @@ body {
   display: grid;
   grid-auto-flow: column;
   grid-template-rows: repeat(3, auto);
-  column-gap: 1rem;
+  column-gap: var(--space-4);
 }
 /* Same growing-underline effect as .post-body a (see below), but the
    sidebar's text is white on the solid --theme-color background instead of
@@ -553,7 +585,7 @@ body {
    mobile nav, so its links need to be easy to hit with a thumb. */
 .sidebar-nav a {
   display: inline-block;
-  margin: .5rem 0;
+  margin: var(--space-2) 0;
   font-size: 1.15rem;
 }
 
@@ -565,8 +597,8 @@ body {
    another row of height. .sidebar is position: relative unconditionally. */
 .sidebar-copyright {
   position: absolute;
-  right: .5rem;
-  bottom: .5rem;
+  right: var(--space-2);
+  bottom: var(--space-2);
   margin: 0;
   font-size: .75rem;
 }
@@ -584,12 +616,12 @@ body {
   }
 
   .sidebar-nav-remote {
-    margin-top: .75rem;
+    margin-top: var(--space-3);
   }
 
   .sidebar-copyright {
     position: static;
-    margin: 0 0 1rem;
+    margin: 0 0 var(--space-4);
     font-size: inherit;
   }
 
@@ -611,10 +643,10 @@ body {
  */
 
 .content {
-  max-width: 38rem;
+  max-width: var(--measure);
   margin-left: auto;
   margin-right: auto;
-  padding: 4rem 1rem;
+  padding: var(--space-8) var(--space-4);
   /* Long unbroken tokens (URLs as link text, long code identifiers) don't
      wrap by default and force real horizontal overflow at narrow widths -
      <pre> already handles this, but inline text/code/links don't. */
@@ -642,7 +674,7 @@ body {
   }
 
   .content {
-    padding: 4rem 2rem;
+    padding: var(--space-8) var(--space-6);
   }
 }
 
@@ -693,8 +725,8 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(clamp(160px, 22cqw, 200px), clamp(220px, 28cqw, 260px)));
   justify-content: center;
-  gap: 2.5rem;
-  margin: 2rem 0 0;
+  gap: var(--space-6);
+  margin: var(--space-6) 0 0;
   padding: 0;
   list-style: none;
 }
@@ -734,8 +766,8 @@ body {
   flex-direction: column;
   align-items: flex-start;
   justify-content: space-between;
-  gap: .6rem;
-  padding: 1rem 1.25rem;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
   background-color: var(--theme-color);
   border-radius: 5px 5px 0 0;
 }
@@ -754,14 +786,14 @@ body {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: .5rem 1.25rem;
+  gap: var(--space-2) var(--space-5);
   flex-shrink: 0;
 }
 
 .project-card-links a {
   display: inline-flex;
   align-items: center;
-  padding: .4rem .5rem;
+  padding: var(--space-2);
   opacity: .8;
   transition: opacity .15s ease;
 }
@@ -782,7 +814,7 @@ body {
    visible text label instead. Hidden again at 48em where the popover works. */
 .icon-label {
   display: inline;
-  margin-left: .4rem;
+  margin-left: var(--space-2);
   font-size: .9rem;
 }
 
@@ -791,7 +823,7 @@ body {
   margin: 0;
   border: none;
   border-radius: 4px;
-  padding: .35rem .6rem;
+  padding: var(--space-1) var(--space-2);
   background: #222;
   color: #fff;
   font-size: .8rem;
@@ -807,7 +839,7 @@ body {
   justify-content: center;
   font-size: 3.5rem;
   line-height: 1;
-  padding: 1.5rem;
+  padding: var(--space-5);
   background: color-mix(in oklab, var(--theme-color) 12%, white);
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .08);
   text-decoration: none;
@@ -824,7 +856,7 @@ body {
 }
 
 .project-card-body {
-  padding: 1.25rem;
+  padding: var(--space-5);
 }
 
 .project-card-body p {
@@ -835,16 +867,16 @@ body {
   .project-card-header {
     flex-direction: row;
     align-items: center;
-    gap: .75rem;
+    gap: var(--space-3);
   }
 
   .project-card-links {
     flex-wrap: nowrap;
-    gap: .6rem;
+    gap: var(--space-2);
   }
 
   .project-card-links a {
-    padding: .2rem;
+    padding: var(--space-1);
   }
 
   /* Popover tooltips take over from here. */
@@ -854,8 +886,8 @@ body {
 
   /* Roomier quotes once there's width to spare. Was its own 30em breakpoint. */
   blockquote {
-    padding-right: 5rem;
-    padding-left: 1.25rem;
+    padding-right: var(--space-8);
+    padding-left: var(--space-5);
   }
 }
 
@@ -869,15 +901,15 @@ body {
 }
 
 blockquote.alert {
-  padding: .5rem 1rem;
+  padding: var(--space-2) var(--space-4);
 }
 
 blockquote.alert .alert-heading {
   display: flex;
   align-items: center;
-  gap: .4rem;
+  gap: var(--space-2);
   margin-top: 0;
-  margin-bottom: .25rem;
+  margin-bottom: var(--space-1);
   font-weight: bold;
 }
 
@@ -902,9 +934,9 @@ blockquote.alert-wat       { border-color: #ff1f8f; }
   content: "";
   display: block;
   width: 70%;
-  margin: 1.25rem auto;
+  margin: var(--space-5) auto;
   border-top: 2px solid color-mix(in oklab, var(--theme-color) 50%, white);
-  margin-bottom: 3rem;
+  margin-bottom: var(--space-7);
 }
 
 .alert-wat .alert-heading       { color: #ff1f8f; }
@@ -933,3 +965,27 @@ blockquote.alert-wat       { border-color: #ff1f8f; }
   --link-highlight: color-mix(in oklab, var(--theme-color) 15%, white);
   background-size: 100% 100%;
 }
+
+/* ==== Measure experiment (temporary) ====================================
+ *
+ * TEMPORARY - remove once the reading measure is settled.
+ *
+ * Default is --measure: 38rem. To compare, add ONE of these classes to
+ * <body> in devtools (Elements panel, edit the class attribute). It will
+ * survive the 70s colour rotation - colours.html only swaps the
+ * theme-base-* class now, it no longer reassigns className wholesale.
+ *
+ *   measure-xnarrow   30rem
+ *   measure-narrow    34rem
+ *   (none)            38rem   <- current default
+ *   measure-wide      42rem
+ *   measure-xwide     46rem
+ *
+ * :not(.full) keeps the projects page full-bleed - .content.full and
+ * `.measure-x .content` have equal specificity, so without it these would
+ * win on source order and cap that page's width.
+ */
+.measure-xnarrow .content:not(.full) { max-width: 30rem; }
+.measure-narrow  .content:not(.full) { max-width: 34rem; }
+.measure-wide    .content:not(.full) { max-width: 42rem; }
+.measure-xwide   .content:not(.full) { max-width: 46rem; }
