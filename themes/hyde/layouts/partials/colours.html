@@ -170,7 +170,7 @@ function scheduleRotation() {
   setTimeout(function rotate() {
     var epoch = currentEpoch();
     startTransition(colourForEpoch(epoch - 1), colourForEpoch(epoch), 0);
-    setInterval(rotate, ROTATE_INTERVAL);
+    setTimeout(rotate, ROTATE_INTERVAL);
   }, msToNextEpoch);
 }
 
