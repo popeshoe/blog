@@ -134,10 +134,15 @@ function findThemeCycleKeyframesRule() {
 
 function startTransition(fromColour, toColour, delayMs) {
   var body = document.querySelector("body");
-  var fadeIn = body.classList.contains("theme-fade-in");
   // theme-base-XX used to be a base16 code (eg. "08"); now that COLOURS is
-  // just hex values, the label is the hex digits themselves instead.
-  body.className = "layout-reverse theme-base-" + toColour.slice(1) + (fadeIn ? " theme-fade-in" : "");
+  // just hex values, the label is the hex digits themselves instead. It
+  // carries no CSS - it exists so the current colour is identifiable in
+  // devtools - so we swap just that one class rather than reassigning
+  // className wholesale, which would clobber anything else on <body>.
+  Array.prototype.slice.call(body.classList).forEach(function (c) {
+    if (c.indexOf("theme-base-") === 0) body.classList.remove(c);
+  });
+  body.classList.add("theme-base-" + toColour.slice(1));
   var keyframesRule = findThemeCycleKeyframesRule();
   for (var i = 0; i < keyframesRule.cssRules.length; i++) {
     var keyframe = keyframesRule.cssRules[i];
