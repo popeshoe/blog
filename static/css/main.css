@@ -1,20 +1,48 @@
 /* =============================================================================
  * main.css
  *
- * Merged from the three stylesheets this site used to load separately:
- *   poole.css  -> base/reset layer (upstream Poole)
- *   syntax.css -> Pygments/Chroma token colours
- *   hyde.css   -> layout, theme-colour engine, components
+ * Contents
  *
- * PHASE 1 NOTE: this is a straight concatenation in the original <link> order.
- * Rule order is load-bearing here - hyde.css deliberately overrides poole.css
- * on `html` font-size and font-family - so the sections are NOT yet reordered.
- * Reordering happens in phase 3, once those cascade conflicts are resolved.
+ *   1. Config          @property declarations, design tokens
+ *   2. Theme engine    the animated --theme-color cycle
+ *   3. Reset & base    element defaults: type, lists, code, quotes, media
+ *   4. Layout          sidebar, content column, breakpoints
+ *   5. Components      sidebar nav, posts, post index, project cards, alerts
+ *   6. Temporary       measure experiment (delete once settled)
+ *
+ * Descended from Poole + Hyde by @mdo (MIT), long since diverged. Originally
+ * three stylesheets - poole.css, syntax.css, hyde.css - whose load order was
+ * load-bearing: hyde deliberately overrode poole on `html` font-size and
+ * font-family, and got it wrong (see the root-type note in section 3). Those
+ * conflicts are resolved, so rules are now grouped by concern rather than by
+ * which file they arrived in.
+ *
+ * Two breakpoints, mobile-first, min-width only:
+ *   48em / 768px  - sidebar becomes a fixed column
+ *   64em / 1024px - wider sidebar
  * =============================================================================
  */
 
 
-/* ==== Design tokens ===================================================== */
+/* =============================================================================
+ * 1. Config
+ * ========================================================================== */
+
+/* Inheritable so one animation on <body> drives the whole page. Registered as
+   a real <color> so it can be animated and used in color-mix(). */
+@property --theme-color {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #fff;
+}
+
+/* Drives the growing-underline effect on links (see section 5). Registered so
+   the colour itself can transition, not just the background-size. */
+@property --link-highlight {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
 
 :root {
   /* Spacing scale. Replaces the ad-hoc .2/.25/.35/.4/.6/.8/1.25/2.5rem values
@@ -28,44 +56,52 @@
   --space-7: 3rem;
   --space-8: 4rem;
 
-  /* Reading measure. See the .measure-* toggles at the end of this file. */
+  /* Reading measure. ~66 characters at the desktop body size. See section 6. */
   --measure: 38rem;
 }
 
 
-/* ==== BEGIN poole.css =================================================== */
-
-/*
- *                        ___
- *                       /\_ \
- *  _____     ___     ___\//\ \      __
- * /\ '__`\  / __`\  / __`\\ \ \   /'__`\
- * \ \ \_\ \/\ \_\ \/\ \_\ \\_\ \_/\  __/
- *  \ \ ,__/\ \____/\ \____//\____\ \____\
- *   \ \ \/  \/___/  \/___/ \/____/\/____/
- *    \ \_\
- *     \/_/
+/* =============================================================================
+ * 2. Theme engine
  *
- * Designed, built, and released under MIT license by @mdo. Learn more at
- * https://github.com/poole/poole.
- */
-
-
-/*
- * Contents
+ * A single CSS animation on <body> drives one registered, inheritable colour
+ * custom property (--theme-color). The sidebar, headings and link colours just
+ * read that variable, so one animation covers the whole page instead of
+ * needing to be restarted per element. On load, JS points the animation at the
+ * current/next colour (by rewriting the @keyframes rule directly, see
+ * colours.html) and gives it a negative animation-delay based on wall-clock
+ * time, seeking it to where it would already be rather than jumping to the
+ * target colour. That also keeps every visitor on the same colour at the same
+ * moment.
  *
- * Body resets
- * Custom type
- * Container
- * Posts and pages
- */
+ * The theme-base-XX class that JS puts on <body> carries no CSS - it's only a
+ * devtools-readable label of which colour is currently targeted, kept out of
+ * the cascade so it can't fight the animation on specificity.
+ * ========================================================================== */
+
+/* The from/to colours here are placeholders, rewritten directly on this rule
+   (via CSSOM, see colours.html) before each restart. Firefox only animates a
+   registered custom property smoothly when its keyframe values are literal
+   colours - if a keyframe instead reads them indirectly through var(), it
+   falls back to a discrete jump partway through instead of easing. Chrome
+   doesn't have this limitation, but literal values work identically there. */
+@keyframes theme-cycle {
+  from { --theme-color: #fff; }
+  to   { --theme-color: #fff; }
+}
+
+body {
+  animation-name: theme-cycle;
+  animation-duration: var(--theme-anim-duration, 55s);
+  animation-delay: var(--theme-anim-delay, 0s);
+  animation-timing-function: ease;
+  animation-fill-mode: forwards;
+}
 
 
-/*
- * Body resets
- *
- * Update the foundational and global aspects of the page.
- */
+/* =============================================================================
+ * 3. Reset & base
+ * ========================================================================== */
 
 * {
   -webkit-box-sizing: border-box;
@@ -79,13 +115,34 @@ body {
   padding: 0;
 }
 
-/* Root type now lives in one place, in the hyde section below. */
+/* Root type. This was previously split across two stylesheets that disagreed:
+   poole stepped html to 20px at 38em, hyde stepped it to 16px at 48em and back
+   to 20px at 58em. hyde loaded last and won, so the root size actually SHRANK
+   by 20% crossing 48em - exactly where the sidebar becomes a fixed column -
+   dragging every rem-based dimension down with it. Separately, a specificity
+   (0,0,2) `html .content { font-size: 18px }` pinned body copy to an absolute
+   18px, so the text never scaled at all; only the chrome did.
+
+   Now: the root honours the reader's browser setting (no px override at all),
+   and body copy takes a single step up at the desktop breakpoint. */
+html {
+  font-family: "PT Sans", Helvetica, Arial, sans-serif;
+  font-size: 100%;
+  line-height: 1.6;
+}
 
 body {
   color: #515151;
   background-color: #fff;
+  font-size: 1rem;
   -webkit-text-size-adjust: 100%;
       -ms-text-size-adjust: 100%;
+}
+
+@media (min-width: 48em) {
+  body {
+    font-size: 1.125rem;
+  }
 }
 
 /* No `:visited` state is required by default (browsers will use `a`) */
@@ -136,7 +193,6 @@ h4, h5, h6 {
   margin-top: 0;
 }
 
-/* Body text */
 p {
   margin-top: 0;
   margin-bottom: var(--space-4);
@@ -146,8 +202,6 @@ strong {
   color: #303030;
 }
 
-
-/* Lists */
 ul, ol, dl {
   margin-top: 0;
   margin-bottom: var(--space-4);
@@ -160,7 +214,6 @@ dd {
   margin-bottom: var(--space-2);
 }
 
-/* Misc */
 hr {
   position: relative;
   margin: var(--space-5) 0;
@@ -180,7 +233,14 @@ abbr[title] {
   border-bottom: 1px dotted #e5e5e5;
 }
 
-/* Code */
+/* Code.
+   NOTE: syntax highlighting was removed - syntax.css (Pygments/Chroma token
+   colours) was dead twice over: no content file contains a code block, and
+   Hugo's markup.highlight.noClasses defaults to true, which emits inline
+   styles and ignores those classes entirely. To bring it back (this does NOT
+   need extended Hugo - only SCSS does): set markup.highlight.noClasses=false
+   in hugo.json, then `hugo gen chromastyles --style=github` (and
+   --style=github-dark) and fold the tokens in as light-dark() pairs. */
 code,
 pre {
   font-family: Menlo, Monaco, "Courier New", monospace;
@@ -230,6 +290,14 @@ blockquote p:last-child {
   margin-bottom: 0;
 }
 
+@media (min-width: 48em) {
+  /* Roomier quotes once there's width to spare. Was its own 30em breakpoint. */
+  blockquote {
+    padding-right: var(--space-8);
+    padding-left: var(--space-5);
+  }
+}
+
 /* The blockquote render hook wraps every non-alert quote in <figure> (so it
    can carry a cite/caption). Nothing styled `figure`, so the UA default of
    `margin: 1em 40px` was silently indenting every quote on the site. */
@@ -250,7 +318,6 @@ img {
   max-width: 100%;
 }
 
-/* Tables */
 table {
   margin-bottom: var(--space-4);
   width: 100%;
@@ -267,25 +334,19 @@ tbody tr:nth-child(odd) th {
   background-color: #f9f9f9;
 }
 
-
-/*
- * Custom type
- *
- * Extend paragraphs with `.lead` for larger introductory text.
- */
-
+/* Larger introductory text. Used by the sidebar tagline and the 404 page. */
 .lead {
   font-size: 1.25rem;
   font-weight: 300;
 }
 
 
-/*
- * Container
- *
- * Center the page content.
- */
+/* =============================================================================
+ * 4. Layout
+ * ========================================================================== */
 
+/* Generic centred box. Only .sidebar-sticky uses this on its own now - the
+   content column used to double up on it (see .content below). */
 .container {
   max-width: 38rem;
   padding-left:  var(--space-4);
@@ -294,187 +355,10 @@ tbody tr:nth-child(odd) th {
   margin-right: auto;
 }
 
-
-/*
- * Posts and pages
+/* Sidebar
  *
- * Each post is wrapped in `.post` and is used on default and post layouts. Each
- * page is wrapped in `.page` and is only used on the page layout.
- */
-
-.page,
-.post {
-  margin-bottom: var(--space-7);
-}
-
-/* Blog post or page title */
-.page-title,
-.post-title,
-.post-title a {
-  color: #303030;
-}
-.page-title,
-.post-title {
-  margin-top: 0;
-}
-
-/* Meta data line below post title */
-.post-date {
-  display: block;
-  margin-top: calc(var(--space-2) * -1);
-  margin-bottom: var(--space-4);
-  color: #9a9a9a;
-}
-
-/* Post index (/post). Previously a bare <ul> with a .pull-right class that no
-   stylesheet defined, so the dates simply sat inline and never aligned. */
-.post-index {
-  padding-left: 0;
-  list-style: none;
-}
-
-.post-index li {
-  display: flex;
-  align-items: baseline;
-  gap: 0 var(--space-4);
-  padding: var(--space-2) 0;
-  border-bottom: 1px solid #e5e5e5;
-}
-
-.post-index li:first-child {
-  border-top: 1px solid #e5e5e5;
-}
-
-/* Long titles wrap inside their own box rather than pushing the date onto a
-   new line; margin-left keeps the date hard right either way. */
-.post-index li a {
-  flex: 1 1 auto;
-}
-
-.post-index time {
-  flex: 0 0 auto;
-  margin-left: auto;
-  color: #9a9a9a;
-  font-size: .85em;
-  white-space: nowrap;
-}
-
-
-/* NOTE: syntax.css (Pygments/Chroma token colours) was removed here. It was
- * dead twice over: no content file contains a code block, and Hugo's
- * markup.highlight.noClasses defaults to true, which emits inline styles and
- * ignores those classes entirely.
- *
- * To bring highlighting back (this does NOT need extended Hugo - only SCSS
- * does): set markup.highlight.noClasses=false in hugo.json, then
- *   hugo gen chromastyles --style=github      > light tokens
- *   hugo gen chromastyles --style=github-dark > dark tokens
- * and fold them in as light-dark() pairs alongside the other colour tokens.
- */
-
-/* ==== BEGIN hyde.css =================================================== */
-
-/*
- *  __                  __
- * /\ \                /\ \
- * \ \ \___   __  __   \_\ \     __
- *  \ \  _ `\/\ \/\ \  /'_` \  /'__`\
- *   \ \ \ \ \ \ \_\ \/\ \_\ \/\  __/
- *    \ \_\ \_\/`____ \ \___,_\ \____\
- *     \/_/\/_/`/___/> \/__,_ /\/____/
- *                /\___/
- *                \/__/
- *
- * Designed, built, and released under MIT license by @mdo. Learn more at
- * https://github.com/poole/hyde.
- */
-
-
-/*
- * Contents
- *
- * Global resets
- * Sidebar
- * Container
- * Reverse layout
- * Themes
- */
-
-/* Custom colour changing
- *
- * A single CSS animation on <body> drives one registered, inheritable colour
- * custom property (--theme-color). The sidebar and link colours just read
- * that variable, so one animation covers every link in the page instead of
- * needing to be restarted per-element. On page load, JS points the animation
- * at the current/next colour (by rewriting the @keyframes rule directly, see
- * colours.html) and gives it a negative animation-delay based on wall-clock
- * time, seeking it straight to where it'd already be rather than jumping
- * straight to the target colour.
- */
-
-@property --theme-color {
-  syntax: "<color>";
-  inherits: true;
-  initial-value: #fff;
-}
-
-/* The from/to colours here are placeholders, rewritten directly on this rule
-   (via CSSOM, see colours.html) before each restart. Firefox only animates a
-   registered custom property smoothly when its keyframe values are literal
-   colours - if a keyframe instead reads them indirectly through var(), it
-   falls back to a discrete jump partway through instead of easing. Chrome
-   doesn't have this limitation, but literal values work identically there. */
-@keyframes theme-cycle {
-  from { --theme-color: #fff; }
-  to   { --theme-color: #fff; }
-}
-
-body {
-  animation-name: theme-cycle;
-  animation-duration: var(--theme-anim-duration, 55s);
-  animation-delay: var(--theme-anim-delay, 0s);
-  animation-timing-function: ease;
-  animation-fill-mode: forwards;
-}
-
-/*
- * Global resets
- *
- * Update the foundational and global aspects of the page.
- */
-
-/* Root type. Previously this was split across two stylesheets that disagreed:
-   poole stepped html to 20px at 38em, hyde stepped it to 16px at 48em and back
-   to 20px at 58em. hyde loaded last and won, so the root size actually SHRANK
-   by 20% crossing 48em - exactly where the sidebar becomes a fixed column -
-   dragging every rem-based dimension down with it. Separately, a specificity
-   (0,0,2) `html .content { font-size: 18px }` pinned body copy to an absolute
-   18px, so the text never scaled at all; only the chrome did.
-
-   Now: the root honours the reader's browser setting (no px override at all),
-   and body copy takes a single step up at the desktop breakpoint. */
-html {
-  font-family: "PT Sans", Helvetica, Arial, sans-serif;
-  font-size: 100%;
-  line-height: 1.6;
-}
-
-body {
-  font-size: 1rem;
-}
-
-@media (min-width: 48em) {
-  body {
-    font-size: 1.125rem;
-  }
-}
-
-
-/*
- * Sidebar
- *
- * Flexible banner for housing site name, intro, and "footer" content. Starts
- * out above content in mobile and later moves to the side with wider viewports.
+ * A full-width banner above the content on mobile, where it doubles as the
+ * page header; a fixed column from 48em up.
  */
 
 .sidebar {
@@ -506,6 +390,33 @@ body {
   z-index: 5;
 }
 
+/* Content column
+ *
+ * Was `class="content container"` on every page, with .content and .container
+ * both setting max-width: 38rem and disagreeing about margins (auto vs 20rem).
+ */
+
+.content {
+  max-width: var(--measure);
+  margin-left: auto;
+  margin-right: auto;
+  padding: var(--space-8) var(--space-4);
+  /* Long unbroken tokens (URLs as link text, long code identifiers) don't
+     wrap by default and force real horizontal overflow at narrow widths -
+     <pre> already handles this, but inline text/code/links don't. */
+  overflow-wrap: break-word;
+}
+
+.content.full {
+  max-width: none;
+  container-type: inline-size;
+}
+
+/* The sidebar is position: fixed, so it's out of flow. Reserve its width as
+   padding on <body> and let the content column centre itself in what's left.
+   The old approach hard-coded margin-left/right per breakpoint (20rem/2rem,
+   then 22rem/4rem), which pinned the column to one side and left a widening
+   dead gap beside it as the viewport grew. */
 @media (min-width: 48em) {
   .sidebar {
     position: fixed;
@@ -521,20 +432,61 @@ body {
   .content::before {
     display: none;
   }
+
+  .sidebar-sticky {
+    position: absolute;
+    right:  var(--space-4);
+    bottom: var(--space-4);
+    left:   var(--space-4);
+  }
+
+  body {
+    padding-left: 18rem;
+  }
+
+  .content {
+    padding: var(--space-8) var(--space-6);
+  }
+
+  /* Reverse layout: sidebar on the right. Set site-wide via the themeColor
+     param in hugo.json, so this is effectively the only layout in use. */
+  .layout-reverse {
+    padding-left: 0;
+    padding-right: 18rem;
+  }
+
+  .layout-reverse .sidebar {
+    left: auto;
+    right: 0;
+  }
 }
 
 @media (min-width: 64em) {
   .sidebar {
     width: 20rem;
   }
+
+  body {
+    padding-left: 20rem;
+  }
+
+  .layout-reverse {
+    padding-left: 0;
+    padding-right: 20rem;
+  }
 }
 
-/* Sidebar links */
+
+/* =============================================================================
+ * 5. Components
+ * ========================================================================== */
+
+/* --- Sidebar contents ---------------------------------------------------- */
+
 .sidebar a {
   color: #fff;
 }
 
-/* About section */
 .sidebar-about a {
   text-decoration: none;
 }
@@ -546,8 +498,7 @@ body {
   font-size: 3rem;
 }
 
-/* Sidebar nav.
-   Mobile-first: on a phone the sidebar doubles as the header, so the six
+/* Mobile-first: on a phone the sidebar doubles as the header, so the six
    links sit in two columns (site links, then social) rather than one tall
    stack that pushed the page content almost entirely off screen. */
 .sidebar-nav {
@@ -558,13 +509,20 @@ body {
   grid-template-rows: repeat(3, auto);
   column-gap: var(--space-4);
 }
-/* Same growing-underline effect as .post-body a (see below), but the
-   sidebar's text is white on the solid --theme-color background instead of
-   dark text on a white page, so the highlight has to stay lighter than the
-   background to read as a highlight at all - and can't go anywhere near as
-   pale as the post-body version or the white link text would disappear
-   into it once the highlight grows to fill the full line height. */
+
+/* Same growing-underline effect as .post a (see below), but the sidebar's
+   text is white on the solid --theme-color background instead of dark text on
+   a white page, so the highlight has to stay lighter than the background to
+   read as a highlight at all - and can't go anywhere near as pale as the
+   post-body version, or the white link text would disappear into it once the
+   highlight grows to fill the full line height.
+
+   Bigger tap targets too: the sidebar is the mobile nav, so its links need to
+   be easy to hit with a thumb, not merely readable. */
 .sidebar-nav a {
+  display: inline-block;
+  margin: var(--space-2) 0;
+  font-size: 1.15rem;
   text-decoration: none;
   --link-highlight: color-mix(in oklab, var(--theme-color) 80%, white);
   background-image: linear-gradient(var(--link-highlight), var(--link-highlight));
@@ -579,14 +537,6 @@ body {
 .sidebar-nav a:hover {
   --link-highlight: color-mix(in oklab, var(--theme-color) 80%, white);
   background-size: 100% 100%;
-}
-
-/* Bigger tap targets on touch-sized screens - the sidebar doubles as the
-   mobile nav, so its links need to be easy to hit with a thumb. */
-.sidebar-nav a {
-  display: inline-block;
-  margin: var(--space-2) 0;
-  font-size: 1.15rem;
 }
 
 .sidebar-nav-remote {
@@ -624,93 +574,51 @@ body {
     margin: 0 0 var(--space-4);
     font-size: inherit;
   }
-
-  .sidebar-sticky {
-    position: absolute;
-    right:  1rem;
-    bottom: 1rem;
-    left:   1rem;
-  }
 }
 
+/* --- Posts and pages ----------------------------------------------------- */
 
-/* Content column
- *
- * Was `class="content container"` on every page, with .content and .container
- * both setting max-width: 38rem and disagreeing about margins (auto vs 20rem).
- * .container is still used on its own by .sidebar-sticky, so it stays - but
- * the content column no longer doubles up on it.
- */
-
-.content {
-  max-width: var(--measure);
-  margin-left: auto;
-  margin-right: auto;
-  padding: var(--space-8) var(--space-4);
-  /* Long unbroken tokens (URLs as link text, long code identifiers) don't
-     wrap by default and force real horizontal overflow at narrow widths -
-     <pre> already handles this, but inline text/code/links don't. */
-  overflow-wrap: break-word;
+.page,
+.post {
+  margin-bottom: var(--space-7);
 }
 
-.content.full {
-  max-width: none;
-  container-type: inline-size;
+.page-title,
+.post-title,
+.post-title a {
+  color: #303030;
+}
+.page-title,
+.post-title {
+  margin-top: 0;
 }
 
-/* The sidebar is position: fixed, so it's out of flow. Reserve its width as
-   padding on <body> and let the content column centre itself in what's left.
-   The old approach hard-coded margin-left/right per breakpoint (20rem/2rem,
-   then 22rem/4rem), which pinned the column to one side and left a widening
-   dead gap beside it as the viewport grew. */
-@media (min-width: 48em) {
-  body {
-    padding-left: 18rem;
-  }
-
-  .layout-reverse {
-    padding-left: 0;
-    padding-right: 18rem;
-  }
-
-  .content {
-    padding: var(--space-8) var(--space-6);
-  }
+.post-date {
+  display: block;
+  margin-top: calc(var(--space-2) * -1);
+  margin-bottom: var(--space-4);
+  color: #9a9a9a;
 }
 
-@media (min-width: 64em) {
-  body {
-    padding-left: 20rem;
-  }
-
-  .layout-reverse {
-    padding-left: 0;
-    padding-right: 20rem;
-  }
+/* Divider between consecutive posts on the homepage. */
+.post + .post::before {
+  content: "";
+  display: block;
+  width: 70%;
+  margin: var(--space-5) auto;
+  border-top: 2px solid color-mix(in oklab, var(--theme-color) 50%, white);
+  margin-bottom: var(--space-7);
 }
 
-
-/*
- * Reverse layout
- *
- * Flip the orientation of the page by placing the `.sidebar` on the right.
- */
-
-@media (min-width: 48em) {
-  .layout-reverse .sidebar {
-    left: auto;
-    right: 0;
-  }
+/* Headings and links pick up the cycling accent colour. */
+.content h1,
+.content h2,
+.content h3,
+.content h4,
+.content h5,
+.content h6 {
+  color: var(--theme-color);
 }
-
-/*
- * Themes
- *
- * Colour values now live in the JS COLOURS array and are fed into the
- * --theme-color animation above; the "theme-base-XX" class from head.html is
- * kept only as a semantic label (which colour is currently targeted) and no
- * longer carries its own CSS, so it can't fight the animation on specificity.
- */
 
 .content a {
   color: var(--theme-color);
@@ -720,7 +628,66 @@ body {
   color: inherit;
 }
 
-/* Projects list */
+/* Growing-underline links: a 3px bar that expands to fill the line on hover,
+   with the colour transitioning separately from the size. box-decoration-break
+   keeps it correct on links that wrap across lines. */
+.post a {
+  text-decoration: none;
+  font-weight: 700;
+  --link-highlight: color-mix(in oklab, var(--theme-color) 50%, white);
+  background-image: linear-gradient(var(--link-highlight), var(--link-highlight));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 3px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  transition: --link-highlight 0.16s ease-out, background-size 0.16s ease-in-out;
+}
+
+.post a:hover {
+  --link-highlight: color-mix(in oklab, var(--theme-color) 15%, white);
+  background-size: 100% 100%;
+}
+
+/* --- Post index (/post) --------------------------------------------------
+   Previously a bare <ul> whose dates carried a .pull-right class that no
+   stylesheet defined, so they never aligned. */
+
+.post-index {
+  padding-left: 0;
+  list-style: none;
+}
+
+.post-index li {
+  display: flex;
+  align-items: baseline;
+  gap: 0 var(--space-4);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.post-index li:first-child {
+  border-top: 1px solid #e5e5e5;
+}
+
+/* Long titles wrap inside their own box rather than pushing the date onto a
+   new line; margin-left keeps the date hard right either way. */
+.post-index li a {
+  flex: 1 1 auto;
+}
+
+.post-index time {
+  flex: 0 0 auto;
+  margin-left: auto;
+  color: #9a9a9a;
+  font-size: .85em;
+  white-space: nowrap;
+}
+
+/* --- Project cards (/projects) -------------------------------------------
+   Any post can appear here by adding a `project` block to its front matter.
+   Sized in container query units against .content.full. */
+
 .project-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(clamp(160px, 22cqw, 200px), clamp(220px, 28cqw, 260px)));
@@ -757,6 +724,10 @@ body {
   scale: 1.1;
   transform: rotate(0deg) translateY(-4px);
   box-shadow: 8px 8px 6px rgba(0, 0, 0, .2);
+}
+
+.project-card a:hover {
+  text-decoration: none;
 }
 
 /* Mobile-first: title stacks above the icon row, which needs room to breathe
@@ -810,29 +781,6 @@ body {
   flex-shrink: 0;
 }
 
-/* Touch has no hover, so the popover tooltips never fire - the icons carry a
-   visible text label instead. Hidden again at 48em where the popover works. */
-.icon-label {
-  display: inline;
-  margin-left: var(--space-2);
-  font-size: .9rem;
-}
-
-.icon-popover[popover] {
-  inset: auto;
-  margin: 0;
-  border: none;
-  border-radius: 4px;
-  padding: var(--space-1) var(--space-2);
-  background: #222;
-  color: #fff;
-  font-size: .8rem;
-  white-space: nowrap;
-  pointer-events: none;
-  transform: translateX(-50%);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, .2);
-}
-
 .project-card-art {
   display: flex;
   align-items: center;
@@ -851,16 +799,36 @@ body {
   background: color-mix(in oklab, var(--theme-color) 22%, white);
 }
 
-.project-card a:hover {
-  text-decoration: none;
-}
-
 .project-card-body {
   padding: var(--space-5);
 }
 
 .project-card-body p {
   margin-bottom: 0;
+}
+
+/* Touch has no hover, so the popover tooltips never fire - the icons carry a
+   visible text label instead. Hidden again at 48em where the popover works. */
+.icon-label {
+  display: inline;
+  margin-left: var(--space-2);
+  font-size: .9rem;
+}
+
+/* Positioned by JS against the trigger's bounding box (see projects/list.html). */
+.icon-popover[popover] {
+  inset: auto;
+  margin: 0;
+  border: none;
+  border-radius: 4px;
+  padding: var(--space-1) var(--space-2);
+  background: #222;
+  color: #fff;
+  font-size: .8rem;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translateX(-50%);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .2);
 }
 
 @media (min-width: 48em) {
@@ -883,22 +851,12 @@ body {
   .icon-label {
     display: none;
   }
-
-  /* Roomier quotes once there's width to spare. Was its own 30em breakpoint. */
-  blockquote {
-    padding-right: var(--space-8);
-    padding-left: var(--space-5);
-  }
 }
 
-.content h1,
-.content h2,
-.content h3,
-.content h4,
-.content h5,
-.content h6 {
-  color: var(--theme-color);
-}
+/* --- Alert callouts ------------------------------------------------------
+   GitHub-style alerts, emitted by the blockquote render hook from
+   `> [!NOTE]`-style markup, plus a non-standard `wat` type. No content file
+   currently uses these. */
 
 blockquote.alert {
   padding: var(--space-2) var(--space-4);
@@ -929,62 +887,30 @@ blockquote.alert-wat       { border-color: #ff1f8f; }
 .alert-important .alert-heading { color: #8250df; }
 .alert-warning .alert-heading   { color: #9a6700; }
 .alert-caution .alert-heading   { color: #cf222e; }
-
-.post + .post::before {
-  content: "";
-  display: block;
-  width: 70%;
-  margin: var(--space-5) auto;
-  border-top: 2px solid color-mix(in oklab, var(--theme-color) 50%, white);
-  margin-bottom: var(--space-7);
-}
-
 .alert-wat .alert-heading       { color: #ff1f8f; }
 
 
-@property --link-highlight {
-  syntax: "<color>";
-  inherits: true;
-  initial-value: transparent;
-}
-
-.post a {
-  text-decoration: none;
-  font-weight: 700;
-  --link-highlight: color-mix(in oklab, var(--theme-color) 50%, white);
-  background-image: linear-gradient(var(--link-highlight), var(--link-highlight));
-  background-repeat: no-repeat;
-  background-position: 0 100%;
-  background-size: 100% 3px;
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
-  transition: --link-highlight 0.16s ease-out, background-size 0.16s ease-in-out;
-}
-
-.post a:hover {
-  --link-highlight: color-mix(in oklab, var(--theme-color) 15%, white);
-  background-size: 100% 100%;
-}
-
-/* ==== Measure experiment (temporary) ====================================
+/* =============================================================================
+ * 6. Temporary: measure experiment
  *
- * TEMPORARY - remove once the reading measure is settled.
+ * DELETE once the reading measure is settled.
  *
- * Default is --measure: 38rem. To compare, add ONE of these classes to
- * <body> in devtools (Elements panel, edit the class attribute). It will
- * survive the 70s colour rotation - colours.html only swaps the
- * theme-base-* class now, it no longer reassigns className wholesale.
+ * Default is --measure: 38rem. To compare, add ONE of these classes to <body>
+ * in devtools (Elements panel, edit the class attribute). It survives the 70s
+ * colour rotation - colours.html only swaps the theme-base-* class now, it no
+ * longer reassigns className wholesale.
  *
- *   measure-xnarrow   30rem
- *   measure-narrow    34rem
- *   (none)            38rem   <- current default
- *   measure-wide      42rem
- *   measure-xwide     46rem
+ *   measure-xnarrow   30rem   ~50 characters
+ *   measure-narrow    34rem   ~58 characters
+ *   (none)            38rem   ~66 characters  <- current default
+ *   measure-wide      42rem   ~73 characters
+ *   measure-xwide     46rem   ~81 characters
  *
  * :not(.full) keeps the projects page full-bleed - .content.full and
- * `.measure-x .content` have equal specificity, so without it these would
- * win on source order and cap that page's width.
- */
+ * `.measure-x .content` have equal specificity, so without it these would win
+ * on source order and cap that page's width.
+ * ========================================================================== */
+
 .measure-xnarrow .content:not(.full) { max-width: 30rem; }
 .measure-narrow  .content:not(.full) { max-width: 34rem; }
 .measure-wide    .content:not(.full) { max-width: 42rem; }
