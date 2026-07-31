@@ -28,7 +28,7 @@ At the time I was bullish about AI writing software, it could clearly do some of
 
 ### What
 
-So with my lightly used Github copilot subscription in one hand, and a plucky (but simple) idea in the other, I set about it. All the game screens and basic functionality worked in a single blast, perhaps not surprisingly since we're just shuffling a string and recording yes/no against each one but I was surprised given my prior experience. 
+So with my lightly used Github copilot subscription in one hand, and a plucky (but simple) idea in the other, I set about it. All the game screens and basic functionality worked in a single blast, perhaps not surprisingly since we're just shuffling a list of strings and recording yes/no against each one but I was surprised given my prior experience. 
 
 By far the most time and tokens went into making the accelerometer controls work, for a long time the AI would churn away, trying to resolve a tilt up or down from the stream of `DeviceOrientationEvent`, whenever it had solved for one orientation it would break another. It eventually got to the point where it built an [orientation debugging screen](http://guessr.porkcullis.com?debug) so that it and I could look at the values in real time and I could report to Opus what axes were changing in various orientations, it still took a number of iterations to get a somewhat working solution. 
 
