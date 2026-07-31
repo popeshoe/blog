@@ -1,22 +1,22 @@
 <div class="theme-switch" data-theme-switch data-open="false" hidden>
   <div class="theme-switch-options" id="theme-switch-options">
     <button type="button" class="theme-switch-option" data-theme-value="light">
-      <span class="theme-switch-icon" aria-hidden="true">🌣</span>
+      <span class="theme-switch-icon" data-icon="light" aria-hidden="true">🌣</span>
       <span class="theme-switch-label">Light</span>
     </button>
     <button type="button" class="theme-switch-option" data-theme-value="dark">
-      <span class="theme-switch-icon" aria-hidden="true">☽</span>
+      <span class="theme-switch-icon" data-icon="dark" aria-hidden="true">☽</span>
       <span class="theme-switch-label">Dark</span>
     </button>
     <button type="button" class="theme-switch-option" data-theme-value="system">
-      <span class="theme-switch-icon" aria-hidden="true">🖳</span>
+      <span class="theme-switch-icon" data-icon="system" aria-hidden="true">🖳</span>
       <span class="theme-switch-label">System</span>
     </button>
   </div>
 
   <button type="button" class="theme-switch-trigger"
           aria-expanded="false" aria-controls="theme-switch-options">
-    <span class="theme-switch-icon" aria-hidden="true"></span>
+    <span class="theme-switch-icon" data-icon="toggle" aria-hidden="true">◑</span>
     <span class="visually-hidden">Colour theme</span>
   </button>
 </div>
@@ -29,7 +29,9 @@
   var root    = document.documentElement;
   var trigger = wrap.querySelector(".theme-switch-trigger");
   var options = Array.prototype.slice.call(wrap.querySelectorAll(".theme-switch-option"));
-  var ICONS   = { light: "🌣", dark: "☽", system: "🖳" };
+  // Option glyphs are literals in the markup and the trigger's is fixed, so
+  // there's no icon map here any more - only the accessible names.
+  var LABELS  = { light: "Light", dark: "Dark", system: "System" };
 
   // "system" is the absence of the attribute, not a third stored value, so a
   // visitor who has chosen once can still go back to following the OS.
@@ -38,10 +40,13 @@
     return t === "light" || t === "dark" ? t : "system";
   }
 
+  // The trigger glyph is fixed, so the only visual indication of the current
+  // scheme is the highlighted option once the menu is open. aria-label carries
+  // it for anyone who can't see that.
   function render() {
     var now = current();
-    trigger.querySelector(".theme-switch-icon").textContent = ICONS[now];
-    trigger.setAttribute("aria-label", "Colour theme: " + now + ". Activate to change.");
+    trigger.setAttribute("aria-label",
+      "Colour theme: " + LABELS[now] + ". Activate to change.");
     options.forEach(function (o) {
       o.setAttribute("aria-pressed", String(o.dataset.themeValue === now));
     });

@@ -1091,6 +1091,18 @@ body::before {
   line-height: 1;
 }
 
+/* Both glyphs sit bolt upright in the font. The crescent reads as a stray
+   bracket, and the half-circle as a hard vertical split rather than a
+   light/dark divide; tilting them fixes both. The attribute is on the icon
+   itself, so this holds wherever the glyph is used. */
+.theme-switch-icon[data-icon="dark"] {
+  rotate: 32deg;
+}
+
+.theme-switch-icon[data-icon="toggle"] {
+  rotate: 45deg;
+}
+
 .theme-switch-label {
   font-size: .8rem;
   white-space: nowrap;
@@ -1124,6 +1136,16 @@ body::before {
 .theme-switch-option:hover,
 .theme-switch-option:focus-visible {
   background-color: color-mix(in oklab, var(--accent-fill) 60%, black);
+}
+
+/* The trigger no longer mirrors the active scheme, so this highlight is the
+   only visual indication of which one is set. It has to be unmistakable:
+   full-strength fill against the others' darkened backgrounds, plus an inner
+   rim. Deliberately lighter than :hover, which darkens - otherwise hovering a
+   neighbour would out-compete the actual selection. */
+.theme-switch-option[aria-pressed="true"] {
+  background-color: var(--accent-fill);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .45);
 }
 
 .theme-switch-option[aria-pressed="true"] .theme-switch-label {
