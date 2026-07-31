@@ -58,6 +58,67 @@
 
   /* Reading measure. ~66 characters at the desktop body size. See section 6. */
   --measure: 38rem;
+
+  /* --- Colour -----------------------------------------------------------
+     Light scheme only for now. Dark mode wraps these in light-dark() rather
+     than redeclaring them, so this stays the single place colour is defined.
+
+     Nothing below section 2 may use a colour literal. */
+
+  /* Surfaces */
+  --surface:        #fff;
+  --surface-sunk:   #f9f9f9;   /* code, pre, table stripe */
+
+  /* Text. -strong and -bold are one hex apart (#313131 / #303030) purely by
+     historical accident; worth collapsing once dark mode lands, kept distinct
+     here so this phase stays provably pixel-identical. */
+  --text:           #515151;
+  --text-strong:    #313131;   /* headings */
+  --text-bold:      #303030;   /* <strong>, post titles */
+  --text-muted:     #9a9a9a;   /* dates, captions */
+  --text-quote:     #7a7a7a;
+  --text-dim:       #555;      /* abbr */
+  --code-text:      #bf616a;
+
+  /* Lines */
+  --border:         #e5e5e5;
+  --rule:           #eee;      /* hr */
+  --card-border:    #888;
+
+  /* Depth */
+  --shadow:         rgba(0, 0, 0, .15);
+  --shadow-lifted:  rgba(0, 0, 0, .2);
+  --shadow-inset:   rgba(0, 0, 0, .08);
+
+  /* Tooltip - deliberately inverted against the page */
+  --popover-bg:     #222;
+  --popover-text:   #fff;
+
+  /* Text placed on top of an accent-filled block */
+  --on-accent:      #fff;
+
+  /* Alert callouts (GitHub's light palette; `wat` is bespoke) */
+  --alert-note:      #0969da;
+  --alert-tip:       #1a7f37;
+  --alert-important: #8250df;
+  --alert-warning:   #9a6700;
+  --alert-caution:   #cf222e;
+  --alert-wat:       #ff1f8f;
+}
+
+/* Accent tokens derive from --theme-color, so they must be declared where
+   that property actually holds the animated value.
+   NOT on :root - the animation runs on <body>, so at :root --theme-color is
+   still its @property initial-value (#fff) and anything derived from it there
+   would compute to white and inherit down as white.
+
+   -fill is for accent-coloured blocks (sidebar, card headers) with --on-accent
+   text over them; -text is for accent-coloured type on the page background.
+   Both are plain passthroughs for now - phase 5 clamps their lightness per
+   colour scheme, which is what makes the dark palette legible. */
+body {
+  --accent-fill: var(--theme-color);
+  --accent-text: var(--theme-color);
 }
 
 
@@ -132,8 +193,8 @@ html {
 }
 
 body {
-  color: #515151;
-  background-color: #fff;
+  color: var(--text);
+  background-color: var(--surface);
   font-size: 1rem;
   -webkit-text-size-adjust: 100%;
       -ms-text-size-adjust: 100%;
@@ -163,7 +224,7 @@ h1, h2, h3, h4, h5, h6 {
   margin-bottom: var(--space-2);
   font-weight: bold;
   line-height: 1.25;
-  color: #313131;
+  color: var(--text-strong);
   text-rendering: optimizeLegibility;
 }
 h1 {
@@ -199,7 +260,7 @@ p {
 }
 
 strong {
-  color: #303030;
+  color: var(--text-bold);
 }
 
 ul, ol, dl {
@@ -218,19 +279,19 @@ hr {
   position: relative;
   margin: var(--space-5) 0;
   border: 0;
-  border-top: 1px solid #eee;
-  border-bottom: 1px solid #fff;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--surface);
 }
 
 abbr {
   font-size: 85%;
   font-weight: bold;
-  color: #555;
+  color: var(--text-dim);
   text-transform: uppercase;
 }
 abbr[title] {
   cursor: help;
-  border-bottom: 1px dotted #e5e5e5;
+  border-bottom: 1px dotted var(--border);
 }
 
 /* Code.
@@ -248,8 +309,8 @@ pre {
 code {
   padding: .25em .5em;
   font-size: 85%;
-  color: #bf616a;
-  background-color: #f9f9f9;
+  color: var(--code-text);
+  background-color: var(--surface-sunk);
   border-radius: 3px;
 }
 pre {
@@ -263,7 +324,7 @@ pre {
   white-space: pre-wrap;
   word-break: break-all;
   word-wrap: break-word;
-  background-color: #f9f9f9;
+  background-color: var(--surface-sunk);
 }
 pre code {
   padding: 0;
@@ -283,8 +344,8 @@ pre code {
 blockquote {
   padding: var(--space-2) var(--space-4);
   margin: var(--space-3) 0;
-  color: #7a7a7a;
-  border-left: .25rem solid #e5e5e5;
+  color: var(--text-quote);
+  border-left: .25rem solid var(--border);
 }
 blockquote p:last-child {
   margin-bottom: 0;
@@ -307,7 +368,7 @@ figure {
 
 .blockquote-caption {
   margin-top: var(--space-2);
-  color: #9a9a9a;
+  color: var(--text-muted);
   font-size: .9em;
 }
 
@@ -321,17 +382,17 @@ img {
 table {
   margin-bottom: var(--space-4);
   width: 100%;
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--border);
   border-collapse: collapse;
 }
 td,
 th {
   padding: var(--space-1) var(--space-2);
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--border);
 }
 tbody tr:nth-child(odd) td,
 tbody tr:nth-child(odd) th {
-  background-color: #f9f9f9;
+  background-color: var(--surface-sunk);
 }
 
 /* Larger introductory text. Used by the sidebar tagline and the 404 page. */
@@ -366,8 +427,8 @@ tbody tr:nth-child(odd) th {
   z-index: 10;
   text-align: center;
   padding: var(--space-6) var(--space-4);
-  color: color-mix(in oklab, var(--theme-color) 50%, white);
-  background-color: var(--theme-color);
+  color: color-mix(in oklab, var(--accent-fill) 50%, white);
+  background-color: var(--accent-fill);
   overflow-wrap: break-word;
 }
 
@@ -383,7 +444,7 @@ tbody tr:nth-child(odd) th {
   height: 3.5rem;
   margin-top: -7rem;
   margin-bottom: 2rem;
-  background-image: linear-gradient(var(--theme-color) 15%, transparent);
+  background-image: linear-gradient(var(--accent-fill) 15%, transparent);
   pointer-events: none;
   /* Above ordinary page content it's fading out (z-index: auto/0), but
      below .sidebar (z-index: 10) so it never paints over the header. */
@@ -484,7 +545,7 @@ tbody tr:nth-child(odd) th {
 /* --- Sidebar contents ---------------------------------------------------- */
 
 .sidebar a {
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .sidebar-about a {
@@ -492,7 +553,7 @@ tbody tr:nth-child(odd) th {
 }
 
 .sidebar-about h1 {
-  color: #fff;
+  color: var(--on-accent);
   margin-top: 0;
   font-family: 'Abel', sans-serif;
   font-size: 3rem;
@@ -524,7 +585,7 @@ tbody tr:nth-child(odd) th {
   margin: var(--space-2) 0;
   font-size: 1.15rem;
   text-decoration: none;
-  --link-highlight: color-mix(in oklab, var(--theme-color) 80%, white);
+  --link-highlight: color-mix(in oklab, var(--accent-fill) 80%, white);
   background-image: linear-gradient(var(--link-highlight), var(--link-highlight));
   background-repeat: no-repeat;
   background-position: 0 100%;
@@ -535,7 +596,7 @@ tbody tr:nth-child(odd) th {
 }
 
 .sidebar-nav a:hover {
-  --link-highlight: color-mix(in oklab, var(--theme-color) 80%, white);
+  --link-highlight: color-mix(in oklab, var(--accent-fill) 80%, white);
   background-size: 100% 100%;
 }
 
@@ -586,7 +647,7 @@ tbody tr:nth-child(odd) th {
 .page-title,
 .post-title,
 .post-title a {
-  color: #303030;
+  color: var(--text-bold);
 }
 .page-title,
 .post-title {
@@ -597,7 +658,7 @@ tbody tr:nth-child(odd) th {
   display: block;
   margin-top: calc(var(--space-2) * -1);
   margin-bottom: var(--space-4);
-  color: #9a9a9a;
+  color: var(--text-muted);
 }
 
 /* Divider between consecutive posts on the homepage. */
@@ -606,7 +667,7 @@ tbody tr:nth-child(odd) th {
   display: block;
   width: 70%;
   margin: var(--space-5) auto;
-  border-top: 2px solid color-mix(in oklab, var(--theme-color) 50%, white);
+  border-top: 2px solid color-mix(in oklab, var(--accent-text) 50%, var(--surface));
   margin-bottom: var(--space-7);
 }
 
@@ -617,11 +678,11 @@ tbody tr:nth-child(odd) th {
 .content h4,
 .content h5,
 .content h6 {
-  color: var(--theme-color);
+  color: var(--accent-text);
 }
 
 .content a {
-  color: var(--theme-color);
+  color: var(--accent-text);
 }
 
 .content a:visited {
@@ -634,7 +695,7 @@ tbody tr:nth-child(odd) th {
 .post a {
   text-decoration: none;
   font-weight: 700;
-  --link-highlight: color-mix(in oklab, var(--theme-color) 50%, white);
+  --link-highlight: color-mix(in oklab, var(--accent-text) 50%, var(--surface));
   background-image: linear-gradient(var(--link-highlight), var(--link-highlight));
   background-repeat: no-repeat;
   background-position: 0 100%;
@@ -645,7 +706,7 @@ tbody tr:nth-child(odd) th {
 }
 
 .post a:hover {
-  --link-highlight: color-mix(in oklab, var(--theme-color) 15%, white);
+  --link-highlight: color-mix(in oklab, var(--accent-text) 15%, var(--surface));
   background-size: 100% 100%;
 }
 
@@ -663,11 +724,11 @@ tbody tr:nth-child(odd) th {
   align-items: baseline;
   gap: 0 var(--space-4);
   padding: var(--space-2) 0;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--border);
 }
 
 .post-index li:first-child {
-  border-top: 1px solid #e5e5e5;
+  border-top: 1px solid var(--border);
 }
 
 /* Long titles wrap inside their own box rather than pushing the date onto a
@@ -679,7 +740,7 @@ tbody tr:nth-child(odd) th {
 .post-index time {
   flex: 0 0 auto;
   margin-left: auto;
-  color: #9a9a9a;
+  color: var(--text-muted);
   font-size: .85em;
   white-space: nowrap;
 }
@@ -700,9 +761,9 @@ tbody tr:nth-child(odd) th {
 
 .project-card {
   overflow: hidden;
-  border: 1px solid #888;
+  border: 1px solid var(--card-border);
   border-radius: 6px;
-  box-shadow: 6px 6px 4px rgba(0, 0, 0, .15);
+  box-shadow: 6px 6px 4px var(--shadow);
   scale: 1;
   transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease, scale .2s ease;
 }
@@ -723,7 +784,7 @@ tbody tr:nth-child(odd) th {
 .project-card:hover {
   scale: 1.1;
   transform: rotate(0deg) translateY(-4px);
-  box-shadow: 8px 8px 6px rgba(0, 0, 0, .2);
+  box-shadow: 8px 8px 6px var(--shadow-lifted);
 }
 
 .project-card a:hover {
@@ -739,7 +800,7 @@ tbody tr:nth-child(odd) th {
   justify-content: space-between;
   gap: var(--space-2);
   padding: var(--space-4) var(--space-5);
-  background-color: var(--theme-color);
+  background-color: var(--accent-fill);
   border-radius: 5px 5px 0 0;
 }
 
@@ -750,7 +811,7 @@ tbody tr:nth-child(odd) th {
 }
 
 .project-card .project-card-header a {
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .project-card-links {
@@ -788,15 +849,15 @@ tbody tr:nth-child(odd) th {
   font-size: 3.5rem;
   line-height: 1;
   padding: var(--space-5);
-  background: color-mix(in oklab, var(--theme-color) 12%, white);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .08);
+  background: color-mix(in oklab, var(--accent-fill) 12%, var(--surface));
+  box-shadow: inset 0 0 0 1px var(--shadow-inset);
   text-decoration: none;
   transition: background-color .15s ease;
   text-wrap-mode: nowrap;
 }
 
 .project-card-art:hover {
-  background: color-mix(in oklab, var(--theme-color) 22%, white);
+  background: color-mix(in oklab, var(--accent-fill) 22%, var(--surface));
 }
 
 .project-card-body {
@@ -822,13 +883,13 @@ tbody tr:nth-child(odd) th {
   border: none;
   border-radius: 4px;
   padding: var(--space-1) var(--space-2);
-  background: #222;
-  color: #fff;
+  background: var(--popover-bg);
+  color: var(--popover-text);
   font-size: .8rem;
   white-space: nowrap;
   pointer-events: none;
   transform: translateX(-50%);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, .2);
+  box-shadow: 0 2px 6px var(--shadow-lifted);
 }
 
 @media (min-width: 48em) {
@@ -875,19 +936,19 @@ blockquote.alert .alert-icon {
   line-height: 1;
 }
 
-blockquote.alert-note      { border-color: #0969da; }
-blockquote.alert-tip       { border-color: #1a7f37; }
-blockquote.alert-important { border-color: #8250df; }
-blockquote.alert-warning   { border-color: #9a6700; }
-blockquote.alert-caution   { border-color: #cf222e; }
-blockquote.alert-wat       { border-color: #ff1f8f; }
+blockquote.alert-note      { border-color: var(--alert-note); }
+blockquote.alert-tip       { border-color: var(--alert-tip); }
+blockquote.alert-important { border-color: var(--alert-important); }
+blockquote.alert-warning   { border-color: var(--alert-warning); }
+blockquote.alert-caution   { border-color: var(--alert-caution); }
+blockquote.alert-wat       { border-color: var(--alert-wat); }
 
-.alert-note .alert-heading      { color: #0969da; }
-.alert-tip .alert-heading       { color: #1a7f37; }
-.alert-important .alert-heading { color: #8250df; }
-.alert-warning .alert-heading   { color: #9a6700; }
-.alert-caution .alert-heading   { color: #cf222e; }
-.alert-wat .alert-heading       { color: #ff1f8f; }
+.alert-note .alert-heading      { color: var(--alert-note); }
+.alert-tip .alert-heading       { color: var(--alert-tip); }
+.alert-important .alert-heading { color: var(--alert-important); }
+.alert-warning .alert-heading   { color: var(--alert-warning); }
+.alert-caution .alert-heading   { color: var(--alert-caution); }
+.alert-wat .alert-heading       { color: var(--alert-wat); }
 
 
 /* =============================================================================
