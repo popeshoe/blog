@@ -5,7 +5,7 @@
       {{ range first 3 (where site.RegularPages "Type" "in" site.Params.mainSections) }}
   <div class="post">
     <h1 class="post-title">
-      <a href="{{ .Permalink }}">
+      <a href="{{ .RelPermalink }}">
         {{ .Title }}
       </a>
     </h1>

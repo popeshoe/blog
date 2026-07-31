@@ -33,9 +33,9 @@ var COLOURS = [
     "#09814A"
 ]
 
-var ROTATE_INTERVAL = 1000 * 10;
+var ROTATE_INTERVAL = 1000 * 70;
 
-var TRANSITION_DURATION = 1000 * 8;
+var TRANSITION_DURATION = 1000 * 55;
 
 // Deterministic pseudo-random value in [0,1) for a given integer seed, so
 // every page load/tab computes the identical value for the same epoch.
@@ -143,7 +143,23 @@ function startTransition(fromColour, toColour, delayMs) {
     if (c.indexOf("theme-base-") === 0) body.classList.remove(c);
   });
   body.classList.add("theme-base-" + toColour.slice(1));
+
   var keyframesRule = findThemeCycleKeyframesRule();
+
+  // Degrade to a flat colour rather than taking the whole theme down. Reading
+  // .cssRules throws SecurityError on a cross-origin stylesheet, so the lookup
+  // returns null and this used to dereference it - a TypeError that killed the
+  // colour engine and left --theme-color at its #fff initial value: white
+  // sidebar, white headings, invisible links. That is exactly what canonifyURLs
+  // caused on www.porkcullis.com, where the stylesheet was pulled from the bare
+  // domain. The config no longer does that, but the failure was silent and
+  // total, so it is worth not being one null away from it again.
+  if (!keyframesRule) {
+    body.style.setProperty("--theme-color", toColour);
+    body.style.animation = "none";
+    return;
+  }
+
   for (var i = 0; i < keyframesRule.cssRules.length; i++) {
     var keyframe = keyframesRule.cssRules[i];
     if (keyframe.keyText === "0%") keyframe.style.setProperty("--theme-color", fromColour);
@@ -170,13 +186,18 @@ function applyInitialColour() {
 
 // Line the recurring rotation up on the same wall-clock boundaries for
 // every visitor, rather than starting a fresh 70s timer from load time.
+// One-shot timeouts recomputed against the next epoch boundary, not
+// setInterval: a fixed interval drifts (and throttled background tabs make
+// it fire late), whereas recomputing re-anchors to the wall clock every
+// tick. An earlier version called setInterval from inside rotate(), which
+// spawned a fresh interval on every tick - the live timers doubled every
+// 70s until the tab ground to a halt.
 function scheduleRotation() {
-  var msToNextEpoch = (currentEpoch() + 1) * ROTATE_INTERVAL - Date.now();
   setTimeout(function rotate() {
     var epoch = currentEpoch();
     startTransition(colourForEpoch(epoch - 1), colourForEpoch(epoch), 0);
-    setInterval(rotate, ROTATE_INTERVAL);
-  }, msToNextEpoch);
+    setTimeout(rotate, (currentEpoch() + 1) * ROTATE_INTERVAL - Date.now());
+  }, (currentEpoch() + 1) * ROTATE_INTERVAL - Date.now());
 }
 
 // A permanent 55s colour animation is exactly what prefers-reduced-motion is

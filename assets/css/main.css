@@ -8,7 +8,7 @@
  *   3. Reset & base    element defaults: type, lists, code, quotes, media
  *   4. Layout          sidebar, content column, breakpoints
  *   5. Components      sidebar nav, posts, post index, project cards, alerts
- *   6. Temporary       measure experiment (delete once settled)
+ *   6. Motion & prefs  reduced-motion, colour-scheme override
  *
  * Descended from Poole + Hyde by @mdo (MIT), long since diverged. Originally
  * three stylesheets - poole.css, syntax.css, hyde.css - whose load order was
@@ -17,9 +17,10 @@
  * conflicts are resolved, so rules are now grouped by concern rather than by
  * which file they arrived in.
  *
- * Two breakpoints, mobile-first, min-width only:
+ * Three breakpoints, mobile-first, min-width only:
  *   48em / 768px  - sidebar becomes a fixed column
- *   64em / 1024px - wider sidebar
+ *   64em / 1024px - wider sidebar, measure steps to 38rem
+ *   80em / 1280px - measure steps to 46rem (no layout change)
  * =============================================================================
  */
 
