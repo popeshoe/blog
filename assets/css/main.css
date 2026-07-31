@@ -56,8 +56,14 @@
   --space-7: 3rem;
   --space-8: 4rem;
 
-  /* Reading measure. ~66 characters at the desktop body size. See section 6. */
-  --measure: 38rem;
+  /* Reading measure, stepped. Snaps between three widths rather than easing,
+     so the column always lands on a deliberate line length:
+       30rem  ~50 characters  (default; also what the 48-64em band gives
+                               naturally, where available width binds first)
+       38rem  ~66 characters  (from 64em)
+       46rem  ~81 characters  (from 80em)
+     Measured at the real rendered font, not estimated. */
+  --measure: 30rem;
 
   /* --- Colour -----------------------------------------------------------
      Every colour is light-dark(light, dark). Because light-dark() resolves
@@ -103,6 +109,12 @@
      --accent-fill for what the lightness clamp actually guarantees. */
   --on-accent:      #fff;
 
+  /* Draws the sidebar's edge against the page. Transparent in light, where
+     the fill is vivid enough to define itself; needed in dark, where the
+     dimmed fill can sit as close as 1.06:1 to the page background. Keyed off
+     the scheme rather than a media query so the manual override honours it. */
+  --sidebar-edge:   light-dark(transparent, rgba(255, 255, 255, .11));
+
   /* Alert callouts. The light column is GitHub's palette; the dark column is
      their dark-mode equivalent, since the light values are far too dark to
      read on --surface. `wat` is bespoke. No content file uses these - see
@@ -129,18 +141,21 @@
    (#330C2F, #2A2D34, #14342b) sits at 1.0-1.8:1 on a dark background - not
    "a bit low", but invisible. */
 body {
-  /* DEFERRED DECISION - dark sidebar treatment. Swap this one line to compare;
-     option A is built in. If you pick C, also set --on-accent to
-     var(--accent-text) so the sidebar type stays legible.
+  /* Dark sidebar: dimmed. Same hue as the palette entry, pushed down into a
+     narrow dark band so it reads as a tinted panel rather than a colour block.
+     Chosen over a full-strength fill because it needs no per-colour curation -
+     every entry lands in the same tonal range whatever its starting lightness.
 
-       A  full accent fill, closest to the current character (in use)
-          oklch(from var(--theme-color) clamp(0.40, l, 0.60) c h)
-       B  dimmed - same hue, reads as a tinted dark panel
-          oklch(from var(--theme-color) clamp(0.22, l, 0.32) c h)
-       C  flat neutral panel, accent moves to the type
-          #1e2126
-  */
-  --accent-fill-dark: oklch(from var(--theme-color) clamp(0.40, l, 0.60) c h);
+     Measured, white-on-fill across all 20 colours:
+       full fill  clamp(0.40, l, 0.60)   3.80-9.65:1
+       dimmed     clamp(0.22, l, 0.32)  11.45-17.01:1
+     so the dark scheme clears AA everywhere with room to spare.
+
+     The cost is panel definition: dimmed, the fill sits 1.06-1.58:1 against
+     --surface, and at the dark end of the palette (#330C2F) the sidebar all
+     but disappears. Rather than lift the band and lose the look, the edge is
+     drawn explicitly - see --sidebar-edge. */
+  --accent-fill-dark: oklch(from var(--theme-color) clamp(0.22, l, 0.32) c h);
 
   /* min() not clamp() in light: the pale palette entries (#f4bf75 at 1.67:1,
      #75b5aa and #f68e5f at 2.35:1) put white sidebar text far below 3:1.
@@ -551,9 +566,20 @@ tbody tr:nth-child(odd) th {
     padding: var(--space-4) 0;
   }
 
-  /* Sidebar is a column now, not a header - nothing to fade into. */
+  /* Sidebar is a column now, not a header - nothing to fade into. Instead
+     it gets a drawn edge, which is what keeps it reading as a panel in dark
+     mode where the dimmed fill sits close to the page. box-shadow rather
+     than a border so it costs no layout width. */
   .content::before {
     display: none;
+  }
+
+  .sidebar {
+    box-shadow: 1px 0 0 var(--sidebar-edge);
+  }
+
+  .layout-reverse .sidebar {
+    box-shadow: -1px 0 0 var(--sidebar-edge);
   }
 
   .sidebar-sticky {
@@ -585,6 +611,10 @@ tbody tr:nth-child(odd) th {
 }
 
 @media (min-width: 64em) {
+  :root {
+    --measure: 38rem;
+  }
+
   .sidebar {
     width: 20rem;
   }
@@ -596,6 +626,14 @@ tbody tr:nth-child(odd) th {
   .layout-reverse {
     padding-left: 0;
     padding-right: 20rem;
+  }
+}
+
+/* Measure-only breakpoint - the layout doesn't change here, the column just
+   takes its last step up now there's width to spend on it. */
+@media (min-width: 80em) {
+  :root {
+    --measure: 46rem;
   }
 }
 
@@ -1209,30 +1247,3 @@ blockquote.alert-wat       { border-color: var(--alert-wat); }
    it rather than writing a third value. */
 :root[data-theme="light"] { color-scheme: only light; }
 :root[data-theme="dark"]  { color-scheme: only dark; }
-
-
-/* =============================================================================
- * 7. Temporary: measure experiment
- *
- * DELETE once the reading measure is settled.
- *
- * Default is --measure: 38rem. To compare, add ONE of these classes to <body>
- * in devtools (Elements panel, edit the class attribute). It survives the 70s
- * colour rotation - colours.html only swaps the theme-base-* class now, it no
- * longer reassigns className wholesale.
- *
- *   measure-xnarrow   30rem   ~50 characters
- *   measure-narrow    34rem   ~58 characters
- *   (none)            38rem   ~66 characters  <- current default
- *   measure-wide      42rem   ~73 characters
- *   measure-xwide     46rem   ~81 characters
- *
- * :not(.full) keeps the projects page full-bleed - .content.full and
- * `.measure-x .content` have equal specificity, so without it these would win
- * on source order and cap that page's width.
- * ========================================================================== */
-
-.measure-xnarrow .content:not(.full) { max-width: 30rem; }
-.measure-narrow  .content:not(.full) { max-width: 34rem; }
-.measure-wide    .content:not(.full) { max-width: 42rem; }
-.measure-xwide   .content:not(.full) { max-width: 46rem; }
