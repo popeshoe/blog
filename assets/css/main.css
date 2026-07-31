@@ -257,10 +257,24 @@ a {
   color: inherit;
   text-decoration: none;
 }
-/* `:focus` is linked to `:hover` for basic accessibility */
 a:hover,
 a:focus {
   text-decoration: underline;
+}
+
+/* :focus used to be tied to :hover, which gave keyboard users nothing the
+   growing-underline effect didn't already do on pointer hover - the two were
+   indistinguishable. A real ring, only for keyboard focus. */
+:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Inside the sidebar the ring sits on the accent fill, where --accent-text is
+   near-invisible; use the same colour as the text over it. */
+.sidebar :focus-visible {
+  outline-color: var(--on-accent);
 }
 
 /* Headings.

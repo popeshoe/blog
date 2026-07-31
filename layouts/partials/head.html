@@ -31,9 +31,19 @@
     } catch (e) { /* private mode / storage disabled - fall back to the OS */ }
   </script>
 
-  <!-- CSS -->
-  <link rel="stylesheet" href="{{ .Site.BaseURL }}/css/main.css?{{ now.Unix }}">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abel">
+  <!-- CSS.
+       Fingerprinted, so the filename changes only when the contents do. The
+       old `?{{ "" }}<build timestamp>` busted the cache on every deploy even when
+       nothing had changed. RelPermalink is root-relative, which also makes
+       this immune to baseURL: `{{ "{{ .Site.BaseURL }}" }}` resolved to the production
+       host even on the dev server, so local pages were loading production CSS
+       and local edits never showed up. -->
+  {{ $css := resources.Get "css/main.css" | minify | fingerprint }}
+  <link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abel&display=swap">
 
   <!-- Without JS, colours.html never runs, so the theme-cycle keyframes stay
        at their #fff placeholders and --theme-color would just be white for

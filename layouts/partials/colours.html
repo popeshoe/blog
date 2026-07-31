@@ -207,39 +207,18 @@ if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
   });
 }
 
-{{ if hugo.IsServer }}
-// Dev-server only: Hugo's LiveReload hot-swaps just the <link
-// rel="stylesheet"> tag on CSS-only changes, without reloading the page or
-// re-running this script. The freshly-swapped-in stylesheet's @keyframes
-// theme-cycle rule starts back at its literal #fff placeholders (see the
-// comment above findThemeCycleKeyframesRule), so --theme-color goes white
-// until something repopulates them. Watch for stylesheet swaps and redo
-// that work each time one lands, instead of waiting for a real navigation.
-var styleSwapObserver = new MutationObserver(function (mutations) {
-  mutations.forEach(function (mutation) {
-    mutation.addedNodes.forEach(function (node) {
-      if (node.tagName === "LINK" && node.rel === "stylesheet") {
-        node.addEventListener("load", function () {
-          // Reach into this specific, just-loaded stylesheet rather than
-          // re-running the generic document.styleSheets search: LiveReload
-          // keeps the old <link> (and its stylesheet) in the document for a
-          // moment after the new one's `load` fires, only removing it
-          // slightly later, so a generic search would still find the old,
-          // about-to-be-removed rule instead of the new one.
-          var rules = node.sheet && node.sheet.cssRules;
-          if (!rules) return;
-          for (var i = 0; i < rules.length; i++) {
-            if (rules[i] instanceof CSSKeyframesRule && rules[i].name === "theme-cycle") {
-              themeCycleKeyframesRule = rules[i];
-              applyInitialColour();
-              break;
-            }
-          }
-        });
-      }
-    });
-  });
-});
-styleSwapObserver.observe(document.head, { childList: true });
-{{ end }}
+// REMOVED: a dev-only MutationObserver that watched for LiveReload swapping
+// the <link rel="stylesheet"> tag in place on CSS-only changes. That left the
+// new stylesheet's @keyframes theme-cycle rule at its #fff placeholders with
+// nothing to repopulate them, so the whole page went white until a real
+// navigation - the observer redid the seek each time a swap landed.
+//
+// The stylesheet is fingerprinted now (see head.html), so its filename
+// changes whenever its contents do. LiveReload can only swap a <link> in
+// place when the URL is stable, so it falls back to a full page reload, which
+// re-runs this script from scratch. Verified: editing the CSS reloads the
+// page (a marker set on window does not survive) and the keyframes come back
+// populated. The observer could no longer fire.
+//
+// If fingerprinting is ever removed, this comes back - `git log` for it.
 </script>
