@@ -20,9 +20,6 @@
   .dev-palette {
     position: absolute;
     z-index: 21;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
     /* Mobile: bottom-left, sitting beside the theme switch. */
     left: calc(var(--space-2) + 2.25rem);
     bottom: var(--space-2);
@@ -34,7 +31,6 @@
       left: auto;
       right: calc(var(--space-4) + 2.25rem);
       bottom: var(--space-4);
-      align-items: flex-end;
     }
   }
 
@@ -57,8 +53,19 @@
     filter: none;
   }
 
+  /* Absolutely positioned rather than stacked in flow above the trigger.
+     visibility: hidden still takes up layout space, so in flow this left the
+     container sized for the open panel even while closed - a 146x192 
+     transparent box at z-index 21, which sat over the theme switch and ate
+     every click meant for its options. */
   .dev-palette-panel {
-    margin-bottom: var(--space-1);
+    position: absolute;
+    bottom: calc(100% + var(--space-1));
+    left: 0;
+    /* The containing block is only as wide as the trigger, and an abspos box
+       shrink-to-fits against that - without this the 5-column grid is
+       squeezed to ~29px and half the swatches land off-screen. */
+    width: max-content;
     padding: var(--space-2);
     border-radius: 6px;
     /* Neutral rather than accent-tinted, so the swatches read honestly
@@ -66,6 +73,10 @@
     background: #1c1f24;
     box-shadow: 0 4px 14px rgba(0, 0, 0, .45);
     visibility: hidden;
+    /* Un-clickable immediately, rather than after the 0.16s visibility hold -
+       otherwise a just-closed panel still swallows clicks on the theme
+       switch underneath it. */
+    pointer-events: none;
     opacity: 0;
     transform: translateY(.5rem);
     transition: opacity .16s ease, transform .16s ease, visibility 0s .16s;
@@ -73,9 +84,20 @@
 
   .dev-palette[data-open="true"] .dev-palette-panel {
     visibility: visible;
+    pointer-events: auto;
     opacity: 1;
     transform: none;
     transition-delay: 0s;
+  }
+
+  /* Must come after the base rule above, not up with the other desktop
+     overrides - same specificity, so source order decides, and anchoring it
+     earlier left `left: 0` winning and pushed the panel off the right edge. */
+  @media (min-width: 48em) {
+    .dev-palette-panel {
+      left: auto;
+      right: 0;
+    }
   }
 
   .dev-palette-note {
@@ -210,8 +232,9 @@
     grid.appendChild(b);
   });
 
-  trigger.addEventListener("click", function (e) {
-    e.stopPropagation();
+  // No stopPropagation, so opening this closes the theme switch and vice
+  // versa - they overlap, and this one sits on top.
+  trigger.addEventListener("click", function () {
     var open = wrap.dataset.open !== "true";
     wrap.dataset.open = String(open);
     trigger.setAttribute("aria-expanded", String(open));

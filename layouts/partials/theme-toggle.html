@@ -70,8 +70,11 @@
     trigger.focus();
   }
 
-  trigger.addEventListener("click", function (e) {
-    e.stopPropagation();
+  // Deliberately does NOT stop propagation: letting the click reach document
+  // is what closes any other corner widget that's open (the dev palette),
+  // since each one closes itself on an outside click. Our own document
+  // handler sees the target inside this wrapper and leaves us alone.
+  trigger.addEventListener("click", function () {
     open(wrap.dataset.open !== "true");
   });
 

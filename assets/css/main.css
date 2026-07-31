@@ -1029,26 +1029,38 @@ body::before {
 .theme-switch {
   position: absolute;
   z-index: 20;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
   left: var(--space-2);
   bottom: var(--space-2);
 }
 
+/* Absolutely positioned, not stacked in flow above the trigger. visibility:
+   hidden still occupies layout space, so an in-flow panel left the container
+   sized for the open menu even while closed - and a transparent container
+   still hit-tests across its whole box, so it swallowed clicks on whatever it
+   overlapped. Out of flow, the container is only ever as big as its trigger. */
 .theme-switch-options {
+  position: absolute;
+  bottom: calc(100% + var(--space-1));
+  left: 0;
+  /* The containing block is now only as wide as the trigger, and an abspos
+     box shrink-to-fits against that - without this the menu is squeezed to
+     ~24px and its contents spill outside the viewport. */
+  width: max-content;
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  margin-bottom: var(--space-1);
-  /* Held back until the fade-out has finished, so the options stay
-     untabbable while closed without killing the transition. */
+  /* visibility keeps the options untabbable while closed without killing the
+     transition; pointer-events makes them un-clickable *immediately* rather
+     than after the 0.2s hold, so a closing menu can't swallow a click meant
+     for whatever is underneath it. */
   visibility: hidden;
+  pointer-events: none;
   transition: visibility 0s .2s;
 }
 
 .theme-switch[data-open="true"] .theme-switch-options {
   visibility: visible;
+  pointer-events: auto;
   transition-delay: 0s;
 }
 
@@ -1067,7 +1079,6 @@ body::before {
 }
 
 .theme-switch-trigger {
-  align-self: flex-start;
   padding: var(--space-1);
   opacity: .75;
   transition: opacity .15s ease;
@@ -1159,11 +1170,12 @@ body::before {
     left: auto;
     right: var(--space-4);
     bottom: var(--space-4);
-    align-items: flex-end;
   }
 
-  .theme-switch-trigger {
-    align-self: flex-end;
+  /* Anchored to the trigger's right edge so the menu opens inward. */
+  .theme-switch-options {
+    left: auto;
+    right: 0;
   }
 
   .theme-switch-option {
