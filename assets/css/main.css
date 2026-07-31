@@ -946,7 +946,15 @@ body::before {
    options up and out. Rendered hidden and revealed by JS, so a no-JS visitor
    never sees a dead control. */
 
+/* Sized off these four so the mobile-first values and the desktop ones live in
+   one place each. Mobile leads: the trigger is a thumb target, not a glyph. */
 .theme-switch {
+  --switch-hit: 2.75rem;
+  --switch-icon: 1.3rem;
+  --switch-trigger-icon: 1.65rem;
+  --switch-label: .9rem;
+  --switch-pad-y: var(--space-2);
+
   position: absolute;
   z-index: 20;
   left: var(--space-2);
@@ -985,7 +993,7 @@ body::before {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-1) var(--space-2);
+  padding: var(--switch-pad-y) var(--space-2);
   border: 0;
   border-radius: 4px;
   background: none;
@@ -994,7 +1002,12 @@ body::before {
   cursor: pointer;
 }
 
+/* Square, and no smaller than a fingertip - padding alone left the tap area
+   the size of the glyph. */
 .theme-switch-trigger {
+  justify-content: center;
+  min-width: var(--switch-hit);
+  min-height: var(--switch-hit);
   padding: var(--space-1);
   opacity: .75;
   transition: opacity .15s ease;
@@ -1006,28 +1019,26 @@ body::before {
   opacity: 1;
 }
 
-/* PT Sans has no coverage for these symbols; unstyled they fall back to tofu.
-   U+1F323 and U+1F5B3 are carried only by Noto Sans Symbols2, U+263D by DejaVu
-   Sans. Both family spellings listed - distributions differ. */
+/* The options carry colour emoji, which every phone ships; the monochrome
+   symbol glyphs they replaced are desktop-font-only and came out as tofu.
+   Fallback is per-glyph, so the symbol families still catch the trigger's
+   U+25D1, which no emoji font covers and PT Sans doesn't either. */
 .theme-switch-icon {
-  font-family: "Noto Sans Symbols 2", "Noto Sans Symbols2", "Noto Sans Symbols",
-               Symbola, "Segoe UI Symbol", "Apple Symbols", "DejaVu Sans", sans-serif;
-  font-size: 1.15rem;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+               "Segoe UI Symbol", "Noto Sans Symbols 2", "Noto Sans Symbols2",
+               Symbola, "Apple Symbols", "DejaVu Sans", sans-serif;
+  font-size: var(--switch-icon);
   line-height: 1;
 }
 
-/* Upright, the crescent reads as a bracket and the half-circle as a hard
-   vertical split. The attribute is on the icon, so this holds anywhere. */
-.theme-switch-icon[data-icon="dark"] {
-  rotate: 32deg;
-}
-
+/* Upright the half-circle reads as a hard vertical split. */
 .theme-switch-icon[data-icon="toggle"] {
+  font-size: var(--switch-trigger-icon);
   rotate: 45deg;
 }
 
 .theme-switch-label {
-  font-size: .8rem;
+  font-size: var(--switch-label);
   white-space: nowrap;
 }
 
@@ -1077,6 +1088,14 @@ body::before {
    line up under the trigger's rather than sitting off to one side. */
 @media (min-width: 48em) {
   .theme-switch {
+    /* Pointer-sized again: no thumb to clear, and the sidebar column is
+       narrow enough that the open menu shouldn't shout. */
+    --switch-hit: auto;
+    --switch-icon: 1.15rem;
+    --switch-trigger-icon: 1.15rem;
+    --switch-label: .8rem;
+    --switch-pad-y: var(--space-1);
+
     left: auto;
     right: var(--space-4);
     bottom: var(--space-4);

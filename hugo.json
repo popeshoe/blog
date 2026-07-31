@@ -2,8 +2,6 @@
 	"title": "Jonathan Stahlhacke",
 	"baseURL": "https://porkcullis.com/",
 	"buildDrafts": false,
-	"//canonifyURLs": "Deliberately unset. It rewrites URLs absolute against baseURL, so on www the stylesheet is cross-origin, colours.html cannot read its @keyframes rule, and the whole theme renders white.",
-	"//taxonomies": "Replaces the legacy `indexes` key, which Hugo still honours as an alias. Removing it entirely re-enables the default categories taxonomy and generates empty /categories/ pages.",
 	"taxonomies": {
 		"tag": "tags"
 	},

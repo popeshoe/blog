@@ -1,15 +1,15 @@
 <div class="theme-switch" data-theme-switch data-open="false" hidden>
   <div class="theme-switch-options" id="theme-switch-options">
     <button type="button" class="theme-switch-option" data-theme-value="light">
-      <span class="theme-switch-icon" data-icon="light" aria-hidden="true">🌣</span>
+      <span class="theme-switch-icon" data-icon="light" aria-hidden="true">🌞</span>
       <span class="theme-switch-label">Light</span>
     </button>
     <button type="button" class="theme-switch-option" data-theme-value="dark">
-      <span class="theme-switch-icon" data-icon="dark" aria-hidden="true">☽</span>
+      <span class="theme-switch-icon" data-icon="dark" aria-hidden="true">🌛</span>
       <span class="theme-switch-label">Dark</span>
     </button>
     <button type="button" class="theme-switch-option" data-theme-value="system">
-      <span class="theme-switch-icon" data-icon="system" aria-hidden="true">🖳</span>
+      <span class="theme-switch-icon" data-icon="system" aria-hidden="true">💻</span>
       <span class="theme-switch-label">System</span>
     </button>
   </div>
@@ -91,7 +91,20 @@
     }
   });
 
+  // "System" means this device's setting, so name the device when the pointer
+  // media queries are confident about it: a coarse pointer with no fine one
+  // anywhere is a phone or tablet. Anything else - a mouse present, or a
+  // browser that won't say - keeps the laptop the markup ships with.
+  function deviceIcon() {
+    if (!window.matchMedia) return;
+    if (window.matchMedia("(any-pointer: fine)").matches) return;
+    if (!window.matchMedia("(any-pointer: coarse)").matches) return;
+    var icon = wrap.querySelector('[data-icon="system"]');
+    if (icon) icon.textContent = "📱";
+  }
+
   // Revealed only once handlers are attached, so no-JS never sees a dead control.
+  deviceIcon();
   wrap.hidden = false;
   render();
 })();
