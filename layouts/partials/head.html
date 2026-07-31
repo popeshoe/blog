@@ -20,16 +20,30 @@
 
   <title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} &middot; {{ .Site.Title }}{{ end }}</title>
 
-  <!-- CSS -->
-  <link rel="stylesheet" href="{{ .Site.BaseURL }}/css/poole.css?{{ now.Unix }}">
-  <link rel="stylesheet" href="{{ .Site.BaseURL }}/css/syntax.css?{{ now.Unix }}">
-  <link rel="stylesheet" href="{{ .Site.BaseURL }}/css/hyde.css?{{ now.Unix }}">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abel">
+  <!-- Must run before the stylesheet and stay inline: an external file would
+       race first paint and flash the wrong scheme. No stored value = follow OS. -->
+  <script>
+    try {
+      var t = localStorage.getItem("theme");
+      if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+    } catch (e) { /* private mode / storage disabled - fall back to the OS */ }
+  </script>
 
-  <!-- Without JS, colours.html never runs, so the theme-cycle keyframes stay
-       at their #fff placeholders and --theme-color would just be white for
-       the whole page. Turn the animation off and pin a single static colour
-       instead. -->
+  <!-- Fingerprinted, so the filename changes only when the contents do.
+       RelPermalink is root-relative and canonifyURLs is off (see hugo.json), so
+       this stays same-origin on any host - which colours.html needs in order to
+       read its @keyframes rule out of the sheet. No SRI: the asset is
+       self-hosted and same-origin, so anyone able to alter it could equally
+       rewrite the hash here. -->
+  {{ $css := resources.Get "css/main.css" | minify | fingerprint }}
+  <link rel="stylesheet" href="{{ $css.RelPermalink }}">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abel&display=swap">
+
+  <!-- Without JS the keyframes stay at their #fff placeholders, so pin a
+       static colour instead. -->
   <noscript>
     <style>
       body {

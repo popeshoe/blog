@@ -1,0 +1,251 @@
+{{/* Dev-only palette picker. Everything - markup, styles, script - is inside
+     this guard, so none of it reaches a production build. */}}
+{{ if hugo.IsServer }}
+<div class="dev-palette" data-dev-palette data-open="false">
+  <div class="dev-palette-panel" id="dev-palette-panel">
+    <p class="dev-palette-note">palette &middot; dev server only</p>
+    <div class="dev-palette-grid" data-dev-palette-grid></div>
+    <button type="button" class="dev-palette-resume" data-dev-palette-resume>
+      Resume cycle
+    </button>
+  </div>
+
+  <button type="button" class="dev-palette-trigger"
+          aria-expanded="false" aria-controls="dev-palette-panel"
+          title="Palette (dev only)">🎨</button>
+</div>
+
+<style>
+  .dev-palette {
+    position: absolute;
+    z-index: 21;
+    /* Mobile: bottom-left, sitting beside the theme switch. */
+    left: calc(var(--space-2) + 2.25rem);
+    bottom: var(--space-2);
+  }
+
+  @media (min-width: 48em) {
+    .dev-palette {
+      /* Desktop: bottom-right, beside the theme switch. */
+      left: auto;
+      right: calc(var(--space-4) + 2.25rem);
+      bottom: var(--space-4);
+    }
+  }
+
+  .dev-palette-trigger {
+    padding: var(--space-1);
+    border: 0;
+    background: none;
+    font-size: 1.05rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: .75;
+    filter: grayscale(.4);
+    transition: opacity .15s ease, filter .15s ease;
+  }
+
+  .dev-palette-trigger:hover,
+  .dev-palette-trigger:focus-visible,
+  .dev-palette[data-open="true"] .dev-palette-trigger {
+    opacity: 1;
+    filter: none;
+  }
+
+  /* Abspos, not in flow: visibility:hidden still takes layout space, which
+     left this sitting over the theme switch and eating its clicks. */
+  .dev-palette-panel {
+    position: absolute;
+    bottom: calc(100% + var(--space-1));
+    left: 0;
+    /* Trigger-sized containing block, and an abspos box shrink-to-fits it. */
+    width: max-content;
+    padding: var(--space-2);
+    border-radius: 6px;
+    /* Neutral rather than accent-tinted, so the swatches read honestly
+       against it instead of against the colour being previewed. */
+    background: #1c1f24;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .45);
+    visibility: hidden;
+    /* Unclickable immediately, not after the 0.16s visibility hold. */
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(.5rem);
+    transition: opacity .16s ease, transform .16s ease, visibility 0s .16s;
+  }
+
+  .dev-palette[data-open="true"] .dev-palette-panel {
+    visibility: visible;
+    pointer-events: auto;
+    opacity: 1;
+    transform: none;
+    transition-delay: 0s;
+  }
+
+  /* Must follow the base rule - same specificity, so source order decides. */
+  @media (min-width: 48em) {
+    .dev-palette-panel {
+      left: auto;
+      right: 0;
+    }
+  }
+
+  .dev-palette-note {
+    margin: 0 0 var(--space-1);
+    color: #8b9198;
+    font-size: .6rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .dev-palette-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1.35rem);
+    gap: 3px;
+  }
+
+  .dev-palette-swatch {
+    width: 1.35rem;
+    height: 1.35rem;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, .18);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: transform .12s ease, border-color .12s ease;
+  }
+
+  .dev-palette-swatch:hover,
+  .dev-palette-swatch:focus-visible {
+    transform: scale(1.18);
+    border-color: #fff;
+  }
+
+  .dev-palette-swatch[aria-pressed="true"] {
+    border-color: #fff;
+    box-shadow: 0 0 0 2px #1c1f24, 0 0 0 3px #fff;
+  }
+
+  .dev-palette-resume {
+    display: block;
+    width: 100%;
+    margin-top: var(--space-2);
+    padding: 3px var(--space-1);
+    border: 1px solid #3a3f47;
+    border-radius: 3px;
+    background: none;
+    color: #c8ccd2;
+    font: inherit;
+    font-size: .65rem;
+    cursor: pointer;
+  }
+
+  .dev-palette-resume:hover,
+  .dev-palette-resume:focus-visible {
+    background: #262a31;
+    color: #fff;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dev-palette-panel,
+    .dev-palette-swatch,
+    .dev-palette-trigger {
+      transition: none;
+    }
+    .dev-palette-panel { transform: none; }
+    .dev-palette-swatch:hover { transform: none; }
+  }
+</style>
+
+<script>
+(function () {
+  var wrap = document.querySelector("[data-dev-palette]");
+  if (!wrap || typeof COLOURS === "undefined") return;
+
+  var grid    = wrap.querySelector("[data-dev-palette-grid]");
+  var trigger = wrap.querySelector(".dev-palette-trigger");
+  var resume  = wrap.querySelector("[data-dev-palette-resume]");
+  var body    = document.body;
+
+  // Pinning has to neutralise these, not just set --theme-color: the rotation
+  // timer and visibilitychange re-seek would restart the animation over it
+  // within a minute. Both resolve by global name at call time, so swapping
+  // them out keeps colours.html free of dev-only branches.
+  var realStart  = startTransition;
+  var realSeek   = applyInitialColour;
+  var pinned     = null;
+
+  function pin(hex) {
+    startTransition = function () {};
+    applyInitialColour = function () {};
+    body.style.animation = "none";
+    body.style.setProperty("--theme-color", hex);
+    pinned = hex;
+    render();
+  }
+
+  function unpin() {
+    startTransition = realStart;
+    applyInitialColour = realSeek;
+    body.style.removeProperty("--theme-color");
+    body.style.animation = "";
+    pinned = null;
+    applyInitialColour();   // re-seek to wall-clock position
+    render();
+  }
+
+  function render() {
+    Array.prototype.forEach.call(grid.children, function (b) {
+      b.setAttribute("aria-pressed", String(b.dataset.colour === pinned));
+    });
+    resume.disabled = pinned === null;
+    resume.textContent = pinned === null ? "Cycling" : "Resume cycle";
+  }
+
+  // From the COLOURS global, so it cannot drift out of sync with the palette.
+  COLOURS.forEach(function (hex) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "dev-palette-swatch";
+    b.style.background = hex;
+    b.dataset.colour = hex;
+    b.title = hex;
+    b.setAttribute("aria-label", "Pin theme colour " + hex);
+    b.addEventListener("click", function (e) {
+      e.stopPropagation();
+      pin(hex);
+    });
+    grid.appendChild(b);
+  });
+
+  // No stopPropagation, so opening this closes the theme switch and vice versa.
+  trigger.addEventListener("click", function () {
+    var open = wrap.dataset.open !== "true";
+    wrap.dataset.open = String(open);
+    trigger.setAttribute("aria-expanded", String(open));
+  });
+
+  resume.addEventListener("click", function (e) {
+    e.stopPropagation();
+    unpin();
+  });
+
+  document.addEventListener("click", function (e) {
+    if (wrap.dataset.open === "true" && !wrap.contains(e.target)) {
+      wrap.dataset.open = "false";
+      trigger.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && wrap.dataset.open === "true") {
+      wrap.dataset.open = "false";
+      trigger.setAttribute("aria-expanded", "false");
+      trigger.focus();
+    }
+  });
+
+  render();
+})();
+</script>
+{{ end }}

@@ -1,0 +1,1187 @@
+/* =============================================================================
+ * main.css
+ *
+ *   1. Config       @property declarations, design tokens
+ *   2. Theme engine the animated --theme-color cycle
+ *   3. Reset & base element defaults
+ *   4. Layout       sidebar, content column, breakpoints
+ *   5. Components   sidebar nav, posts, post index, project cards, alerts
+ *   6. Motion       reduced-motion, colour-scheme override
+ *
+ * Descended from Poole + Hyde by @mdo (MIT), long since diverged.
+ *
+ * Breakpoints, mobile-first, min-width only:
+ *   48em  sidebar becomes a fixed column
+ *   64em  wider sidebar, measure -> 38rem
+ *   80em  measure -> 46rem
+ * =============================================================================
+ */
+
+
+/* =============================================================================
+ * 1. Config
+ * ========================================================================== */
+
+/* Inheritable so one animation on <body> drives the whole page. Registered as
+   a real <color> so it can be animated and used in color-mix(). */
+@property --theme-color {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #fff;
+}
+
+/* Drives the growing-underline effect on links (see section 5). Registered so
+   the colour itself can transition, not just the background-size. */
+@property --link-highlight {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
+:root {
+  /* Spacing scale. Replaces the ad-hoc .2/.25/.35/.4/.6/.8/1.25/2.5rem values
+     that were scattered across the components. */
+  --space-1: .25rem;
+  --space-2: .5rem;
+  --space-3: .75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  /* Horizontal padding on the content column. A token because
+     .content-header has to match it exactly to line up with other pages. */
+  --gutter: var(--space-4);
+
+  /* Reading measure. Steps to 38rem at 64em, 46rem at 80em: ~50/66/81 chars. */
+  --measure: 30rem;
+
+  /* light-dark() resolves against the element's used color-scheme, so
+     constraining that one property on :root switches the whole palette
+     (see section 6). Nothing below section 2 may use a colour literal. */
+
+  color-scheme: light dark;
+
+  /* Surfaces */
+  --surface:        light-dark(#fff,     #14161a);
+  --surface-sunk:   light-dark(#f9f9f9,  #1e2126);   /* table stripe */
+  /* Distinct from --surface-sunk on purpose: both were #f9f9f9, so an inline
+     code chip inside a striped table row disappeared into the row. */
+  --code-bg:        light-dark(#f2f3f5,  #22262d);
+
+  /* Text */
+  --text:           light-dark(#515151,  #c8ccd2);
+  --text-strong:    light-dark(#313131,  #e8eaee);   /* headings, strong, titles */
+  --text-muted:     light-dark(#9a9a9a,  #8b9198);   /* dates, captions */
+  --text-quote:     light-dark(#7a7a7a,  #a8adb5);
+  --text-dim:       light-dark(#555,     #a8adb5);   /* abbr */
+  --code-text:      light-dark(#bf616a,  #e88b93);
+
+  /* Lines */
+  --border:         light-dark(#e5e5e5,  #2c3038);
+  --rule:           light-dark(#eee,     #262a31);   /* hr */
+  --card-border:    light-dark(#888,     #3a3f47);
+
+  /* Depth. Drop shadows read weakly on a dark surface however far you push
+     them, so dark mode leans on --card-border instead of fighting this. */
+  --shadow:         light-dark(rgba(0, 0, 0, .15), rgba(0, 0, 0, .55));
+  --shadow-lifted:  light-dark(rgba(0, 0, 0, .2),  rgba(0, 0, 0, .65));
+  --shadow-inset:   light-dark(rgba(0, 0, 0, .08), rgba(0, 0, 0, .35));
+
+  /* Tooltip - deliberately inverted against the page, so it flips too */
+  --popover-bg:     light-dark(#222,     #e8eaee);
+  --popover-text:   light-dark(#fff,     #14161a);
+
+  /* Text on top of an accent-filled block. See the contrast note beside
+     --accent-fill for what the lightness clamp actually guarantees. */
+  --on-accent:      #fff;
+
+  /* Needed in dark, where the dimmed fill can sit 1.06:1 against the page. */
+  --sidebar-edge:   light-dark(transparent, rgba(255, 255, 255, .11));
+
+  /* GitHub's light and dark palettes; `wat` is bespoke. See content/styleguide.md. */
+  --alert-note:      light-dark(#0969da, #4493f8);
+  --alert-tip:       light-dark(#1a7f37, #3fb950);
+  --alert-important: light-dark(#8250df, #ab7df8);
+  --alert-warning:   light-dark(#9a6700, #d29922);
+  --alert-caution:   light-dark(#cf222e, #f85149);
+  --alert-wat:       light-dark(#ff1f8f, #ff6fb5);
+}
+
+/* Declared on <body>, NOT :root: the animation runs on <body>, so at :root
+   --theme-color is still its #fff initial value and anything derived from it
+   there computes to white and inherits down as white.
+
+   Both clamp the palette colour's lightness, keeping hue and chroma. Without
+   it the dark end of the palette (#330C2F, #2A2D34) sits at 1.0-1.8:1 on a
+   dark background - invisible, not merely low. */
+body {
+  /* Dimmed rather than a full-strength fill: every entry lands in the same
+     tonal band whatever its lightness, so the palette needs no curation, and
+     white-on-fill goes from 3.8-9.7:1 to 11.5-17:1. The cost is that the
+     panel sits only 1.06-1.58:1 against the page - hence --sidebar-edge. */
+  --accent-fill-dark: oklch(from var(--theme-color) clamp(0.22, l, 0.32) c h);
+
+  /* Caps lightness so white sidebar text clears the pale entries (#f4bf75
+     was 1.67:1). White-on-fill by cap: 0.655 -> 3:1, 0.62 -> 3.5-4.4:1,
+     0.552 -> 4.5:1. 0.62 is a deliberate middle - large text clears AA, the
+     ~18px nav links technically want 4.5:1, and tightening further visibly
+     darkens the sidebar across half the palette. */
+  --accent-fill: light-dark(
+                   oklch(from var(--theme-color) min(l, 0.62) c h),
+                   var(--accent-fill-dark));
+
+  --accent-text: light-dark(
+                   oklch(from var(--theme-color) clamp(0.35, l, 0.55) c h),
+                   oklch(from var(--theme-color) clamp(0.62, l, 0.85) c h));
+}
+
+
+/* =============================================================================
+ * 2. Theme engine
+ *
+ * One animation on <body> drives an inherited custom property, so a single
+ * animation covers the page. On load, JS points it at the current/next colour
+ * and seeks it with a negative animation-delay derived from wall-clock time,
+ * which also keeps every visitor on the same colour at the same moment. See
+ * colours.html.
+ *
+ * The theme-base-XX class JS puts on <body> carries no CSS - it's a devtools
+ * label, kept out of the cascade so it can't fight the animation.
+ * ========================================================================== */
+
+/* The from/to colours here are placeholders, rewritten directly on this rule
+   (via CSSOM, see colours.html) before each restart. Firefox only animates a
+   registered custom property smoothly when its keyframe values are literal
+   colours - if a keyframe instead reads them indirectly through var(), it
+   falls back to a discrete jump partway through instead of easing. Chrome
+   doesn't have this limitation, but literal values work identically there. */
+@keyframes theme-cycle {
+  from { --theme-color: #fff; }
+  to   { --theme-color: #fff; }
+}
+
+body {
+  animation-name: theme-cycle;
+  animation-duration: var(--theme-anim-duration, 55s);
+  animation-delay: var(--theme-anim-delay, 0s);
+  animation-timing-function: ease;
+  animation-fill-mode: forwards;
+}
+
+
+/* =============================================================================
+ * 3. Reset & base
+ * ========================================================================== */
+
+* {
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* No px override on the root: it honours the reader's browser setting. Body
+   copy takes one step up at the desktop breakpoint. */
+html {
+  font-family: "PT Sans", Helvetica, Arial, sans-serif;
+  font-size: 100%;
+  line-height: 1.6;
+
+  /* Reclaim the ~12px a classic scrollbar takes, which narrows the layout and
+     shifts the centred column between scrolling and non-scrolling pages. No
+     native scrollbar can overlay (`overflow: overlay` is gone, scrollbar-gutter
+     only reserves), so hiding is the only route. Wheel/keyboard/touch scrolling
+     is unaffected. Root scroller only - a wide <pre> keeps its bar, where
+     nothing else signals that content continues sideways. */
+  scrollbar-width: none;           /* Firefox, and the modern standard */
+}
+
+/* WebKit/Blink don't support scrollbar-width yet. */
+html::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  color: var(--text);
+  background-color: var(--surface);
+  font-size: 1rem;
+  -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+}
+
+@media (min-width: 48em) {
+  body {
+    font-size: 1.125rem;
+  }
+}
+
+/* No `:visited` state is required by default (browsers will use `a`) */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+a:hover,
+a:focus {
+  text-decoration: underline;
+}
+
+/* Keyboard-only ring: :focus was tied to :hover, which the growing-underline
+   effect made indistinguishable from a pointer hover. */
+:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Inside the sidebar the ring sits on the accent fill, where --accent-text is
+   near-invisible; use the same colour as the text over it. */
+.sidebar :focus-visible {
+  outline-color: var(--on-accent);
+}
+
+/* Heading top margins descend h1 -> h6. */
+h1, h2, h3, h4, h5, h6 {
+  margin-bottom: var(--space-2);
+  font-weight: bold;
+  line-height: 1.25;
+  color: var(--text-strong);
+  text-rendering: optimizeLegibility;
+}
+h1 {
+  margin-top: var(--space-7);
+  font-size: 2rem;
+}
+h2 {
+  margin-top: var(--space-6);
+  font-size: 1.5rem;
+}
+h3 {
+  margin-top: var(--space-5);
+  font-size: 1.25rem;
+}
+h4, h5, h6 {
+  margin-top: var(--space-4);
+  font-size: 1rem;
+}
+
+/* Section spacing must not push the first thing on a page off the top; page
+   titles are a bare <h1> in most templates. */
+.content > :first-child,
+.post > :first-child,
+.post-body > :first-child {
+  margin-top: 0;
+}
+
+p {
+  margin-top: 0;
+  margin-bottom: var(--space-4);
+}
+
+strong {
+  color: var(--text-strong);
+}
+
+ul, ol, dl {
+  margin-top: 0;
+  margin-bottom: var(--space-4);
+}
+
+dt {
+  font-weight: bold;
+}
+dd {
+  margin-bottom: var(--space-2);
+}
+
+/* No fake bevel: a second border in the page colour only works in light mode. */
+hr {
+  position: relative;
+  margin: var(--space-5) 0;
+  border: 0;
+  border-top: 1px solid var(--rule);
+}
+
+abbr {
+  font-size: 85%;
+  font-weight: bold;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+abbr[title] {
+  cursor: help;
+  border-bottom: 1px dotted var(--border);
+}
+
+/* Syntax highlighting was removed: no content file has a code block, and
+   Hugo's markup.highlight.noClasses defaults to true, emitting inline styles
+   that ignore classes anyway. To restore (does NOT need extended Hugo): set
+   noClasses=false, then `hugo gen chromastyles --style=github` and
+   --style=github-dark, folded in as light-dark() pairs. */
+code,
+pre {
+  font-family: Menlo, Monaco, "Courier New", monospace;
+}
+code {
+  padding: .25em .5em;
+  font-size: 85%;
+  color: var(--code-text);
+  background-color: var(--code-bg);
+  border-radius: 3px;
+}
+pre {
+  display: block;
+  margin-top: 0;
+  margin-bottom: var(--space-4);
+  padding: var(--space-4);
+  font-size: .8rem;
+  line-height: 1.4;
+  white-space: pre;
+  white-space: pre-wrap;
+  word-break: break-all;
+  word-wrap: break-word;
+  background-color: var(--code-bg);
+}
+pre code {
+  padding: 0;
+  font-size: 100%;
+  color: inherit;
+  background-color: transparent;
+}
+.highlight {
+  margin-bottom: var(--space-4);
+  border-radius: 4px;
+}
+.highlight pre {
+  margin-bottom: 0;
+}
+
+/* Quotes */
+blockquote {
+  padding: var(--space-2) var(--space-4);
+  margin: var(--space-3) 0;
+  color: var(--text-quote);
+  border-left: .25rem solid var(--border);
+}
+blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+@media (min-width: 48em) {
+  /* Roomier quotes once there's width to spare. Was its own 30em breakpoint. */
+  blockquote {
+    padding-right: var(--space-8);
+    padding-left: var(--space-5);
+  }
+}
+
+/* The render hook wraps non-alert quotes in <figure>; the UA `margin: 1em 40px`
+   was silently indenting every quote on the site. */
+figure {
+  margin: 0;
+}
+
+.blockquote-caption {
+  margin-top: var(--space-2);
+  color: var(--text-muted);
+  font-size: .9em;
+}
+
+img {
+  display: block;
+  margin: 0 0 var(--space-4);
+  border-radius: 5px;
+  max-width: 100%;
+}
+
+table {
+  margin-bottom: var(--space-4);
+  width: 100%;
+  border: 1px solid var(--border);
+  border-collapse: collapse;
+}
+td,
+th {
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--border);
+}
+tbody tr:nth-child(odd) td,
+tbody tr:nth-child(odd) th {
+  background-color: var(--surface-sunk);
+}
+
+/* Larger introductory text. Used by the sidebar tagline and the 404 page. */
+.lead {
+  font-size: 1.25rem;
+  font-weight: 300;
+}
+
+
+/* =============================================================================
+ * 4. Layout
+ * ========================================================================== */
+
+/* Generic centred box. Only .sidebar-sticky uses this on its own now - the
+   content column used to double up on it (see .content below). */
+.container {
+  max-width: 38rem;
+  padding-left:  var(--space-4);
+  padding-right: var(--space-4);
+  margin-left:  auto;
+  margin-right: auto;
+}
+
+/* Sidebar: full-width header on mobile, fixed column from 48em. */
+
+.sidebar {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  padding: var(--space-6) var(--space-4);
+  color: color-mix(in oklab, var(--accent-fill) 50%, white);
+  background-color: var(--accent-fill);
+  overflow-wrap: break-word;
+}
+
+/* Fades page content in under the mobile header instead of ending the colour
+   block on a hard edge. On <body>, not .content: .content has a max-width, so
+   anchoring it there left a bare strip down each side once that bound.
+   margin-bottom pulls back its own height so it overlays rather than pushes. */
+body::before {
+  content: "";
+  display: block;
+  position: sticky;
+  top: 0;
+  height: 3.5rem;
+  margin-bottom: -3.5rem;
+  background-image: linear-gradient(var(--accent-fill) 15%, transparent);
+  pointer-events: none;
+  /* Above ordinary page content it's fading over (z-index: auto/0), but
+     below .sidebar (z-index: 10) so it never paints over the header. */
+  z-index: 5;
+}
+
+/* Content column. .container is still used on its own by .sidebar-sticky. */
+
+.content {
+  max-width: var(--measure);
+  margin-left: auto;
+  margin-right: auto;
+  padding: var(--space-8) var(--gutter);
+  /* URLs as link text and long identifiers overflow otherwise; <pre> handles
+     itself, inline text does not. */
+  overflow-wrap: break-word;
+}
+
+.content.full {
+  max-width: none;
+  container-type: inline-size;
+}
+
+/* Holds the page header to the same measure as every other page, so only the
+   project grid takes the full-bleed width. */
+.content-header {
+  /* --measure is a border-box width on .content, and .content.full already
+     applies the gutter out here - adding it again double-gutters on narrow
+     screens where the measure does not bind. */
+  max-width: calc(var(--measure) - 2 * var(--gutter));
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* The sidebar is fixed and out of flow, so reserve its width as padding on
+   <body> and let the column centre in what remains. */
+@media (min-width: 48em) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 18rem;
+    text-align: left;
+    padding: var(--space-4) 0;
+  }
+
+  /* A drawn edge instead, which is what keeps the panel readable in dark mode.
+     box-shadow, not border, so it costs no layout width. */
+  body::before {
+    display: none;
+  }
+
+  .sidebar {
+    box-shadow: 1px 0 0 var(--sidebar-edge);
+  }
+
+  .layout-reverse .sidebar {
+    box-shadow: -1px 0 0 var(--sidebar-edge);
+  }
+
+  .sidebar-sticky {
+    position: absolute;
+    right:  var(--space-4);
+    bottom: var(--space-4);
+    left:   var(--space-4);
+  }
+
+  body {
+    padding-left: 18rem;
+  }
+
+  :root {
+    --gutter: var(--space-6);
+  }
+
+  /* Reverse layout: sidebar on the right. Set site-wide via the themeColor
+     param in hugo.json, so this is effectively the only layout in use. */
+  .layout-reverse {
+    padding-left: 0;
+    padding-right: 18rem;
+  }
+
+  .layout-reverse .sidebar {
+    left: auto;
+    right: 0;
+  }
+}
+
+@media (min-width: 64em) {
+  :root {
+    --measure: 38rem;
+  }
+
+  .sidebar {
+    width: 20rem;
+  }
+
+  body {
+    padding-left: 20rem;
+  }
+
+  .layout-reverse {
+    padding-left: 0;
+    padding-right: 20rem;
+  }
+}
+
+/* Measure-only breakpoint - the layout doesn't change here, the column just
+   takes its last step up now there's width to spend on it. */
+@media (min-width: 80em) {
+  :root {
+    --measure: 46rem;
+  }
+}
+
+
+/* =============================================================================
+ * 5. Components
+ * ========================================================================== */
+
+/* --- Sidebar contents ---------------------------------------------------- */
+
+.sidebar a {
+  color: var(--on-accent);
+}
+
+.sidebar-about a {
+  text-decoration: none;
+}
+
+.sidebar-about h1 {
+  color: var(--on-accent);
+  margin-top: 0;
+  font-family: 'Abel', sans-serif;
+  font-size: 3rem;
+}
+
+/* Two columns on mobile - a single tall stack pushed the page content almost
+   entirely off screen. */
+.sidebar-nav {
+  padding-left: 0;
+  list-style: none;
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(3, auto);
+  column-gap: var(--space-4);
+}
+
+/* Same growing-underline as .post a, but white text on the accent fill means
+   the highlight must stay lighter than its own background and can't go as
+   pale as the post-body version, or the link text disappears into it.
+   Larger tap targets too: this doubles as the mobile nav. */
+.sidebar-nav a {
+  display: inline-block;
+  margin: var(--space-2) 0;
+  font-size: 1.15rem;
+  text-decoration: none;
+  --link-highlight: color-mix(in oklab, var(--accent-fill) 80%, white);
+  background-image: linear-gradient(var(--link-highlight), var(--link-highlight));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 3px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  transition: --link-highlight 0.16s ease-in-out, background-size 0.16s ease-in-out;
+}
+
+.sidebar-nav a:hover {
+  --link-highlight: color-mix(in oklab, var(--accent-fill) 80%, white);
+  background-size: 100% 100%;
+}
+
+.sidebar-nav-remote {
+  margin-top: 0;
+}
+
+/* Pin the copyright to the header's own corner rather than letting it add
+   another row of height. .sidebar is position: relative unconditionally. */
+.sidebar-copyright {
+  position: absolute;
+  right: var(--space-2);
+  bottom: var(--space-2);
+  margin: 0;
+  font-size: .75rem;
+}
+
+@media (min-width: 48em) {
+  /* Back to a single vertical stack in the fixed column. */
+  .sidebar-nav {
+    display: block;
+  }
+
+  .sidebar-nav a {
+    display: inline;
+    margin: 0;
+    font-size: inherit;
+  }
+
+  .sidebar-nav-remote {
+    margin-top: var(--space-3);
+  }
+
+  .sidebar-copyright {
+    position: static;
+    margin: 0 0 var(--space-4);
+    font-size: inherit;
+  }
+}
+
+/* --- Posts and pages ----------------------------------------------------- */
+
+.page,
+.post {
+  margin-bottom: var(--space-7);
+}
+
+.page-title,
+.post-title,
+.post-title a {
+  color: var(--text-strong);
+}
+.page-title,
+.post-title {
+  margin-top: 0;
+}
+
+.post-date {
+  display: block;
+  margin-top: calc(var(--space-2) * -1);
+  margin-bottom: var(--space-4);
+  color: var(--text-muted);
+}
+
+/* Divider between consecutive posts on the homepage. */
+.post + .post::before {
+  content: "";
+  display: block;
+  width: 70%;
+  margin: var(--space-5) auto;
+  border-top: 2px solid color-mix(in oklab, var(--accent-text) 50%, var(--surface));
+  margin-bottom: var(--space-7);
+}
+
+/* Headings and links pick up the cycling accent colour. */
+.content h1,
+.content h2,
+.content h3,
+.content h4,
+.content h5,
+.content h6 {
+  color: var(--accent-text);
+}
+
+.content a {
+  color: var(--accent-text);
+}
+
+.content a:visited {
+  color: inherit;
+}
+
+/* A 3px bar that grows to fill the line on hover; box-decoration-break keeps
+   it correct on links that wrap. */
+.post a {
+  text-decoration: none;
+  font-weight: 700;
+  --link-highlight: color-mix(in oklab, var(--accent-text) 50%, var(--surface));
+  background-image: linear-gradient(var(--link-highlight), var(--link-highlight));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 3px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  transition: --link-highlight 0.16s ease-out, background-size 0.16s ease-in-out;
+}
+
+.post a:hover {
+  --link-highlight: color-mix(in oklab, var(--accent-text) 15%, var(--surface));
+  background-size: 100% 100%;
+}
+
+/* --- Post index (/post) --------------------------------------------------- */
+
+.post-index {
+  padding-left: 0;
+  list-style: none;
+}
+
+.post-index li {
+  display: flex;
+  align-items: baseline;
+  gap: 0 var(--space-4);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.post-index li:first-child {
+  border-top: 1px solid var(--border);
+}
+
+/* Long titles wrap inside their own box rather than pushing the date onto a
+   new line; margin-left keeps the date hard right either way. */
+.post-index li a {
+  flex: 1 1 auto;
+}
+
+.post-index time {
+  flex: 0 0 auto;
+  margin-left: auto;
+  color: var(--text-muted);
+  font-size: .85em;
+  white-space: nowrap;
+}
+
+/* --- Project cards (/projects) --------------------------------------------
+   Any post joins this list by adding a `project` block to its front matter.
+   Sized in container query units against .content.full. */
+
+.project-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(clamp(160px, 22cqw, 200px), clamp(220px, 28cqw, 260px)));
+  justify-content: center;
+  gap: var(--space-6);
+  margin: var(--space-6) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.project-card {
+  --tilt: 0deg;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  box-shadow: 6px 6px 4px var(--shadow);
+  scale: 1;
+  transform: rotate(var(--tilt));
+  transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease, scale .2s ease;
+}
+
+/* Hand-placed rather than gridded. The angle is a custom property so the
+   reduced-motion block can keep the tilt while dropping the hover movement. */
+.project-card:nth-child(3n+1) { --tilt: -2deg; }
+.project-card:nth-child(3n+2) { --tilt: 1.5deg; }
+.project-card:nth-child(3n)   { --tilt: -1deg; }
+
+.project-card:hover {
+  scale: 1.1;
+  transform: rotate(0deg) translateY(-4px);
+  box-shadow: 8px 8px 6px var(--shadow-lifted);
+}
+
+.project-card a:hover {
+  text-decoration: none;
+}
+
+/* Mobile-first: title stacks above the icon row, which needs room to breathe
+   for touch. The 48em block below puts them back on one line. */
+.project-card-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  background-color: var(--accent-fill);
+  border-radius: 5px 5px 0 0;
+}
+
+.project-card-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  text-wrap-mode: nowrap;
+}
+
+.project-card .project-card-header a {
+  color: var(--on-accent);
+}
+
+.project-card-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  flex-shrink: 0;
+}
+
+.project-card-links a {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-2);
+  opacity: .8;
+  transition: opacity .15s ease;
+}
+
+.project-card-links a:hover,
+.project-card-links a:focus {
+  opacity: 1;
+  text-decoration: none;
+}
+
+.project-card-links svg {
+  width: 1.4rem;
+  height: 1.4rem;
+  flex-shrink: 0;
+}
+
+.project-card-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3.5rem;
+  line-height: 1;
+  padding: var(--space-5);
+  background: color-mix(in oklab, var(--accent-fill) 12%, var(--surface));
+  box-shadow: inset 0 0 0 1px var(--shadow-inset);
+  text-decoration: none;
+  transition: background-color .15s ease;
+  text-wrap-mode: nowrap;
+}
+
+.project-card-art:hover {
+  background: color-mix(in oklab, var(--accent-fill) 22%, var(--surface));
+}
+
+.project-card-body {
+  padding: var(--space-5);
+}
+
+.project-card-body p {
+  margin-bottom: 0;
+}
+
+/* Touch has no hover, so the popover tooltips never fire - the icons carry a
+   visible text label instead. Hidden again at 48em where the popover works. */
+.icon-label {
+  display: inline;
+  margin-left: var(--space-2);
+  font-size: .9rem;
+}
+
+/* Positioned by JS against the trigger's bounding box (see projects/list.html). */
+.icon-popover[popover] {
+  inset: auto;
+  margin: 0;
+  border: none;
+  border-radius: 4px;
+  padding: var(--space-1) var(--space-2);
+  background: var(--popover-bg);
+  color: var(--popover-text);
+  font-size: .8rem;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translateX(-50%);
+  box-shadow: 0 2px 6px var(--shadow-lifted);
+}
+
+@media (min-width: 48em) {
+  .project-card-header {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .project-card-links {
+    flex-wrap: nowrap;
+    gap: var(--space-2);
+  }
+
+  .project-card-links a {
+    padding: var(--space-1);
+  }
+
+  /* Popover tooltips take over from here. */
+  .icon-label {
+    display: none;
+  }
+}
+
+/* --- Theme switch --------------------------------------------------------
+   Icon in the sidebar's bottom corner - bottom-left as the mobile header,
+   bottom-right as the desktop column. Activating it flies three labelled
+   options up and out. Rendered hidden and revealed by JS, so a no-JS visitor
+   never sees a dead control. */
+
+.theme-switch {
+  position: absolute;
+  z-index: 20;
+  left: var(--space-2);
+  bottom: var(--space-2);
+}
+
+/* Absolutely positioned, not in flow: visibility:hidden still occupies layout
+   space, which left the container sized for the open menu and swallowing
+   clicks on whatever it overlapped. */
+.theme-switch-options {
+  position: absolute;
+  bottom: calc(100% + var(--space-1));
+  left: 0;
+  /* The containing block is trigger-sized, and an abspos box shrink-to-fits
+     against it. */
+  width: max-content;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  /* visibility keeps them untabbable; pointer-events makes them unclickable
+     immediately rather than after the 0.2s hold, so a closing menu cannot
+     swallow a click aimed underneath. */
+  visibility: hidden;
+  pointer-events: none;
+  transition: visibility 0s .2s;
+}
+
+.theme-switch[data-open="true"] .theme-switch-options {
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s;
+}
+
+.theme-switch-option,
+.theme-switch-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: var(--on-accent);
+  font: inherit;
+  cursor: pointer;
+}
+
+.theme-switch-trigger {
+  padding: var(--space-1);
+  opacity: .75;
+  transition: opacity .15s ease;
+}
+
+.theme-switch-trigger:hover,
+.theme-switch-trigger:focus-visible,
+.theme-switch[data-open="true"] .theme-switch-trigger {
+  opacity: 1;
+}
+
+/* PT Sans has no coverage for these symbols; unstyled they fall back to tofu.
+   U+1F323 and U+1F5B3 are carried only by Noto Sans Symbols2, U+263D by DejaVu
+   Sans. Both family spellings listed - distributions differ. */
+.theme-switch-icon {
+  font-family: "Noto Sans Symbols 2", "Noto Sans Symbols2", "Noto Sans Symbols",
+               Symbola, "Segoe UI Symbol", "Apple Symbols", "DejaVu Sans", sans-serif;
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+/* Upright, the crescent reads as a bracket and the half-circle as a hard
+   vertical split. The attribute is on the icon, so this holds anywhere. */
+.theme-switch-icon[data-icon="dark"] {
+  rotate: 32deg;
+}
+
+.theme-switch-icon[data-icon="toggle"] {
+  rotate: 45deg;
+}
+
+.theme-switch-label {
+  font-size: .8rem;
+  white-space: nowrap;
+}
+
+/* Options sit collapsed on the trigger and fly up when opened. */
+.theme-switch-option {
+  opacity: 0;
+  transform: translateY(.6rem) scale(.96);
+  background-color: color-mix(in oklab, var(--accent-fill) 80%, black);
+  transition: opacity .18s ease,
+              transform .18s cubic-bezier(.2, .7, .3, 1.2),
+              background-color .15s ease;
+}
+
+.theme-switch[data-open="true"] .theme-switch-option {
+  opacity: 1;
+  transform: none;
+}
+
+/* Opening, the option nearest the trigger leads and the stack unfurls
+   upward; closing runs the other way, so it retracts back down onto it. */
+.theme-switch-option:nth-child(1) { transition-delay: 0s; }
+.theme-switch-option:nth-child(2) { transition-delay: .045s; }
+.theme-switch-option:nth-child(3) { transition-delay: .09s; }
+
+.theme-switch[data-open="true"] .theme-switch-option:nth-child(3) { transition-delay: 0s; }
+.theme-switch[data-open="true"] .theme-switch-option:nth-child(2) { transition-delay: .045s; }
+.theme-switch[data-open="true"] .theme-switch-option:nth-child(1) { transition-delay: .09s; }
+
+.theme-switch-option:hover,
+.theme-switch-option:focus-visible {
+  background-color: color-mix(in oklab, var(--accent-fill) 60%, black);
+}
+
+/* The trigger glyph is fixed, so this is the only visual indication of the
+   active scheme. Lighter than :hover, which darkens - otherwise hovering a
+   neighbour would out-compete the real selection. */
+.theme-switch-option[aria-pressed="true"] {
+  background-color: var(--accent-fill);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .45);
+}
+
+.theme-switch-option[aria-pressed="true"] .theme-switch-label {
+  font-weight: 700;
+}
+
+/* Desktop: anchored bottom-right, so the options right-align and their icons
+   line up under the trigger's rather than sitting off to one side. */
+@media (min-width: 48em) {
+  .theme-switch {
+    left: auto;
+    right: var(--space-4);
+    bottom: var(--space-4);
+  }
+
+  /* Anchored to the trigger's right edge so the menu opens inward. */
+  .theme-switch-options {
+    left: auto;
+    right: 0;
+  }
+
+  .theme-switch-option {
+    flex-direction: row-reverse;
+  }
+}
+
+/* Screen-reader-only label for the icon-only trigger. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- Alert callouts ------------------------------------------------------
+   From the blockquote render hook, plus a non-standard `wat` type. */
+
+blockquote.alert {
+  padding: var(--space-2) var(--space-4);
+}
+
+blockquote.alert .alert-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: 0;
+  margin-bottom: var(--space-1);
+  font-weight: bold;
+}
+
+blockquote.alert .alert-icon {
+  line-height: 1;
+}
+
+blockquote.alert-note      { border-color: var(--alert-note); }
+blockquote.alert-tip       { border-color: var(--alert-tip); }
+blockquote.alert-important { border-color: var(--alert-important); }
+blockquote.alert-warning   { border-color: var(--alert-warning); }
+blockquote.alert-caution   { border-color: var(--alert-caution); }
+blockquote.alert-wat       { border-color: var(--alert-wat); }
+
+.alert-note .alert-heading      { color: var(--alert-note); }
+.alert-tip .alert-heading       { color: var(--alert-tip); }
+.alert-important .alert-heading { color: var(--alert-important); }
+.alert-warning .alert-heading   { color: var(--alert-warning); }
+.alert-caution .alert-heading   { color: var(--alert-caution); }
+.alert-wat .alert-heading       { color: var(--alert-wat); }
+
+
+/* =============================================================================
+ * 6. Motion & preferences
+ * ========================================================================== */
+
+/* Turning the animation off leaves --theme-color at its #fff initial value, so
+   colours.html pairs this by setting the current epoch's colour inline.
+   Reduced-motion visitors keep the full palette and stay in sync - they just
+   get one fixed colour per page load. */
+@media (prefers-reduced-motion: reduce) {
+  body {
+    animation: none;
+  }
+
+  .post a,
+  .sidebar-nav a,
+  .project-card,
+  .project-card-links a,
+  .project-card-art,
+  .theme-switch-trigger,
+  .theme-switch-options {
+    transition: none;
+  }
+
+  /* The options still appear and disappear, they just don't fly. */
+  .theme-switch-option {
+    transform: none;
+    transition: opacity .01s;
+    transition-delay: 0s;
+  }
+
+  /* Keep the static hand-placed tilt - it isn't motion - but drop the lift
+     and scale on hover, leaving the shadow as the only hover cue. */
+  .project-card:hover {
+    scale: 1;
+    transform: rotate(var(--tilt));
+  }
+}
+
+/* Set on <html> by the sidebar control. On <html> not <body> deliberately:
+   colours.html rewrites classes on <body> every rotation. No attribute means
+   "follow the OS", which is why the control removes it rather than writing a
+   third value. */
+:root[data-theme="light"] { color-scheme: only light; }
+:root[data-theme="dark"]  { color-scheme: only dark; }

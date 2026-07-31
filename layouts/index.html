@@ -1,16 +1,11 @@
-{{ partial "head.html" . }}
-<body class="{{ .Site.Params.themeColor }}">
-{{ partial "colours.html" . }}
-
-{{ partial "sidebar.html" . }}
-
-    <div class="content container">
+{{ define "main" }}
+    <div class="content">
 <div class="posts">
 
       {{ range first 3 (where site.RegularPages "Type" "in" site.Params.mainSections) }}
   <div class="post">
     <h1 class="post-title">
-      <a href="{{ .Permalink }}">
+      <a href="{{ .RelPermalink }}">
         {{ .Title }}
       </a>
     </h1>
@@ -24,6 +19,4 @@
 
 		<a href="/post">More posts&hellip;</a>
 </div>
-
-  </body>
-</html>
+{{ end }}

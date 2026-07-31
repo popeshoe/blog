@@ -1,12 +1,11 @@
-{{ partial "head.html" . }}
-<body class="{{ .Site.Params.themeColor }}">
-{{ partial "colours.html" . }}
-
-	{{ partial "sidebar.html" . }}
-
-	<div class="content container full">
-		<h1>{{ .Title }}</h1>
-		<div class="post-body">{{ .Content }}</div>
+{{ define "main" }}
+	<div class="content full">
+		{{/* Full-bleed column for the grid, but the header keeps the same measure
+		     and centring as every other page. */}}
+		<div class="content-header">
+			<h1>{{ .Title }}</h1>
+			<div class="post-body">{{ .Content }}</div>
+		</div>
 		<ul class="project-list">
 			{{ range where site.RegularPages "Params.project.url" "!=" nil }}
 			{{ $page := . }}
@@ -14,7 +13,7 @@
 				<div class="project-card-header">
 					<h2><a href="{{ .Params.project.url }}">{{ .Params.project.name }}</a></h2>
 					<div class="project-card-links">
-						<a href="{{ .Permalink }}" aria-label="Read the blog post">
+						<a href="{{ .RelPermalink }}" aria-label="Read the blog post">
 							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
 							<span class="icon-label">About</span>
 							<span class="icon-popover" popover="manual">About</span>
@@ -38,14 +37,18 @@
 			{{ end }}
 		</ul>
 	</div>
+{{ end }}
 
+{{ define "scripts" }}
 	<script>
-	var isMobileView = window.matchMedia('(max-width: 47.999em)');
+	// Matches the CSS desktop breakpoint. Below it the icons carry a visible
+	// text label instead, since touch has no hover to trigger a popover.
+	var isDesktop = window.matchMedia('(min-width: 48em)');
 	document.querySelectorAll('.project-card-links a').forEach(function (link) {
 		var pop = link.querySelector('[popover]');
 		if (!pop) return;
 		function show() {
-			if (isMobileView.matches) return;
+			if (!isDesktop.matches) return;
 			pop.showPopover();
 			var rect = link.getBoundingClientRect();
 			pop.style.left = (rect.left + rect.width / 2) + 'px';
@@ -60,5 +63,4 @@
 		link.addEventListener('blur', hide);
 	});
 	</script>
-</body>
-</html>
+{{ end }}

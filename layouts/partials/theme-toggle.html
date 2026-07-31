@@ -1,0 +1,98 @@
+<div class="theme-switch" data-theme-switch data-open="false" hidden>
+  <div class="theme-switch-options" id="theme-switch-options">
+    <button type="button" class="theme-switch-option" data-theme-value="light">
+      <span class="theme-switch-icon" data-icon="light" aria-hidden="true">🌣</span>
+      <span class="theme-switch-label">Light</span>
+    </button>
+    <button type="button" class="theme-switch-option" data-theme-value="dark">
+      <span class="theme-switch-icon" data-icon="dark" aria-hidden="true">☽</span>
+      <span class="theme-switch-label">Dark</span>
+    </button>
+    <button type="button" class="theme-switch-option" data-theme-value="system">
+      <span class="theme-switch-icon" data-icon="system" aria-hidden="true">🖳</span>
+      <span class="theme-switch-label">System</span>
+    </button>
+  </div>
+
+  <button type="button" class="theme-switch-trigger"
+          aria-expanded="false" aria-controls="theme-switch-options">
+    <span class="theme-switch-icon" data-icon="toggle" aria-hidden="true">◑</span>
+    <span class="visually-hidden">Colour theme</span>
+  </button>
+</div>
+
+<script>
+(function () {
+  var wrap = document.querySelector("[data-theme-switch]");
+  if (!wrap) return;
+
+  var root    = document.documentElement;
+  var trigger = wrap.querySelector(".theme-switch-trigger");
+  var options = Array.prototype.slice.call(wrap.querySelectorAll(".theme-switch-option"));
+  var LABELS  = { light: "Light", dark: "Dark", system: "System" };
+
+  // "system" is the absence of the attribute, so a visitor who has chosen once
+  // can still go back to following the OS.
+  function current() {
+    var t = root.dataset.theme;
+    return t === "light" || t === "dark" ? t : "system";
+  }
+
+  // The trigger glyph is fixed, so aria-label carries the current scheme for
+  // anyone who cannot see the highlighted option.
+  function render() {
+    var now = current();
+    trigger.setAttribute("aria-label",
+      "Colour theme: " + LABELS[now] + ". Activate to change.");
+    options.forEach(function (o) {
+      o.setAttribute("aria-pressed", String(o.dataset.themeValue === now));
+    });
+  }
+
+  function open(state) {
+    wrap.dataset.open = String(state);
+    trigger.setAttribute("aria-expanded", String(state));
+  }
+
+  function choose(value) {
+    if (value === "system") {
+      delete root.dataset.theme;
+      try { localStorage.removeItem("theme"); } catch (e) {}
+    } else {
+      root.dataset.theme = value;
+      try { localStorage.setItem("theme", value); } catch (e) {}
+    }
+    render();
+    open(false);
+    trigger.focus();
+  }
+
+  // No stopPropagation: letting the click reach document is what closes the
+  // other corner widget, since each closes itself on an outside click.
+  trigger.addEventListener("click", function () {
+    open(wrap.dataset.open !== "true");
+  });
+
+  options.forEach(function (o) {
+    o.addEventListener("click", function (e) {
+      e.stopPropagation();
+      choose(o.dataset.themeValue);
+    });
+  });
+
+  document.addEventListener("click", function (e) {
+    if (wrap.dataset.open === "true" && !wrap.contains(e.target)) open(false);
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && wrap.dataset.open === "true") {
+      open(false);
+      trigger.focus();
+    }
+  });
+
+  // Revealed only once handlers are attached, so no-JS never sees a dead control.
+  wrap.hidden = false;
+  render();
+})();
+</script>
