@@ -6,7 +6,7 @@
 
 	<div class="content container full">
 		<h1>{{ .Title }}</h1>
-
+		<div class="post-body">{{ .Content }}</div>
 		<ul class="project-list">
 			{{ range where site.RegularPages "Params.project.url" "!=" nil }}
 			{{ $page := . }}

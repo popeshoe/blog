@@ -330,10 +330,11 @@ a.sidebar-nav-item:focus {
 
 .project-card {
   overflow: hidden;
-  border: 1px solid #333;
+  border: 1px solid #888;
   border-radius: 6px;
-  box-shadow: 6px 6px 0 rgba(0, 0, 0, .15);
-  transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease;
+  box-shadow: 6px 6px 4px rgba(0, 0, 0, .15);
+  scale: 1;
+  transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease, scale .2s ease;
 }
 
 /* A little scatter so the cards feel hand-placed rather than gridded. */
@@ -350,9 +351,9 @@ a.sidebar-nav-item:focus {
 }
 
 .project-card:hover {
-  border-color: var(--theme-color);
+  scale: 1.1;
   transform: rotate(0deg) translateY(-4px);
-  box-shadow: 8px 8px 0 rgba(0, 0, 0, .2);
+  box-shadow: 8px 8px 6px rgba(0, 0, 0, .2);
 }
 
 .project-card-header {
