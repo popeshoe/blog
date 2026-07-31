@@ -20,7 +20,7 @@ I made a heads-up style guessing game in the browser! Check it out!
 
 ### Why
 
-A few months ago I was drunk in a pub with some friends and we found ourselves trying to play one of those charades style guessing games in the style of heads-up. Going through the Google Play Store we found that almost every version we tried was some combination of ugly, hard to use, severely limited, or had terrible performance. 
+A while ago I was drunk in a Bristol pub with some friends and we found ourselves trying to play one of those charades style guessing games in the style of heads-up. Going through the Google Play Store we found that almost every version we tried was some combination of ugly, hard to use, severely limited, or had terrible performance. 
 
 After a few semi-successful rounds we gave up, defeated. What stuck with me was my friend saying that these apps seem like the kind of thing that a decent LLM could shit out in a single prompt. When I got home I figured I'd give it a go. 
 
@@ -32,12 +32,12 @@ So with my lightly used Github copilot subscription in one hand, and a plucky (b
 
 By far the most time and tokens went into making the accelerometer controls work, for a long time the AI would churn away, trying to resolve a tilt up or down from the stream of `DeviceOrientationEvent`, whenever it had solved for one orientation it would break another. It eventually got to the point where it built an [orientation debugging screen](http://guessr.porkcullis.com?debug) so that it and I could look at the values in real time and I could report to Opus what axes were changing in various orientations, it still took a number of iterations to get a somewhat working solution. 
 
-Eventually I got frustrated and looked at the [mdn docs](https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent/accelerationIncludingGravity) myself and suggested it try the `devicemotion` event listener instead of `deviceorientation` along with a link to the docs. It was immediately solved with that single prompt, huzzah! The issue turned out to be [**gimbal lock**](https://en.wikipedia.org/wiki/Gimbal_lock) and the position in which I had the player hold their phone was coincidentally exactly where the lock would occur so that even a tiny movement of the phone would feed back wildly chaotic readings.
+Eventually I got frustrated and looked at the [mdn docs](https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent/accelerationIncludingGravity) myself, and suggested it try the `devicemotion` event listener instead of `deviceorientation` along with a link to the docs. Opus immediately solved it on that single prompt, huzzah! The issue turned out to be [**gimbal lock**](https://en.wikipedia.org/wiki/Gimbal_lock) and the position in which I had the player hold their phone was coincidentally exactly where the lock would occur so that even a tiny movement of the phone would feed back wildly chaotic readings.
 
 > [!wat]
 > Gimbal lock was a problem for the [Apollo program](https://en.wikipedia.org/wiki/Gimbal_lock#On_Apollo_11), this episode where I ask a computer to write basic javascript puts me in the same caliber as any of those mission control nerds.
 
-In switching to `DeviceMotionEvent.accelerationIncludingGravity` I was moving from 3 Earth-relative Euler angles (which would have to be computed) to three device relative acceleration values, where suddenly we have an easily identifiable "down" vector which makes it trivial to detect tilts relative to the ground. Easy!
+The fix works because it trades three angles for one vector. `deviceorientation` reports Euler angles relative to the Earth — and that Earth-relative frame is exactly what collapses at the upright position. Whereas `accelerationIncludingGravity` gives us the raw g-force: a three-axis vector that, at rest, points opposite to gravity, with this we can trivially detect tilts with some **atan2** magic. Easy!
 
 With that solved I just had to make the thing usable, I added snazzy animations to the in-game cards, vibrations for when you got things right and wrong, as well as to alert you that time was running out. 
 
