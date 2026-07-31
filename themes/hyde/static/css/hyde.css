@@ -90,6 +90,8 @@ html {
  */
 
 .sidebar {
+  position: relative;
+  z-index: 10;
   text-align: center;
   padding: 2rem 1rem;
   color: color-mix(in oklab, var(--theme-color) 50%, white);
@@ -122,7 +124,9 @@ html {
     margin-bottom: 2rem;
     background-image: linear-gradient(var(--theme-color) 15%, transparent);
     pointer-events: none;
-    z-index: 99999;
+    /* Above ordinary page content it's fading out (z-index: auto/0), but
+       below .sidebar (z-index: 10) so it never paints over the header. */
+    z-index: 5;
   }
 }
 
@@ -132,6 +136,10 @@ html {
 }
 
 /* About section */
+.sidebar-about a {
+  text-decoration: none;
+}
+
 .sidebar-about h1 {
   color: #fff;
   margin-top: 0;
@@ -155,13 +163,36 @@ a.sidebar-nav-item:focus {
   font-weight: bold;
 }
 
+/* Same growing-underline effect as .post-body a (see below), but the
+   sidebar's text is white on the solid --theme-color background instead of
+   dark text on a white page, so the highlight has to stay lighter than the
+   background to read as a highlight at all - and can't go anywhere near as
+   pale as the post-body version or the white link text would disappear
+   into it once the highlight grows to fill the full line height. */
+.sidebar-nav a {
+  text-decoration: none;
+  --link-highlight: color-mix(in oklab, var(--theme-color) 80%, white);
+  background-image: linear-gradient(var(--link-highlight), var(--link-highlight));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 3px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  transition: --link-highlight 0.16s ease-in-out, background-size 0.16s ease-in-out;
+}
+
+.sidebar-nav a:hover {
+  --link-highlight: color-mix(in oklab, var(--theme-color) 80%, white);
+  background-size: 100% 100%;
+}
+
 /* Bigger tap targets on touch-sized screens - the sidebar sits above the
    content and doubles as the mobile nav, so its links need to be easy to
    hit with a thumb, not just readable. */
 @media (max-width: 47.999em) {
   .sidebar-nav a {
-    display: block;
-    padding: .5rem 0;
+    display: inline-block;
+    margin: .5rem 0;
     font-size: 1.15rem;
   }
 
@@ -180,18 +211,14 @@ a.sidebar-nav-item:focus {
   }
 
   /* Pin the copyright line to the header's own corner instead of
-     letting it add another row of vertical height. */
-  .sidebar {
-    position: relative;
-  }
-
+     letting it add another row of vertical height. .sidebar is already
+     position: relative unconditionally (see above). */
   .sidebar-copyright {
     position: absolute;
     right: .5rem;
     bottom: .5rem;
     margin: 0;
     font-size: .75rem;
-    opacity: .7;
   }
 }
 
