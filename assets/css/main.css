@@ -510,20 +510,27 @@ tbody tr:nth-child(odd) th {
 }
 
 /* Mobile: the sidebar is the page header, so fade the content in underneath
-   it instead of ending the colour block on a hard edge. */
-.content::before {
+   it instead of ending the colour block on a hard edge.
+
+   This hangs off <body>, not .content. It used to be .content::before with
+   -16px side margins to cancel that column's padding, which silently assumed
+   .content spanned the viewport. Once .content gained a max-width the
+   assumption broke: at 760px the column is 480px wide and centred, so the
+   gradient covered 512px of a 748px page and left a bare strip down each
+   side. body is full-bleed by definition, so there is nothing to cancel.
+
+   margin-bottom pulls back its own height so it takes up no space in flow -
+   it overlays, it doesn't push the page down. */
+body::before {
   content: "";
   display: block;
   position: sticky;
-  top: 0px;
-  margin-left: -16px;
-  margin-right: -16px;
+  top: 0;
   height: 3.5rem;
-  margin-top: -7rem;
-  margin-bottom: 2rem;
+  margin-bottom: -3.5rem;
   background-image: linear-gradient(var(--accent-fill) 15%, transparent);
   pointer-events: none;
-  /* Above ordinary page content it's fading out (z-index: auto/0), but
+  /* Above ordinary page content it's fading over (z-index: auto/0), but
      below .sidebar (z-index: 10) so it never paints over the header. */
   z-index: 5;
 }
@@ -570,7 +577,7 @@ tbody tr:nth-child(odd) th {
      it gets a drawn edge, which is what keeps it reading as a panel in dark
      mode where the dimmed fill sits close to the page. box-shadow rather
      than a border so it costs no layout width. */
-  .content::before {
+  body::before {
     display: none;
   }
 
