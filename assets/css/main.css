@@ -972,34 +972,149 @@ tbody tr:nth-child(odd) th {
   }
 }
 
-/* --- Theme control -------------------------------------------------------
-   Three-state: system -> light -> dark. Rendered hidden and revealed by JS,
-   so a no-JS visitor never sees a dead control. */
+/* --- Theme switch --------------------------------------------------------
+   A small icon anchored to the sidebar's bottom corner: bottom-left while the
+   sidebar is the mobile header, bottom-right once it is the desktop column.
+   Activating it flies three labelled options up and out; choosing one applies
+   the scheme and retracts them.
 
-.theme-toggle {
+   Rendered hidden and revealed by JS, so a no-JS visitor never sees a dead
+   control. */
+
+.theme-switch {
+  position: absolute;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  left: var(--space-2);
+  bottom: var(--space-2);
+}
+
+.theme-switch-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: var(--space-1);
+  /* Held back until the fade-out has finished, so the options stay
+     untabbable while closed without killing the transition. */
+  visibility: hidden;
+  transition: visibility 0s .2s;
+}
+
+.theme-switch[data-open="true"] .theme-switch-options {
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.theme-switch-option,
+.theme-switch-trigger {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  margin-top: var(--space-4);
-  padding: var(--space-1) 0;
+  padding: var(--space-1) var(--space-2);
   border: 0;
+  border-radius: 4px;
   background: none;
-  color: inherit;
+  color: var(--on-accent);
   font: inherit;
-  font-size: .85rem;
   cursor: pointer;
-  opacity: .8;
+}
+
+.theme-switch-trigger {
+  align-self: flex-start;
+  padding: var(--space-1);
+  opacity: .75;
   transition: opacity .15s ease;
 }
 
-.theme-toggle:hover,
-.theme-toggle:focus-visible {
+.theme-switch-trigger:hover,
+.theme-switch-trigger:focus-visible,
+.theme-switch[data-open="true"] .theme-switch-trigger {
   opacity: 1;
 }
 
-.theme-toggle-icon {
-  font-size: 1rem;
+/* PT Sans has no coverage for these symbols, and neither do most UI stacks -
+   unstyled, they fall back to whatever the system font has and render as an
+   unreadable mark or tofu. Measured on this machine: U+1F323 and U+1F5B3 are
+   carried only by Noto Sans Symbols2, U+263D by DejaVu Sans. Both family
+   spellings are listed because the name differs between distributions. */
+.theme-switch-icon {
+  font-family: "Noto Sans Symbols 2", "Noto Sans Symbols2", "Noto Sans Symbols",
+               Symbola, "Segoe UI Symbol", "Apple Symbols", "DejaVu Sans", sans-serif;
+  font-size: 1.15rem;
   line-height: 1;
+}
+
+.theme-switch-label {
+  font-size: .8rem;
+  white-space: nowrap;
+}
+
+/* Options sit collapsed on the trigger and fly up when opened. */
+.theme-switch-option {
+  opacity: 0;
+  transform: translateY(.6rem) scale(.96);
+  background-color: color-mix(in oklab, var(--accent-fill) 80%, black);
+  transition: opacity .18s ease,
+              transform .18s cubic-bezier(.2, .7, .3, 1.2),
+              background-color .15s ease;
+}
+
+.theme-switch[data-open="true"] .theme-switch-option {
+  opacity: 1;
+  transform: none;
+}
+
+/* Opening, the option nearest the trigger leads and the stack unfurls
+   upward; closing runs the other way, so it retracts back down onto it. */
+.theme-switch-option:nth-child(1) { transition-delay: 0s; }
+.theme-switch-option:nth-child(2) { transition-delay: .045s; }
+.theme-switch-option:nth-child(3) { transition-delay: .09s; }
+
+.theme-switch[data-open="true"] .theme-switch-option:nth-child(3) { transition-delay: 0s; }
+.theme-switch[data-open="true"] .theme-switch-option:nth-child(2) { transition-delay: .045s; }
+.theme-switch[data-open="true"] .theme-switch-option:nth-child(1) { transition-delay: .09s; }
+
+.theme-switch-option:hover,
+.theme-switch-option:focus-visible {
+  background-color: color-mix(in oklab, var(--accent-fill) 60%, black);
+}
+
+.theme-switch-option[aria-pressed="true"] .theme-switch-label {
+  font-weight: 700;
+}
+
+/* Desktop: anchored bottom-right, so the options right-align and their icons
+   line up under the trigger's rather than sitting off to one side. */
+@media (min-width: 48em) {
+  .theme-switch {
+    left: auto;
+    right: var(--space-4);
+    bottom: var(--space-4);
+    align-items: flex-end;
+  }
+
+  .theme-switch-trigger {
+    align-self: flex-end;
+  }
+
+  .theme-switch-option {
+    flex-direction: row-reverse;
+  }
+}
+
+/* Screen-reader-only label for the icon-only trigger. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* --- Alert callouts ------------------------------------------------------
@@ -1062,8 +1177,16 @@ blockquote.alert-wat       { border-color: var(--alert-wat); }
   .project-card,
   .project-card-links a,
   .project-card-art,
-  .theme-toggle {
+  .theme-switch-trigger,
+  .theme-switch-options {
     transition: none;
+  }
+
+  /* The options still appear and disappear, they just don't fly. */
+  .theme-switch-option {
+    transform: none;
+    transition: opacity .01s;
+    transition-delay: 0s;
   }
 
   /* Keep the static hand-placed tilt - it isn't motion - but drop the lift

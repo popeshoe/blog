@@ -31,15 +31,21 @@
     } catch (e) { /* private mode / storage disabled - fall back to the OS */ }
   </script>
 
-  <!-- CSS.
-       Fingerprinted, so the filename changes only when the contents do. The
-       old `?{{ "" }}<build timestamp>` busted the cache on every deploy even when
-       nothing had changed. RelPermalink is root-relative, which also makes
-       this immune to baseURL: `{{ "{{ .Site.BaseURL }}" }}` resolved to the production
-       host even on the dev server, so local pages were loading production CSS
-       and local edits never showed up. -->
+  <!-- CSS. Fingerprinted, so the filename changes only when the contents do.
+       The old build-timestamp query string busted the cache on every deploy
+       even when nothing had changed. minify runs before fingerprint, so
+       comment-only edits don't change the hash either.
+
+       No integrity/SRI attribute, deliberately. canonifyURLs is on, so this
+       URL is rewritten to an absolute one against baseURL, which makes the
+       stylesheet cross-origin whenever the host being browsed differs from
+       baseURL (LAN IP vs localhost, www vs bare domain). SRI on a
+       cross-origin resource without CORS headers makes the browser block the
+       file outright and the page renders with no CSS at all. For a
+       self-hosted asset that is same-origin in production, SRI guards against
+       nothing a compromised host wouldn't already control. -->
   {{ $css := resources.Get "css/main.css" | minify | fingerprint }}
-  <link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">
+  <link rel="stylesheet" href="{{ $css.RelPermalink }}">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
