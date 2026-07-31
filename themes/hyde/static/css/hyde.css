@@ -94,6 +94,7 @@ html {
   padding: 2rem 1rem;
   color: color-mix(in oklab, var(--theme-color) 50%, white);
   background-color: var(--theme-color);
+  overflow-wrap: break-word;
 }
 
 @media (min-width: 48em) {
@@ -134,7 +135,7 @@ html {
   color: #fff;
   margin-top: 0;
   font-family: 'Abel', sans-serif;
-  font-size: 3.25rem;
+  font-size: 3rem;
 }
 
 /* Sidebar nav */
@@ -164,11 +165,11 @@ a.sidebar-nav-item:focus {
   }
 }
 
-/* Sticky sidebar
- *
- * Add the `sidebar-sticky` class to the sidebar's container to affix it the
- * contents to the bottom of the sidebar in tablets and up.
- */
+.sidebar-nav-remote {
+  margin-top: .75rem;
+}
+
+
 
 @media (min-width: 48em) {
   .sidebar-sticky {
@@ -189,6 +190,11 @@ a.sidebar-nav-item:focus {
 .content {
   padding-top:    4rem;
   padding-bottom: 4rem;
+  /* Long unbroken tokens (URLs as link text, long code identifiers) don't
+     wrap by default and force real horizontal overflow at narrow widths -
+     <pre> already handles this (see poole.css) but inline text/code/links
+     don't. */
+  overflow-wrap: break-word;
 }
 
 @media (min-width: 48em) {
@@ -245,9 +251,6 @@ a.sidebar-nav-item:focus {
   color: var(--theme-color);
 }
 
-/* :visited can't be styled with a custom property (browsers block var()
-   there for history-sniffing privacy reasons), so it gets a static,
-   neutral color instead of tracking the cycling theme color. */
 .content a:visited {
   color: inherit;
 }
@@ -384,9 +387,6 @@ a.sidebar-nav-item:focus {
   margin-bottom: 0;
 }
 
-/* On touch-sized screens there's no hover to reveal the popover labels, so
-   show them as plain text next to the icons instead, and give everything
-   more room to breathe as a bigger tap target. */
 @media (max-width: 47.999em) {
   .project-card-header {
     flex-direction: column;
@@ -447,4 +447,14 @@ blockquote.alert-wat       { border-color: #ff1f8f; }
 .alert-important .alert-heading { color: #8250df; }
 .alert-warning .alert-heading   { color: #9a6700; }
 .alert-caution .alert-heading   { color: #cf222e; }
+
+.post + .post::before {
+  content: "";
+  display: block;
+  width: 70%;
+  margin: 1.25rem auto;
+  border-top: 2px solid color-mix(in oklab, var(--theme-color) 50%, white);
+  margin-bottom: 3rem;
+}
+
 .alert-wat .alert-heading       { color: #ff1f8f; }
