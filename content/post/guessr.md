@@ -4,7 +4,7 @@
     "date": "2026-04-10",
     "project": {
         "name": "Guessr",
-        "url": "http://guessr.porkcullis.com",
+        "url": "https://guessr.porkcullis.com",
         "description": "A charades/heads up style guessing game you can play in your browser.",
         "repo": "https://github.com/popeshoe/guessr",
         "icon": "📱"
@@ -14,9 +14,9 @@
     ]
 }
 
-I made a heads-up style guessing game in the browser! Check it out!
+Here's how a drunken utterance led me to strip my phone of its sense of up, confound Claude, and do battle with NASA's dreaded spectre: gimbal lock. All to make a simple heads-up style guessing game that you can try here:
 
-## [http://guessr.porkcullis.com](http://guessr.porkcullis.com)
+## [https://guessr.porkcullis.com](https://guessr.porkcullis.com)
 
 ### Why
 
@@ -24,20 +24,20 @@ A while ago I was drunk in a Bristol pub with some friends and we found ourselve
 
 After a few semi-successful rounds we gave up, defeated. What stuck with me was my friend saying that these apps seem like the kind of thing that a decent LLM could shit out in a single prompt. When I got home I figured I'd give it a go. 
 
-At the time I was bullish about AI writing software, it could clearly do some of the job, but all my attempts at anything adventurous had pretty bad results. The best use I'd found for it was to have it write boilerplate for me, and migrate changes I'd made in one part of the code to others, junior dev stuff. Around the same time Opus 4 was being touted on [hacker news](https://news.ycombinator.com/) as the new hot shit, capable of one-shotting anything you could ask for with a good enough prompt.
+At the time I was lukewarm about AI writing software, it could clearly do some of the job, but all my attempts at anything adventurous had pretty bad results. The best use I'd found for it was to have it write boilerplate for me, and migrate changes I'd made in one part of the code to others, junior dev stuff. Around the same time Opus 4 was being touted on [hacker news](https://news.ycombinator.com/) as the new hot shit, capable of one-shotting anything you could ask for with a good enough prompt.
 
 ### What
 
 So with my lightly used Github copilot subscription in one hand, and a plucky (but simple) idea in the other, I set about it. All the game screens and basic functionality worked in a single blast, perhaps not surprisingly since we're just shuffling a list of strings and recording yes/no against each one but I was surprised given my prior experience. 
 
-By far the most time and tokens went into making the accelerometer controls work, for a long time the AI would churn away, trying to resolve a tilt up or down from the stream of `DeviceOrientationEvent`, whenever it had solved for one orientation it would break another. It eventually got to the point where it built an [orientation debugging screen](http://guessr.porkcullis.com?debug) so that it and I could look at the values in real time and I could report to Opus what axes were changing in various orientations, it still took a number of iterations to get a somewhat working solution. 
+By far the most time and tokens went into making the accelerometer controls work, for a long time the AI would churn away, trying to resolve a tilt up or down from the stream of `DeviceOrientationEvent`, whenever it had solved for one orientation it would break another. It eventually got to the point where it built an [orientation debugging screen](https://guessr.porkcullis.com?debug) so that it and I could look at the values in real time and I could report to Opus what axes were changing in various orientations, it still took a number of iterations to get a somewhat working solution. 
 
 Eventually I got frustrated and looked at the [mdn docs](https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent/accelerationIncludingGravity) myself, and suggested it try the `devicemotion` event listener instead of `deviceorientation` along with a link to the docs. Opus immediately solved it on that single prompt, huzzah! The issue turned out to be [gimbal lock](https://en.wikipedia.org/wiki/Gimbal_lock) and the position in which I had the player hold their phone was coincidentally exactly where the lock would occur so that even a tiny movement of the phone would feed back wildly chaotic readings.
 
 > [!wat]
-> Gimbal lock was a problem for the [Apollo program](https://en.wikipedia.org/wiki/Gimbal_lock#On_Apollo_11), this episode where I ask a computer to write basic javascript puts me in the same caliber as any of those mission control nerds.
+> Gimbal lock was a problem for the [Apollo program](https://en.wikipedia.org/wiki/Gimbal_lock#On_Apollo_11), this episode where I ask a computer to write basic javascript puts me in the same calibre as any of those mission control nerds.
 
-The fix works because it trades three angles for one vector. `deviceorientation` reports Euler angles relative to the Earth — and that Earth-relative frame is exactly what collapses at the upright position. Whereas `accelerationIncludingGravity` gives us the raw g-force: a three-axis vector that, at rest, points opposite to gravity, with this we can trivially detect tilts with some **atan2** magic. Easy!
+`deviceorientation` describes the phone as three Euler angles applied in order: spin, then tilt front-to-back, then roll. Tilt it 90° and the roll axis swings around until it lines up with the spin axis, so two of the three knobs now do the same job and a huge range of values all describe the same physical orientation, that's gimbal lock. The chaotic readings weren't noise, they were all correct — the browser was picking a different but equally valid answer every few frames. `devicemotion` avoids it by never decomposing anything: `accelerationIncludingGravity` gives you which way gravity is pulling on each of the phone's axes, and one `atan2` turns that into a tilt angle that behaves everywhere.
 
 With that solved I just had to make the thing usable, I added snazzy animations to the in-game cards, vibrations for when you got things right and wrong, as well as to alert you that time was running out. 
 
@@ -58,7 +58,7 @@ Here's what I got with my two evenings and one month's worth of inflated copilot
 
 I'd say that's pretty cool, check it out for yourself (Phone recommended):
 
-## [http://guessr.porkcullis.com](http://guessr.porkcullis.com)
+## [https://guessr.porkcullis.com](https://guessr.porkcullis.com)
 
 ### Wax
 
