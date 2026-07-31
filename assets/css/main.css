@@ -256,6 +256,27 @@ html {
   font-family: "PT Sans", Helvetica, Arial, sans-serif;
   font-size: 100%;
   line-height: 1.6;
+
+  /* Let the page use the full viewport width instead of surrendering ~12px
+     to a classic scrollbar - which narrows the layout and shifts the centred
+     content column sideways, so it jumps between pages long enough to scroll
+     and pages that aren't.
+
+     There is no way to make a *native* scrollbar overlay: `overflow: overlay`
+     was non-standard and has been removed, and scrollbar-gutter only reserves
+     space rather than reclaiming it. Hiding it is the only route. Scrolling
+     still works by wheel, trackpad, keyboard, touch and Page Up/Down; what's
+     lost is the visible position indicator and the draggable thumb.
+
+     Scoped to the root scroller deliberately - inner scrollers such as a wide
+     <pre> keep their scrollbars, where the affordance actually matters
+     because there's no other cue that content continues sideways. */
+  scrollbar-width: none;           /* Firefox, and the modern standard */
+}
+
+/* WebKit/Blink don't support scrollbar-width yet. */
+html::-webkit-scrollbar {
+  display: none;
 }
 
 body {
