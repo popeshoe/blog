@@ -177,6 +177,16 @@ function scheduleRotation() {
 applyInitialColour();
 scheduleRotation();
 
+// Background tabs throttle setTimeout/setInterval, so the recurring
+// rotate() call in scheduleRotation() can fire late (or in a backlogged
+// burst) and hard-reset the animation via startTransition(..., 0), which
+// doesn't account for elapsed time the way applyInitialColour() does. Redo
+// the proper elapsed-time seek whenever the tab becomes visible again to
+// correct for that instead of trusting the drifting timer.
+document.addEventListener("visibilitychange", function () {
+  if (!document.hidden) applyInitialColour();
+});
+
 {{ if hugo.IsServer }}
 // Dev-server only: Hugo's LiveReload hot-swaps just the <link
 // rel="stylesheet"> tag on CSS-only changes, without reloading the page or
