@@ -6,7 +6,7 @@
         "name": "On the Menu",
         "url": "http://menu.porkcullis.com",
         "description": "A silly restaurant menu generator. Endless combinations of absurd dishes",
-        "icon": "🍝"
+        "icon": "🍝🍱"
     },
     "tags": [
         "Project", "Silly", "Side Project"
