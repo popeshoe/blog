@@ -60,50 +60,59 @@
   --measure: 38rem;
 
   /* --- Colour -----------------------------------------------------------
-     Light scheme only for now. Dark mode wraps these in light-dark() rather
-     than redeclaring them, so this stays the single place colour is defined.
+     Every colour is light-dark(light, dark). Because light-dark() resolves
+     against the element's *used* color-scheme, flipping `color-scheme` on
+     :root switches the whole palette at once - no duplicated variable blocks,
+     no !important, and a manual override is one property (see section 6).
 
      Nothing below section 2 may use a colour literal. */
 
-  /* Surfaces */
-  --surface:        #fff;
-  --surface-sunk:   #f9f9f9;   /* code, pre, table stripe */
+  color-scheme: light dark;
 
-  /* Text. -strong and -bold are one hex apart (#313131 / #303030) purely by
-     historical accident; worth collapsing once dark mode lands, kept distinct
-     here so this phase stays provably pixel-identical. */
-  --text:           #515151;
-  --text-strong:    #313131;   /* headings */
-  --text-bold:      #303030;   /* <strong>, post titles */
-  --text-muted:     #9a9a9a;   /* dates, captions */
-  --text-quote:     #7a7a7a;
-  --text-dim:       #555;      /* abbr */
-  --code-text:      #bf616a;
+  /* Surfaces */
+  --surface:        light-dark(#fff,     #14161a);
+  --surface-sunk:   light-dark(#f9f9f9,  #1e2126);   /* table stripe */
+  /* Distinct from --surface-sunk on purpose: both were #f9f9f9, so an inline
+     code chip inside a striped table row disappeared into the row. */
+  --code-bg:        light-dark(#f2f3f5,  #22262d);
+
+  /* Text */
+  --text:           light-dark(#515151,  #c8ccd2);
+  --text-strong:    light-dark(#313131,  #e8eaee);   /* headings, strong, titles */
+  --text-muted:     light-dark(#9a9a9a,  #8b9198);   /* dates, captions */
+  --text-quote:     light-dark(#7a7a7a,  #a8adb5);
+  --text-dim:       light-dark(#555,     #a8adb5);   /* abbr */
+  --code-text:      light-dark(#bf616a,  #e88b93);
 
   /* Lines */
-  --border:         #e5e5e5;
-  --rule:           #eee;      /* hr */
-  --card-border:    #888;
+  --border:         light-dark(#e5e5e5,  #2c3038);
+  --rule:           light-dark(#eee,     #262a31);   /* hr */
+  --card-border:    light-dark(#888,     #3a3f47);
 
-  /* Depth */
-  --shadow:         rgba(0, 0, 0, .15);
-  --shadow-lifted:  rgba(0, 0, 0, .2);
-  --shadow-inset:   rgba(0, 0, 0, .08);
+  /* Depth. Drop shadows read weakly on a dark surface however far you push
+     them, so dark mode leans on --card-border instead of fighting this. */
+  --shadow:         light-dark(rgba(0, 0, 0, .15), rgba(0, 0, 0, .55));
+  --shadow-lifted:  light-dark(rgba(0, 0, 0, .2),  rgba(0, 0, 0, .65));
+  --shadow-inset:   light-dark(rgba(0, 0, 0, .08), rgba(0, 0, 0, .35));
 
-  /* Tooltip - deliberately inverted against the page */
-  --popover-bg:     #222;
-  --popover-text:   #fff;
+  /* Tooltip - deliberately inverted against the page, so it flips too */
+  --popover-bg:     light-dark(#222,     #e8eaee);
+  --popover-text:   light-dark(#fff,     #14161a);
 
-  /* Text placed on top of an accent-filled block */
+  /* Text on top of an accent-filled block. See the contrast note beside
+     --accent-fill for what the lightness clamp actually guarantees. */
   --on-accent:      #fff;
 
-  /* Alert callouts (GitHub's light palette; `wat` is bespoke) */
-  --alert-note:      #0969da;
-  --alert-tip:       #1a7f37;
-  --alert-important: #8250df;
-  --alert-warning:   #9a6700;
-  --alert-caution:   #cf222e;
-  --alert-wat:       #ff1f8f;
+  /* Alert callouts. The light column is GitHub's palette; the dark column is
+     their dark-mode equivalent, since the light values are far too dark to
+     read on --surface. `wat` is bespoke. No content file uses these - see
+     content/styleguide.md (a draft) to review them. */
+  --alert-note:      light-dark(#0969da, #4493f8);
+  --alert-tip:       light-dark(#1a7f37, #3fb950);
+  --alert-important: light-dark(#8250df, #ab7df8);
+  --alert-warning:   light-dark(#9a6700, #d29922);
+  --alert-caution:   light-dark(#cf222e, #f85149);
+  --alert-wat:       light-dark(#ff1f8f, #ff6fb5);
 }
 
 /* Accent tokens derive from --theme-color, so they must be declared where
@@ -114,11 +123,48 @@
 
    -fill is for accent-coloured blocks (sidebar, card headers) with --on-accent
    text over them; -text is for accent-coloured type on the page background.
-   Both are plain passthroughs for now - phase 5 clamps their lightness per
-   colour scheme, which is what makes the dark palette legible. */
+   Both clamp the palette colour's LIGHTNESS while keeping its hue and chroma,
+   so each of the 20 colours keeps its identity but lands in a band that reads
+   against the current surface. Without this, the dark end of the palette
+   (#330C2F, #2A2D34, #14342b) sits at 1.0-1.8:1 on a dark background - not
+   "a bit low", but invisible. */
 body {
-  --accent-fill: var(--theme-color);
-  --accent-text: var(--theme-color);
+  /* DEFERRED DECISION - dark sidebar treatment. Swap this one line to compare;
+     option A is built in. If you pick C, also set --on-accent to
+     var(--accent-text) so the sidebar type stays legible.
+
+       A  full accent fill, closest to the current character (in use)
+          oklch(from var(--theme-color) clamp(0.40, l, 0.60) c h)
+       B  dimmed - same hue, reads as a tinted dark panel
+          oklch(from var(--theme-color) clamp(0.22, l, 0.32) c h)
+       C  flat neutral panel, accent moves to the type
+          #1e2126
+  */
+  --accent-fill-dark: oklch(from var(--theme-color) clamp(0.40, l, 0.60) c h);
+
+  /* min() not clamp() in light: the pale palette entries (#f4bf75 at 1.67:1,
+     #75b5aa and #f68e5f at 2.35:1) put white sidebar text far below 3:1.
+     Capping lightness fixes that without editing the palette or touching
+     colours.html.
+
+     Measured white-on-fill across all 20 colours, by lightness cap:
+       cap 0.655  -> >= 3.0:1  (WCAG AA for large text and UI components)
+       cap 0.620  -> 3.5-4.4:1 (in use; worst case #75b5aa at 3.52)
+       cap 0.552  -> >= 4.5:1  (WCAG AA for normal-size text)
+
+     0.62 is a deliberate middle. The site title (3rem) and card headings
+     (1.25rem bold) count as large text and clear AA comfortably; the sidebar
+     nav links are ~18px regular and technically want 4.5:1, which they don't
+     reach. Going to 0.552 would satisfy that but visibly darkens the sidebar
+     on more than half the palette - a change to the site's character, so it's
+     bundled with the deferred sidebar decision rather than made silently. */
+  --accent-fill: light-dark(
+                   oklch(from var(--theme-color) min(l, 0.62) c h),
+                   var(--accent-fill-dark));
+
+  --accent-text: light-dark(
+                   oklch(from var(--theme-color) clamp(0.35, l, 0.55) c h),
+                   oklch(from var(--theme-color) clamp(0.62, l, 0.85) c h));
 }
 
 
@@ -260,7 +306,7 @@ p {
 }
 
 strong {
-  color: var(--text-bold);
+  color: var(--text-strong);
 }
 
 ul, ol, dl {
@@ -275,12 +321,14 @@ dd {
   margin-bottom: var(--space-2);
 }
 
+/* The old rule had a second `border-bottom: 1px solid <page background>` to
+   fake an engraved bevel - a light-mode-only trick that just reads as a
+   doubled line on a dark surface. */
 hr {
   position: relative;
   margin: var(--space-5) 0;
   border: 0;
   border-top: 1px solid var(--rule);
-  border-bottom: 1px solid var(--surface);
 }
 
 abbr {
@@ -310,7 +358,7 @@ code {
   padding: .25em .5em;
   font-size: 85%;
   color: var(--code-text);
-  background-color: var(--surface-sunk);
+  background-color: var(--code-bg);
   border-radius: 3px;
 }
 pre {
@@ -324,7 +372,7 @@ pre {
   white-space: pre-wrap;
   word-break: break-all;
   word-wrap: break-word;
-  background-color: var(--surface-sunk);
+  background-color: var(--code-bg);
 }
 pre code {
   padding: 0;
@@ -647,7 +695,7 @@ tbody tr:nth-child(odd) th {
 .page-title,
 .post-title,
 .post-title a {
-  color: var(--text-bold);
+  color: var(--text-strong);
 }
 .page-title,
 .post-title {
