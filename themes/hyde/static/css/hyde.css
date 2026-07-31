@@ -105,6 +105,7 @@ html {
     bottom: 0;
     width: 18rem;
     text-align: left;
+    padding: 1rem 0rem;
   }
 }
 
@@ -163,6 +164,35 @@ a.sidebar-nav-item:focus {
     padding: .5rem 0;
     font-size: 1.15rem;
   }
+
+  /* Two columns (site links, then social links) instead of one tall
+     stack - on a phone the single-column nav pushed the page content
+     almost entirely off screen. */
+  .sidebar-nav {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(3, auto);
+    column-gap: 1rem;
+  }
+
+  .sidebar-nav .sidebar-nav-remote {
+    margin-top: 0;
+  }
+
+  /* Pin the copyright line to the header's own corner instead of
+     letting it add another row of vertical height. */
+  .sidebar {
+    position: relative;
+  }
+
+  .sidebar-copyright {
+    position: absolute;
+    right: .5rem;
+    bottom: .5rem;
+    margin: 0;
+    font-size: .75rem;
+    opacity: .7;
+  }
 }
 
 .sidebar-nav-remote {
@@ -195,6 +225,11 @@ a.sidebar-nav-item:focus {
      <pre> already handles this (see poole.css) but inline text/code/links
      don't. */
   overflow-wrap: break-word;
+}
+
+.content.full {
+  max-width: inherit;
+  container-type: inline-size;
 }
 
 @media (min-width: 48em) {
@@ -258,7 +293,7 @@ a.sidebar-nav-item:focus {
 /* Projects list */
 .project-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 280px));
+  grid-template-columns: repeat(auto-fit, minmax(clamp(160px, 22cqw, 200px), clamp(220px, 28cqw, 260px)));
   justify-content: center;
   gap: 2.5rem;
   margin: 2rem 0 0;
@@ -306,6 +341,7 @@ a.sidebar-nav-item:focus {
 .project-card-header h2 {
   margin: 0;
   font-size: 1.25rem;
+  text-wrap-mode: nowrap;
 }
 
 .project-card .project-card-header a {
@@ -369,6 +405,7 @@ a.sidebar-nav-item:focus {
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .08);
   text-decoration: none;
   transition: background-color .15s ease;
+  text-wrap-mode: nowrap;
 }
 
 .project-card-art:hover {
@@ -395,7 +432,8 @@ a.sidebar-nav-item:focus {
   }
 
   .project-card-links {
-    gap: 1.25rem;
+    flex-wrap: wrap;
+    gap: .5rem 1.25rem;
   }
 
   .project-card-links a {
@@ -458,3 +496,27 @@ blockquote.alert-wat       { border-color: #ff1f8f; }
 }
 
 .alert-wat .alert-heading       { color: #ff1f8f; }
+
+.post-body a {
+  text-decoration: none;
+  font-weight: 700;
+  position: relative;
+}
+
+.post-body a::before {
+  content: "";
+  background-color: color-mix(in oklab, var(--theme-color) 30%, white);
+  position: absolute;
+  left: 0px;
+  bottom: -1px;
+  width: 100%;
+  height: 3px;
+  z-index: -1;
+  transition: 0.16s ease-in-out;
+}
+
+.post-body a:hover::before {
+  bottom: -1px;
+  height: 100%;
+  background-color: color-mix(in oklab, var(--theme-color) 15%, white);
+}

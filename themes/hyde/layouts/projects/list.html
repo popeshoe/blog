@@ -4,7 +4,7 @@
 
 	{{ partial "sidebar.html" . }}
 
-	<div class="content container">
+	<div class="content container full">
 		<h1>{{ .Title }}</h1>
 
 		<ul class="project-list">
@@ -16,8 +16,8 @@
 					<div class="project-card-links">
 						<a href="{{ .Permalink }}" aria-label="Read the blog post">
 							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-							<span class="icon-label">Blog post</span>
-							<span class="icon-popover" popover="manual">Read the blog post</span>
+							<span class="icon-label">About</span>
+							<span class="icon-popover" popover="manual">About</span>
 						</a>
 						{{ with .Params.project.repo }}
 						<a href="{{ . }}" aria-label="View the source on GitHub">
