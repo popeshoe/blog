@@ -179,18 +179,33 @@ function scheduleRotation() {
   }, msToNextEpoch);
 }
 
-applyInitialColour();
-scheduleRotation();
+// A permanent 55s colour animation is exactly what prefers-reduced-motion is
+// asking us not to do. Rather than falling back to a single hard-coded colour
+// (which would throw away the palette entirely), pick the colour the rest of
+// the world is currently on and just... stop there. No transition, no
+// rotation timer, no visibility re-seek. Navigating or refreshing may land on
+// the next colour, and that's the only change a reduced-motion visitor sees.
+//
+// The paired `body { animation: none }` lives in the reduced-motion block in
+// main.css. Without it the animation would keep overriding this inline value;
+// without this, turning the animation off would leave --theme-color at its
+// @property initial-value of #fff, i.e. an invisible white sidebar.
+if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  document.body.style.setProperty("--theme-color", colourForEpoch(currentEpoch()));
+} else {
+  applyInitialColour();
+  scheduleRotation();
 
-// Background tabs throttle setTimeout/setInterval, so the recurring
-// rotate() call in scheduleRotation() can fire late (or in a backlogged
-// burst) and hard-reset the animation via startTransition(..., 0), which
-// doesn't account for elapsed time the way applyInitialColour() does. Redo
-// the proper elapsed-time seek whenever the tab becomes visible again to
-// correct for that instead of trusting the drifting timer.
-document.addEventListener("visibilitychange", function () {
-  if (!document.hidden) applyInitialColour();
-});
+  // Background tabs throttle setTimeout/setInterval, so the recurring
+  // rotate() call in scheduleRotation() can fire late (or in a backlogged
+  // burst) and hard-reset the animation via startTransition(..., 0), which
+  // doesn't account for elapsed time the way applyInitialColour() does. Redo
+  // the proper elapsed-time seek whenever the tab becomes visible again to
+  // correct for that instead of trusting the drifting timer.
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden) applyInitialColour();
+  });
+}
 
 {{ if hugo.IsServer }}
 // Dev-server only: Hugo's LiveReload hot-swaps just the <link

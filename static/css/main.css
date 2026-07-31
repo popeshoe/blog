@@ -808,26 +808,22 @@ tbody tr:nth-child(odd) th {
 }
 
 .project-card {
+  --tilt: 0deg;
   overflow: hidden;
   border: 1px solid var(--card-border);
   border-radius: 6px;
   box-shadow: 6px 6px 4px var(--shadow);
   scale: 1;
+  transform: rotate(var(--tilt));
   transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease, scale .2s ease;
 }
 
-/* A little scatter so the cards feel hand-placed rather than gridded. */
-.project-card:nth-child(3n+1) {
-  transform: rotate(-2deg);
-}
-
-.project-card:nth-child(3n+2) {
-  transform: rotate(1.5deg);
-}
-
-.project-card:nth-child(3n) {
-  transform: rotate(-1deg);
-}
+/* A little scatter so the cards feel hand-placed rather than gridded. The
+   angle lives in a custom property so the reduced-motion block can keep the
+   static tilt while dropping the movement on hover. */
+.project-card:nth-child(3n+1) { --tilt: -2deg; }
+.project-card:nth-child(3n+2) { --tilt: 1.5deg; }
+.project-card:nth-child(3n)   { --tilt: -1deg; }
 
 .project-card:hover {
   scale: 1.1;
@@ -962,6 +958,36 @@ tbody tr:nth-child(odd) th {
   }
 }
 
+/* --- Theme control -------------------------------------------------------
+   Three-state: system -> light -> dark. Rendered hidden and revealed by JS,
+   so a no-JS visitor never sees a dead control. */
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  padding: var(--space-1) 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: .85rem;
+  cursor: pointer;
+  opacity: .8;
+  transition: opacity .15s ease;
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
+  opacity: 1;
+}
+
+.theme-toggle-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
 /* --- Alert callouts ------------------------------------------------------
    GitHub-style alerts, emitted by the blockquote render hook from
    `> [!NOTE]`-style markup, plus a non-standard `wat` type. No content file
@@ -1000,7 +1026,56 @@ blockquote.alert-wat       { border-color: var(--alert-wat); }
 
 
 /* =============================================================================
- * 6. Temporary: measure experiment
+ * 6. Motion & preferences
+ * ========================================================================== */
+
+/* The whole site runs a permanent 55s colour animation, so this preference
+   needs a real answer rather than being ignored.
+
+   Turning the animation off leaves --theme-color at its @property
+   initial-value (#fff), i.e. an invisible white sidebar - so colours.html
+   pairs this by setting --theme-color inline to the current epoch's colour.
+   The result: reduced-motion visitors get the full palette and stay in sync
+   with everyone else, they just get one fixed colour per page load instead of
+   a transition. Navigating or refreshing may land on the next colour. */
+@media (prefers-reduced-motion: reduce) {
+  body {
+    animation: none;
+  }
+
+  .post a,
+  .sidebar-nav a,
+  .project-card,
+  .project-card-links a,
+  .project-card-art,
+  .theme-toggle {
+    transition: none;
+  }
+
+  /* Keep the static hand-placed tilt - it isn't motion - but drop the lift
+     and scale on hover, leaving the shadow as the only hover cue. */
+  .project-card:hover {
+    scale: 1;
+    transform: rotate(var(--tilt));
+  }
+}
+
+/* Manual colour-scheme override, set on <html> by the control in the sidebar.
+   light-dark() resolves against the element's *used* color-scheme, so
+   constraining that one property switches every token at once.
+
+   This lives on <html> and not <body> deliberately: colours.html rewrites
+   classes on <body> every 70 seconds, and until phase 2 it reassigned
+   className wholesale - anything parked there was liable to be wiped.
+
+   No attribute at all means "follow the OS", which is why the control removes
+   it rather than writing a third value. */
+:root[data-theme="light"] { color-scheme: only light; }
+:root[data-theme="dark"]  { color-scheme: only dark; }
+
+
+/* =============================================================================
+ * 7. Temporary: measure experiment
  *
  * DELETE once the reading measure is settled.
  *

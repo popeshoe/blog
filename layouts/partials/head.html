@@ -20,6 +20,17 @@
 
   <title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} &middot; {{ .Site.Title }}{{ end }}</title>
 
+  <!-- Colour scheme override, applied before the stylesheet loads so a
+       light/dark choice never flashes the wrong scheme on navigation. Must
+       stay inline and blocking - an external file would race the first paint.
+       No stored value means "follow the OS", which is the default. -->
+  <script>
+    try {
+      var t = localStorage.getItem("theme");
+      if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+    } catch (e) { /* private mode / storage disabled - fall back to the OS */ }
+  </script>
+
   <!-- CSS -->
   <link rel="stylesheet" href="{{ .Site.BaseURL }}/css/main.css?{{ now.Unix }}">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abel">

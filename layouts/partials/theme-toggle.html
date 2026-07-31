@@ -1,0 +1,55 @@
+<button type="button" class="theme-toggle" data-theme-toggle hidden>
+  <span class="theme-toggle-icon" aria-hidden="true"></span>
+  <span class="theme-toggle-text"></span>
+</button>
+
+<script>
+(function () {
+  var btn = document.querySelector("[data-theme-toggle]");
+  if (!btn) return;
+
+  var root = document.documentElement;
+  var ORDER  = ["system", "light", "dark"];
+  // Emoji rather than geometric glyphs (◐ ☀ ☾): PT Sans has no coverage for
+  // those, so they fell back to whatever the system font had and rendered as
+  // an unreadable mark. Emoji come from the emoji font and are already used
+  // elsewhere on the site (project icons, alert icons).
+  var ICONS  = { system: "🖥️", light: "☀️", dark: "🌙" };
+  var LABELS = { system: "System", light: "Light", dark: "Dark" };
+
+  // "system" is the absence of the attribute, not a third value - that's what
+  // lets the page keep following the OS if it switches on a schedule.
+  function current() {
+    var t = root.dataset.theme;
+    return t === "light" || t === "dark" ? t : "system";
+  }
+
+  function render() {
+    var s = current();
+    btn.querySelector(".theme-toggle-icon").textContent = ICONS[s];
+    btn.querySelector(".theme-toggle-text").textContent = LABELS[s];
+    btn.setAttribute("aria-label",
+      "Colour theme: " + LABELS[s] + ". Activate to change.");
+  }
+
+  function apply(s) {
+    if (s === "system") {
+      delete root.dataset.theme;
+      try { localStorage.removeItem("theme"); } catch (e) {}
+    } else {
+      root.dataset.theme = s;
+      try { localStorage.setItem("theme", s); } catch (e) {}
+    }
+    render();
+  }
+
+  btn.addEventListener("click", function () {
+    apply(ORDER[(ORDER.indexOf(current()) + 1) % ORDER.length]);
+  });
+
+  // Revealed only once the handler is attached, so a no-JS visitor never sees
+  // a control that does nothing.
+  btn.hidden = false;
+  render();
+})();
+</script>
