@@ -1,7 +1,12 @@
 {{ define "main" }}
 	<div class="content full">
-		<h1>{{ .Title }}</h1>
-		<div class="post-body">{{ .Content }}</div>
+		{{/* The column is full-bleed so the card grid can use the width, but
+		     the page header reads like every other page - same measure, same
+		     centring - rather than running the whole way across. */}}
+		<div class="content-header">
+			<h1>{{ .Title }}</h1>
+			<div class="post-body">{{ .Content }}</div>
+		</div>
 		<ul class="project-list">
 			{{ range where site.RegularPages "Params.project.url" "!=" nil }}
 			{{ $page := . }}

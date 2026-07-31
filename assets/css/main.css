@@ -56,6 +56,10 @@
   --space-7: 3rem;
   --space-8: 4rem;
 
+  /* Horizontal padding on the content column. A token because
+     .content-header has to match it exactly to line up with other pages. */
+  --gutter: var(--space-4);
+
   /* Reading measure, stepped. Snaps between three widths rather than easing,
      so the column always lands on a deliberate line length:
        30rem  ~50 characters  (default; also what the 48-64em band gives
@@ -545,7 +549,7 @@ body::before {
   max-width: var(--measure);
   margin-left: auto;
   margin-right: auto;
-  padding: var(--space-8) var(--space-4);
+  padding: var(--space-8) var(--gutter);
   /* Long unbroken tokens (URLs as link text, long code identifiers) don't
      wrap by default and force real horizontal overflow at narrow widths -
      <pre> already handles this, but inline text/code/links don't. */
@@ -555,6 +559,19 @@ body::before {
 .content.full {
   max-width: none;
   container-type: inline-size;
+}
+
+/* Inside a full-bleed column, holds the page header and intro to the same
+   measure and centring every other page uses, so only the thing that wants
+   the width (the project grid) actually takes it. */
+.content-header {
+  /* --measure is a border-box width on .content, i.e. it includes the gutter.
+     The gutter is already applied by .content.full out here, so subtract it
+     rather than adding it again - re-applying it double-gutters the header on
+     narrow screens, where the measure doesn't bind and the box fills anyway. */
+  max-width: calc(var(--measure) - 2 * var(--gutter));
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* The sidebar is position: fixed, so it's out of flow. Reserve its width as
@@ -600,8 +617,8 @@ body::before {
     padding-left: 18rem;
   }
 
-  .content {
-    padding: var(--space-8) var(--space-6);
+  :root {
+    --gutter: var(--space-6);
   }
 
   /* Reverse layout: sidebar on the right. Set site-wide via the themeColor
