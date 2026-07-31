@@ -8,7 +8,6 @@
       "tag": "tags"
    },
    "baseurl": "https://porkcullis.com/",
-   "canonifyurls": false,
    "theme": "hyde",
    "params": {
       "themeColor": "theme-base-0f layout-reverse",
