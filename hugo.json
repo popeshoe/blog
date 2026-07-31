@@ -2,8 +2,8 @@
 	"title": "Jonathan Stahlhacke",
 	"baseURL": "https://porkcullis.com/",
 	"buildDrafts": false,
-	"//canonifyURLs": "Deliberately NOT set. It rewrites every relative URL to an absolute one against baseURL, so on www.porkcullis.com the stylesheet was fetched from the bare domain - cross-origin. That made sheet.cssRules throw SecurityError, so colours.html could not find its @keyframes theme-cycle rule, the colour engine died, and --theme-color stayed at its #fff initial value: white sidebar, white headings, invisible links. Root-relative URLs work on whatever host serves them.",
-	"//": "Replaces the legacy `indexes` key. Hugo still honours `indexes` as an alias for `taxonomies`, and it was doing real work: restricting taxonomies to tags only. Dropping it silently re-enabled the default `categories` taxonomy and generated a set of empty /categories/ pages.",
+	"//canonifyURLs": "Deliberately unset. It rewrites URLs absolute against baseURL, so on www the stylesheet is cross-origin, colours.html cannot read its @keyframes rule, and the whole theme renders white.",
+	"//taxonomies": "Replaces the legacy `indexes` key, which Hugo still honours as an alias. Removing it entirely re-enables the default categories taxonomy and generates empty /categories/ pages.",
 	"taxonomies": {
 		"tag": "tags"
 	},

@@ -1,6 +1,5 @@
-{{/* Dev-server-only palette picker. The whole partial - markup, styles and
-     script - is inside this guard, so nothing here reaches a production
-     build. Styles are inline rather than in main.css for the same reason. */}}
+{{/* Dev-only palette picker. Everything - markup, styles, script - is inside
+     this guard, so none of it reaches a production build. */}}
 {{ if hugo.IsServer }}
 <div class="dev-palette" data-dev-palette data-open="false">
   <div class="dev-palette-panel" id="dev-palette-panel">
@@ -53,18 +52,13 @@
     filter: none;
   }
 
-  /* Absolutely positioned rather than stacked in flow above the trigger.
-     visibility: hidden still takes up layout space, so in flow this left the
-     container sized for the open panel even while closed - a 146x192 
-     transparent box at z-index 21, which sat over the theme switch and ate
-     every click meant for its options. */
+  /* Abspos, not in flow: visibility:hidden still takes layout space, which
+     left this sitting over the theme switch and eating its clicks. */
   .dev-palette-panel {
     position: absolute;
     bottom: calc(100% + var(--space-1));
     left: 0;
-    /* The containing block is only as wide as the trigger, and an abspos box
-       shrink-to-fits against that - without this the 5-column grid is
-       squeezed to ~29px and half the swatches land off-screen. */
+    /* Trigger-sized containing block, and an abspos box shrink-to-fits it. */
     width: max-content;
     padding: var(--space-2);
     border-radius: 6px;
@@ -73,9 +67,7 @@
     background: #1c1f24;
     box-shadow: 0 4px 14px rgba(0, 0, 0, .45);
     visibility: hidden;
-    /* Un-clickable immediately, rather than after the 0.16s visibility hold -
-       otherwise a just-closed panel still swallows clicks on the theme
-       switch underneath it. */
+    /* Unclickable immediately, not after the 0.16s visibility hold. */
     pointer-events: none;
     opacity: 0;
     transform: translateY(.5rem);
@@ -90,9 +82,7 @@
     transition-delay: 0s;
   }
 
-  /* Must come after the base rule above, not up with the other desktop
-     overrides - same specificity, so source order decides, and anchoring it
-     earlier left `left: 0` winning and pushed the panel off the right edge. */
+  /* Must follow the base rule - same specificity, so source order decides. */
   @media (min-width: 48em) {
     .dev-palette-panel {
       left: auto;
@@ -177,13 +167,10 @@
   var resume  = wrap.querySelector("[data-dev-palette-resume]");
   var body    = document.body;
 
-  // colours.html declares these at the top level of a classic script, so they
-  // are globals and can be swapped out. Pinning a colour has to neutralise
-  // them, not just set --theme-color: the 70s rotation timer and the
-  // visibilitychange re-seek both call startTransition/applyInitialColour,
-  // which would restart the animation and stomp on the pinned value within a
-  // minute. Both call through the global name at call time, so replacing them
-  // is enough - colours.html itself needs no dev-only branches.
+  // Pinning has to neutralise these, not just set --theme-color: the rotation
+  // timer and visibilitychange re-seek would restart the animation over it
+  // within a minute. Both resolve by global name at call time, so swapping
+  // them out keeps colours.html free of dev-only branches.
   var realStart  = startTransition;
   var realSeek   = applyInitialColour;
   var pinned     = null;
@@ -215,8 +202,7 @@
     resume.textContent = pinned === null ? "Cycling" : "Resume cycle";
   }
 
-  // Built from the COLOURS global rather than duplicating the list, so this
-  // can never drift out of sync with the real palette.
+  // From the COLOURS global, so it cannot drift out of sync with the palette.
   COLOURS.forEach(function (hex) {
     var b = document.createElement("button");
     b.type = "button";
@@ -232,8 +218,7 @@
     grid.appendChild(b);
   });
 
-  // No stopPropagation, so opening this closes the theme switch and vice
-  // versa - they overlap, and this one sits on top.
+  // No stopPropagation, so opening this closes the theme switch and vice versa.
   trigger.addEventListener("click", function () {
     var open = wrap.dataset.open !== "true";
     wrap.dataset.open = String(open);

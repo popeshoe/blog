@@ -20,10 +20,8 @@
 
   <title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} &middot; {{ .Site.Title }}{{ end }}</title>
 
-  <!-- Colour scheme override, applied before the stylesheet loads so a
-       light/dark choice never flashes the wrong scheme on navigation. Must
-       stay inline and blocking - an external file would race the first paint.
-       No stored value means "follow the OS", which is the default. -->
+  <!-- Must run before the stylesheet and stay inline: an external file would
+       race first paint and flash the wrong scheme. No stored value = follow OS. -->
   <script>
     try {
       var t = localStorage.getItem("theme");
@@ -31,22 +29,12 @@
     } catch (e) { /* private mode / storage disabled - fall back to the OS */ }
   </script>
 
-  <!-- CSS. Fingerprinted, so the filename changes only when the contents do.
-       The old build-timestamp query string busted the cache on every deploy
-       even when nothing had changed. minify runs before fingerprint, so
-       comment-only edits don't change the hash either.
-
-       RelPermalink is root-relative, and canonifyURLs is deliberately off (see
-       hugo.json), so this resolves against whatever host is serving the page.
-       That matters: it keeps the stylesheet same-origin on www vs the bare
-       domain, on a LAN IP, anywhere - and colours.html needs same-origin to
-       read its @keyframes rule out of the sheet.
-
-       No integrity/SRI attribute, deliberately. It would guard against a
-       tampered stylesheet, but this one is self-hosted and same-origin, so
-       anyone able to alter it could equally alter the hash in this file.
-       Fingerprinting already covers the case SRI would actually help with
-       here, a stale or corrupted copy served under the same name. -->
+  <!-- Fingerprinted, so the filename changes only when the contents do.
+       RelPermalink is root-relative and canonifyURLs is off (see hugo.json), so
+       this stays same-origin on any host - which colours.html needs in order to
+       read its @keyframes rule out of the sheet. No SRI: the asset is
+       self-hosted and same-origin, so anyone able to alter it could equally
+       rewrite the hash here. -->
   {{ $css := resources.Get "css/main.css" | minify | fingerprint }}
   <link rel="stylesheet" href="{{ $css.RelPermalink }}">
 
@@ -54,10 +42,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abel&display=swap">
 
-  <!-- Without JS, colours.html never runs, so the theme-cycle keyframes stay
-       at their #fff placeholders and --theme-color would just be white for
-       the whole page. Turn the animation off and pin a single static colour
-       instead. -->
+  <!-- Without JS the keyframes stay at their #fff placeholders, so pin a
+       static colour instead. -->
   <noscript>
     <style>
       body {

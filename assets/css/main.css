@@ -1,26 +1,19 @@
 /* =============================================================================
  * main.css
  *
- * Contents
+ *   1. Config       @property declarations, design tokens
+ *   2. Theme engine the animated --theme-color cycle
+ *   3. Reset & base element defaults
+ *   4. Layout       sidebar, content column, breakpoints
+ *   5. Components   sidebar nav, posts, post index, project cards, alerts
+ *   6. Motion       reduced-motion, colour-scheme override
  *
- *   1. Config          @property declarations, design tokens
- *   2. Theme engine    the animated --theme-color cycle
- *   3. Reset & base    element defaults: type, lists, code, quotes, media
- *   4. Layout          sidebar, content column, breakpoints
- *   5. Components      sidebar nav, posts, post index, project cards, alerts
- *   6. Motion & prefs  reduced-motion, colour-scheme override
+ * Descended from Poole + Hyde by @mdo (MIT), long since diverged.
  *
- * Descended from Poole + Hyde by @mdo (MIT), long since diverged. Originally
- * three stylesheets - poole.css, syntax.css, hyde.css - whose load order was
- * load-bearing: hyde deliberately overrode poole on `html` font-size and
- * font-family, and got it wrong (see the root-type note in section 3). Those
- * conflicts are resolved, so rules are now grouped by concern rather than by
- * which file they arrived in.
- *
- * Three breakpoints, mobile-first, min-width only:
- *   48em / 768px  - sidebar becomes a fixed column
- *   64em / 1024px - wider sidebar, measure steps to 38rem
- *   80em / 1280px - measure steps to 46rem (no layout change)
+ * Breakpoints, mobile-first, min-width only:
+ *   48em  sidebar becomes a fixed column
+ *   64em  wider sidebar, measure -> 38rem
+ *   80em  measure -> 46rem
  * =============================================================================
  */
 
@@ -61,22 +54,12 @@
      .content-header has to match it exactly to line up with other pages. */
   --gutter: var(--space-4);
 
-  /* Reading measure, stepped. Snaps between three widths rather than easing,
-     so the column always lands on a deliberate line length:
-       30rem  ~50 characters  (default; also what the 48-64em band gives
-                               naturally, where available width binds first)
-       38rem  ~66 characters  (from 64em)
-       46rem  ~81 characters  (from 80em)
-     Measured at the real rendered font, not estimated. */
+  /* Reading measure. Steps to 38rem at 64em, 46rem at 80em: ~50/66/81 chars. */
   --measure: 30rem;
 
-  /* --- Colour -----------------------------------------------------------
-     Every colour is light-dark(light, dark). Because light-dark() resolves
-     against the element's *used* color-scheme, flipping `color-scheme` on
-     :root switches the whole palette at once - no duplicated variable blocks,
-     no !important, and a manual override is one property (see section 6).
-
-     Nothing below section 2 may use a colour literal. */
+  /* light-dark() resolves against the element's used color-scheme, so
+     constraining that one property on :root switches the whole palette
+     (see section 6). Nothing below section 2 may use a colour literal. */
 
   color-scheme: light dark;
 
@@ -114,16 +97,10 @@
      --accent-fill for what the lightness clamp actually guarantees. */
   --on-accent:      #fff;
 
-  /* Draws the sidebar's edge against the page. Transparent in light, where
-     the fill is vivid enough to define itself; needed in dark, where the
-     dimmed fill can sit as close as 1.06:1 to the page background. Keyed off
-     the scheme rather than a media query so the manual override honours it. */
+  /* Needed in dark, where the dimmed fill can sit 1.06:1 against the page. */
   --sidebar-edge:   light-dark(transparent, rgba(255, 255, 255, .11));
 
-  /* Alert callouts. The light column is GitHub's palette; the dark column is
-     their dark-mode equivalent, since the light values are far too dark to
-     read on --surface. `wat` is bespoke. No content file uses these - see
-     content/styleguide.md (a draft) to review them. */
+  /* GitHub's light and dark palettes; `wat` is bespoke. See content/styleguide.md. */
   --alert-note:      light-dark(#0969da, #4493f8);
   --alert-tip:       light-dark(#1a7f37, #3fb950);
   --alert-important: light-dark(#8250df, #ab7df8);
@@ -132,52 +109,25 @@
   --alert-wat:       light-dark(#ff1f8f, #ff6fb5);
 }
 
-/* Accent tokens derive from --theme-color, so they must be declared where
-   that property actually holds the animated value.
-   NOT on :root - the animation runs on <body>, so at :root --theme-color is
-   still its @property initial-value (#fff) and anything derived from it there
-   would compute to white and inherit down as white.
+/* Declared on <body>, NOT :root: the animation runs on <body>, so at :root
+   --theme-color is still its #fff initial value and anything derived from it
+   there computes to white and inherits down as white.
 
-   -fill is for accent-coloured blocks (sidebar, card headers) with --on-accent
-   text over them; -text is for accent-coloured type on the page background.
-   Both clamp the palette colour's LIGHTNESS while keeping its hue and chroma,
-   so each of the 20 colours keeps its identity but lands in a band that reads
-   against the current surface. Without this, the dark end of the palette
-   (#330C2F, #2A2D34, #14342b) sits at 1.0-1.8:1 on a dark background - not
-   "a bit low", but invisible. */
+   Both clamp the palette colour's lightness, keeping hue and chroma. Without
+   it the dark end of the palette (#330C2F, #2A2D34) sits at 1.0-1.8:1 on a
+   dark background - invisible, not merely low. */
 body {
-  /* Dark sidebar: dimmed. Same hue as the palette entry, pushed down into a
-     narrow dark band so it reads as a tinted panel rather than a colour block.
-     Chosen over a full-strength fill because it needs no per-colour curation -
-     every entry lands in the same tonal range whatever its starting lightness.
-
-     Measured, white-on-fill across all 20 colours:
-       full fill  clamp(0.40, l, 0.60)   3.80-9.65:1
-       dimmed     clamp(0.22, l, 0.32)  11.45-17.01:1
-     so the dark scheme clears AA everywhere with room to spare.
-
-     The cost is panel definition: dimmed, the fill sits 1.06-1.58:1 against
-     --surface, and at the dark end of the palette (#330C2F) the sidebar all
-     but disappears. Rather than lift the band and lose the look, the edge is
-     drawn explicitly - see --sidebar-edge. */
+  /* Dimmed rather than a full-strength fill: every entry lands in the same
+     tonal band whatever its lightness, so the palette needs no curation, and
+     white-on-fill goes from 3.8-9.7:1 to 11.5-17:1. The cost is that the
+     panel sits only 1.06-1.58:1 against the page - hence --sidebar-edge. */
   --accent-fill-dark: oklch(from var(--theme-color) clamp(0.22, l, 0.32) c h);
 
-  /* min() not clamp() in light: the pale palette entries (#f4bf75 at 1.67:1,
-     #75b5aa and #f68e5f at 2.35:1) put white sidebar text far below 3:1.
-     Capping lightness fixes that without editing the palette or touching
-     colours.html.
-
-     Measured white-on-fill across all 20 colours, by lightness cap:
-       cap 0.655  -> >= 3.0:1  (WCAG AA for large text and UI components)
-       cap 0.620  -> 3.5-4.4:1 (in use; worst case #75b5aa at 3.52)
-       cap 0.552  -> >= 4.5:1  (WCAG AA for normal-size text)
-
-     0.62 is a deliberate middle. The site title (3rem) and card headings
-     (1.25rem bold) count as large text and clear AA comfortably; the sidebar
-     nav links are ~18px regular and technically want 4.5:1, which they don't
-     reach. Going to 0.552 would satisfy that but visibly darkens the sidebar
-     on more than half the palette - a change to the site's character, so it's
-     bundled with the deferred sidebar decision rather than made silently. */
+  /* Caps lightness so white sidebar text clears the pale entries (#f4bf75
+     was 1.67:1). White-on-fill by cap: 0.655 -> 3:1, 0.62 -> 3.5-4.4:1,
+     0.552 -> 4.5:1. 0.62 is a deliberate middle - large text clears AA, the
+     ~18px nav links technically want 4.5:1, and tightening further visibly
+     darkens the sidebar across half the palette. */
   --accent-fill: light-dark(
                    oklch(from var(--theme-color) min(l, 0.62) c h),
                    var(--accent-fill-dark));
@@ -191,19 +141,14 @@ body {
 /* =============================================================================
  * 2. Theme engine
  *
- * A single CSS animation on <body> drives one registered, inheritable colour
- * custom property (--theme-color). The sidebar, headings and link colours just
- * read that variable, so one animation covers the whole page instead of
- * needing to be restarted per element. On load, JS points the animation at the
- * current/next colour (by rewriting the @keyframes rule directly, see
- * colours.html) and gives it a negative animation-delay based on wall-clock
- * time, seeking it to where it would already be rather than jumping to the
- * target colour. That also keeps every visitor on the same colour at the same
- * moment.
+ * One animation on <body> drives an inherited custom property, so a single
+ * animation covers the page. On load, JS points it at the current/next colour
+ * and seeks it with a negative animation-delay derived from wall-clock time,
+ * which also keeps every visitor on the same colour at the same moment. See
+ * colours.html.
  *
- * The theme-base-XX class that JS puts on <body> carries no CSS - it's only a
- * devtools-readable label of which colour is currently targeted, kept out of
- * the cascade so it can't fight the animation on specificity.
+ * The theme-base-XX class JS puts on <body> carries no CSS - it's a devtools
+ * label, kept out of the cascade so it can't fight the animation.
  * ========================================================================== */
 
 /* The from/to colours here are placeholders, rewritten directly on this rule
@@ -242,35 +187,19 @@ body {
   padding: 0;
 }
 
-/* Root type. This was previously split across two stylesheets that disagreed:
-   poole stepped html to 20px at 38em, hyde stepped it to 16px at 48em and back
-   to 20px at 58em. hyde loaded last and won, so the root size actually SHRANK
-   by 20% crossing 48em - exactly where the sidebar becomes a fixed column -
-   dragging every rem-based dimension down with it. Separately, a specificity
-   (0,0,2) `html .content { font-size: 18px }` pinned body copy to an absolute
-   18px, so the text never scaled at all; only the chrome did.
-
-   Now: the root honours the reader's browser setting (no px override at all),
-   and body copy takes a single step up at the desktop breakpoint. */
+/* No px override on the root: it honours the reader's browser setting. Body
+   copy takes one step up at the desktop breakpoint. */
 html {
   font-family: "PT Sans", Helvetica, Arial, sans-serif;
   font-size: 100%;
   line-height: 1.6;
 
-  /* Let the page use the full viewport width instead of surrendering ~12px
-     to a classic scrollbar - which narrows the layout and shifts the centred
-     content column sideways, so it jumps between pages long enough to scroll
-     and pages that aren't.
-
-     There is no way to make a *native* scrollbar overlay: `overflow: overlay`
-     was non-standard and has been removed, and scrollbar-gutter only reserves
-     space rather than reclaiming it. Hiding it is the only route. Scrolling
-     still works by wheel, trackpad, keyboard, touch and Page Up/Down; what's
-     lost is the visible position indicator and the draggable thumb.
-
-     Scoped to the root scroller deliberately - inner scrollers such as a wide
-     <pre> keep their scrollbars, where the affordance actually matters
-     because there's no other cue that content continues sideways. */
+  /* Reclaim the ~12px a classic scrollbar takes, which narrows the layout and
+     shifts the centred column between scrolling and non-scrolling pages. No
+     native scrollbar can overlay (`overflow: overlay` is gone, scrollbar-gutter
+     only reserves), so hiding is the only route. Wheel/keyboard/touch scrolling
+     is unaffected. Root scroller only - a wide <pre> keeps its bar, where
+     nothing else signals that content continues sideways. */
   scrollbar-width: none;           /* Firefox, and the modern standard */
 }
 
@@ -303,9 +232,8 @@ a:focus {
   text-decoration: underline;
 }
 
-/* :focus used to be tied to :hover, which gave keyboard users nothing the
-   growing-underline effect didn't already do on pointer hover - the two were
-   indistinguishable. A real ring, only for keyboard focus. */
+/* Keyboard-only ring: :focus was tied to :hover, which the growing-underline
+   effect made indistinguishable from a pointer hover. */
 :focus-visible {
   outline: 2px solid var(--accent-text);
   outline-offset: 2px;
@@ -318,9 +246,7 @@ a:focus {
   outline-color: var(--on-accent);
 }
 
-/* Headings.
-   Top margins previously ran h2: 1rem, h3: 1.5rem, h4-6: 1rem - so an h3 got
-   MORE space above it than the h2 it sits under. Now they descend properly. */
+/* Heading top margins descend h1 -> h6. */
 h1, h2, h3, h4, h5, h6 {
   margin-bottom: var(--space-2);
   font-weight: bold;
@@ -345,10 +271,8 @@ h4, h5, h6 {
   font-size: 1rem;
 }
 
-/* Heading top margins are for separating sections, never for pushing the
-   first thing on a page away from the top of its container. Page titles are
-   a bare <h1> in most templates, so without this they'd inherit the section
-   spacing on top of .content's own padding. */
+/* Section spacing must not push the first thing on a page off the top; page
+   titles are a bare <h1> in most templates. */
 .content > :first-child,
 .post > :first-child,
 .post-body > :first-child {
@@ -376,9 +300,7 @@ dd {
   margin-bottom: var(--space-2);
 }
 
-/* The old rule had a second `border-bottom: 1px solid <page background>` to
-   fake an engraved bevel - a light-mode-only trick that just reads as a
-   doubled line on a dark surface. */
+/* No fake bevel: a second border in the page colour only works in light mode. */
 hr {
   position: relative;
   margin: var(--space-5) 0;
@@ -397,14 +319,11 @@ abbr[title] {
   border-bottom: 1px dotted var(--border);
 }
 
-/* Code.
-   NOTE: syntax highlighting was removed - syntax.css (Pygments/Chroma token
-   colours) was dead twice over: no content file contains a code block, and
-   Hugo's markup.highlight.noClasses defaults to true, which emits inline
-   styles and ignores those classes entirely. To bring it back (this does NOT
-   need extended Hugo - only SCSS does): set markup.highlight.noClasses=false
-   in hugo.json, then `hugo gen chromastyles --style=github` (and
-   --style=github-dark) and fold the tokens in as light-dark() pairs. */
+/* Syntax highlighting was removed: no content file has a code block, and
+   Hugo's markup.highlight.noClasses defaults to true, emitting inline styles
+   that ignore classes anyway. To restore (does NOT need extended Hugo): set
+   noClasses=false, then `hugo gen chromastyles --style=github` and
+   --style=github-dark, folded in as light-dark() pairs. */
 code,
 pre {
   font-family: Menlo, Monaco, "Courier New", monospace;
@@ -462,9 +381,8 @@ blockquote p:last-child {
   }
 }
 
-/* The blockquote render hook wraps every non-alert quote in <figure> (so it
-   can carry a cite/caption). Nothing styled `figure`, so the UA default of
-   `margin: 1em 40px` was silently indenting every quote on the site. */
+/* The render hook wraps non-alert quotes in <figure>; the UA `margin: 1em 40px`
+   was silently indenting every quote on the site. */
 figure {
   margin: 0;
 }
@@ -519,11 +437,7 @@ tbody tr:nth-child(odd) th {
   margin-right: auto;
 }
 
-/* Sidebar
- *
- * A full-width banner above the content on mobile, where it doubles as the
- * page header; a fixed column from 48em up.
- */
+/* Sidebar: full-width header on mobile, fixed column from 48em. */
 
 .sidebar {
   position: relative;
@@ -535,18 +449,10 @@ tbody tr:nth-child(odd) th {
   overflow-wrap: break-word;
 }
 
-/* Mobile: the sidebar is the page header, so fade the content in underneath
-   it instead of ending the colour block on a hard edge.
-
-   This hangs off <body>, not .content. It used to be .content::before with
-   -16px side margins to cancel that column's padding, which silently assumed
-   .content spanned the viewport. Once .content gained a max-width the
-   assumption broke: at 760px the column is 480px wide and centred, so the
-   gradient covered 512px of a 748px page and left a bare strip down each
-   side. body is full-bleed by definition, so there is nothing to cancel.
-
-   margin-bottom pulls back its own height so it takes up no space in flow -
-   it overlays, it doesn't push the page down. */
+/* Fades page content in under the mobile header instead of ending the colour
+   block on a hard edge. On <body>, not .content: .content has a max-width, so
+   anchoring it there left a bare strip down each side once that bound.
+   margin-bottom pulls back its own height so it overlays rather than pushes. */
 body::before {
   content: "";
   display: block;
@@ -561,20 +467,15 @@ body::before {
   z-index: 5;
 }
 
-/* Content column
- *
- * Was `class="content container"` on every page, with .content and .container
- * both setting max-width: 38rem and disagreeing about margins (auto vs 20rem).
- */
+/* Content column. .container is still used on its own by .sidebar-sticky. */
 
 .content {
   max-width: var(--measure);
   margin-left: auto;
   margin-right: auto;
   padding: var(--space-8) var(--gutter);
-  /* Long unbroken tokens (URLs as link text, long code identifiers) don't
-     wrap by default and force real horizontal overflow at narrow widths -
-     <pre> already handles this, but inline text/code/links don't. */
+  /* URLs as link text and long identifiers overflow otherwise; <pre> handles
+     itself, inline text does not. */
   overflow-wrap: break-word;
 }
 
@@ -583,24 +484,19 @@ body::before {
   container-type: inline-size;
 }
 
-/* Inside a full-bleed column, holds the page header and intro to the same
-   measure and centring every other page uses, so only the thing that wants
-   the width (the project grid) actually takes it. */
+/* Holds the page header to the same measure as every other page, so only the
+   project grid takes the full-bleed width. */
 .content-header {
-  /* --measure is a border-box width on .content, i.e. it includes the gutter.
-     The gutter is already applied by .content.full out here, so subtract it
-     rather than adding it again - re-applying it double-gutters the header on
-     narrow screens, where the measure doesn't bind and the box fills anyway. */
+  /* --measure is a border-box width on .content, and .content.full already
+     applies the gutter out here - adding it again double-gutters on narrow
+     screens where the measure does not bind. */
   max-width: calc(var(--measure) - 2 * var(--gutter));
   margin-left: auto;
   margin-right: auto;
 }
 
-/* The sidebar is position: fixed, so it's out of flow. Reserve its width as
-   padding on <body> and let the content column centre itself in what's left.
-   The old approach hard-coded margin-left/right per breakpoint (20rem/2rem,
-   then 22rem/4rem), which pinned the column to one side and left a widening
-   dead gap beside it as the viewport grew. */
+/* The sidebar is fixed and out of flow, so reserve its width as padding on
+   <body> and let the column centre in what remains. */
 @media (min-width: 48em) {
   .sidebar {
     position: fixed;
@@ -612,10 +508,8 @@ body::before {
     padding: var(--space-4) 0;
   }
 
-  /* Sidebar is a column now, not a header - nothing to fade into. Instead
-     it gets a drawn edge, which is what keeps it reading as a panel in dark
-     mode where the dimmed fill sits close to the page. box-shadow rather
-     than a border so it costs no layout width. */
+  /* A drawn edge instead, which is what keeps the panel readable in dark mode.
+     box-shadow, not border, so it costs no layout width. */
   body::before {
     display: none;
   }
@@ -705,9 +599,8 @@ body::before {
   font-size: 3rem;
 }
 
-/* Mobile-first: on a phone the sidebar doubles as the header, so the six
-   links sit in two columns (site links, then social) rather than one tall
-   stack that pushed the page content almost entirely off screen. */
+/* Two columns on mobile - a single tall stack pushed the page content almost
+   entirely off screen. */
 .sidebar-nav {
   padding-left: 0;
   list-style: none;
@@ -717,15 +610,10 @@ body::before {
   column-gap: var(--space-4);
 }
 
-/* Same growing-underline effect as .post a (see below), but the sidebar's
-   text is white on the solid --theme-color background instead of dark text on
-   a white page, so the highlight has to stay lighter than the background to
-   read as a highlight at all - and can't go anywhere near as pale as the
-   post-body version, or the white link text would disappear into it once the
-   highlight grows to fill the full line height.
-
-   Bigger tap targets too: the sidebar is the mobile nav, so its links need to
-   be easy to hit with a thumb, not merely readable. */
+/* Same growing-underline as .post a, but white text on the accent fill means
+   the highlight must stay lighter than its own background and can't go as
+   pale as the post-body version, or the link text disappears into it.
+   Larger tap targets too: this doubles as the mobile nav. */
 .sidebar-nav a {
   display: inline-block;
   margin: var(--space-2) 0;
@@ -835,9 +723,8 @@ body::before {
   color: inherit;
 }
 
-/* Growing-underline links: a 3px bar that expands to fill the line on hover,
-   with the colour transitioning separately from the size. box-decoration-break
-   keeps it correct on links that wrap across lines. */
+/* A 3px bar that grows to fill the line on hover; box-decoration-break keeps
+   it correct on links that wrap. */
 .post a {
   text-decoration: none;
   font-weight: 700;
@@ -856,9 +743,7 @@ body::before {
   background-size: 100% 100%;
 }
 
-/* --- Post index (/post) --------------------------------------------------
-   Previously a bare <ul> whose dates carried a .pull-right class that no
-   stylesheet defined, so they never aligned. */
+/* --- Post index (/post) --------------------------------------------------- */
 
 .post-index {
   padding-left: 0;
@@ -891,8 +776,8 @@ body::before {
   white-space: nowrap;
 }
 
-/* --- Project cards (/projects) -------------------------------------------
-   Any post can appear here by adding a `project` block to its front matter.
+/* --- Project cards (/projects) --------------------------------------------
+   Any post joins this list by adding a `project` block to its front matter.
    Sized in container query units against .content.full. */
 
 .project-list {
@@ -916,9 +801,8 @@ body::before {
   transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease, scale .2s ease;
 }
 
-/* A little scatter so the cards feel hand-placed rather than gridded. The
-   angle lives in a custom property so the reduced-motion block can keep the
-   static tilt while dropping the movement on hover. */
+/* Hand-placed rather than gridded. The angle is a custom property so the
+   reduced-motion block can keep the tilt while dropping the hover movement. */
 .project-card:nth-child(3n+1) { --tilt: -2deg; }
 .project-card:nth-child(3n+2) { --tilt: 1.5deg; }
 .project-card:nth-child(3n)   { --tilt: -1deg; }
@@ -1057,13 +941,10 @@ body::before {
 }
 
 /* --- Theme switch --------------------------------------------------------
-   A small icon anchored to the sidebar's bottom corner: bottom-left while the
-   sidebar is the mobile header, bottom-right once it is the desktop column.
-   Activating it flies three labelled options up and out; choosing one applies
-   the scheme and retracts them.
-
-   Rendered hidden and revealed by JS, so a no-JS visitor never sees a dead
-   control. */
+   Icon in the sidebar's bottom corner - bottom-left as the mobile header,
+   bottom-right as the desktop column. Activating it flies three labelled
+   options up and out. Rendered hidden and revealed by JS, so a no-JS visitor
+   never sees a dead control. */
 
 .theme-switch {
   position: absolute;
@@ -1072,26 +953,22 @@ body::before {
   bottom: var(--space-2);
 }
 
-/* Absolutely positioned, not stacked in flow above the trigger. visibility:
-   hidden still occupies layout space, so an in-flow panel left the container
-   sized for the open menu even while closed - and a transparent container
-   still hit-tests across its whole box, so it swallowed clicks on whatever it
-   overlapped. Out of flow, the container is only ever as big as its trigger. */
+/* Absolutely positioned, not in flow: visibility:hidden still occupies layout
+   space, which left the container sized for the open menu and swallowing
+   clicks on whatever it overlapped. */
 .theme-switch-options {
   position: absolute;
   bottom: calc(100% + var(--space-1));
   left: 0;
-  /* The containing block is now only as wide as the trigger, and an abspos
-     box shrink-to-fits against that - without this the menu is squeezed to
-     ~24px and its contents spill outside the viewport. */
+  /* The containing block is trigger-sized, and an abspos box shrink-to-fits
+     against it. */
   width: max-content;
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  /* visibility keeps the options untabbable while closed without killing the
-     transition; pointer-events makes them un-clickable *immediately* rather
-     than after the 0.2s hold, so a closing menu can't swallow a click meant
-     for whatever is underneath it. */
+  /* visibility keeps them untabbable; pointer-events makes them unclickable
+     immediately rather than after the 0.2s hold, so a closing menu cannot
+     swallow a click aimed underneath. */
   visibility: hidden;
   pointer-events: none;
   transition: visibility 0s .2s;
@@ -1129,11 +1006,9 @@ body::before {
   opacity: 1;
 }
 
-/* PT Sans has no coverage for these symbols, and neither do most UI stacks -
-   unstyled, they fall back to whatever the system font has and render as an
-   unreadable mark or tofu. Measured on this machine: U+1F323 and U+1F5B3 are
-   carried only by Noto Sans Symbols2, U+263D by DejaVu Sans. Both family
-   spellings are listed because the name differs between distributions. */
+/* PT Sans has no coverage for these symbols; unstyled they fall back to tofu.
+   U+1F323 and U+1F5B3 are carried only by Noto Sans Symbols2, U+263D by DejaVu
+   Sans. Both family spellings listed - distributions differ. */
 .theme-switch-icon {
   font-family: "Noto Sans Symbols 2", "Noto Sans Symbols2", "Noto Sans Symbols",
                Symbola, "Segoe UI Symbol", "Apple Symbols", "DejaVu Sans", sans-serif;
@@ -1141,10 +1016,8 @@ body::before {
   line-height: 1;
 }
 
-/* Both glyphs sit bolt upright in the font. The crescent reads as a stray
-   bracket, and the half-circle as a hard vertical split rather than a
-   light/dark divide; tilting them fixes both. The attribute is on the icon
-   itself, so this holds wherever the glyph is used. */
+/* Upright, the crescent reads as a bracket and the half-circle as a hard
+   vertical split. The attribute is on the icon, so this holds anywhere. */
 .theme-switch-icon[data-icon="dark"] {
   rotate: 32deg;
 }
@@ -1188,11 +1061,9 @@ body::before {
   background-color: color-mix(in oklab, var(--accent-fill) 60%, black);
 }
 
-/* The trigger no longer mirrors the active scheme, so this highlight is the
-   only visual indication of which one is set. It has to be unmistakable:
-   full-strength fill against the others' darkened backgrounds, plus an inner
-   rim. Deliberately lighter than :hover, which darkens - otherwise hovering a
-   neighbour would out-compete the actual selection. */
+/* The trigger glyph is fixed, so this is the only visual indication of the
+   active scheme. Lighter than :hover, which darkens - otherwise hovering a
+   neighbour would out-compete the real selection. */
 .theme-switch-option[aria-pressed="true"] {
   background-color: var(--accent-fill);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .45);
@@ -1236,9 +1107,7 @@ body::before {
 }
 
 /* --- Alert callouts ------------------------------------------------------
-   GitHub-style alerts, emitted by the blockquote render hook from
-   `> [!NOTE]`-style markup, plus a non-standard `wat` type. No content file
-   currently uses these. */
+   From the blockquote render hook, plus a non-standard `wat` type. */
 
 blockquote.alert {
   padding: var(--space-2) var(--space-4);
@@ -1276,15 +1145,10 @@ blockquote.alert-wat       { border-color: var(--alert-wat); }
  * 6. Motion & preferences
  * ========================================================================== */
 
-/* The whole site runs a permanent 55s colour animation, so this preference
-   needs a real answer rather than being ignored.
-
-   Turning the animation off leaves --theme-color at its @property
-   initial-value (#fff), i.e. an invisible white sidebar - so colours.html
-   pairs this by setting --theme-color inline to the current epoch's colour.
-   The result: reduced-motion visitors get the full palette and stay in sync
-   with everyone else, they just get one fixed colour per page load instead of
-   a transition. Navigating or refreshing may land on the next colour. */
+/* Turning the animation off leaves --theme-color at its #fff initial value, so
+   colours.html pairs this by setting the current epoch's colour inline.
+   Reduced-motion visitors keep the full palette and stay in sync - they just
+   get one fixed colour per page load. */
 @media (prefers-reduced-motion: reduce) {
   body {
     animation: none;
@@ -1315,15 +1179,9 @@ blockquote.alert-wat       { border-color: var(--alert-wat); }
   }
 }
 
-/* Manual colour-scheme override, set on <html> by the control in the sidebar.
-   light-dark() resolves against the element's *used* color-scheme, so
-   constraining that one property switches every token at once.
-
-   This lives on <html> and not <body> deliberately: colours.html rewrites
-   classes on <body> every 70 seconds, and until phase 2 it reassigned
-   className wholesale - anything parked there was liable to be wiped.
-
-   No attribute at all means "follow the OS", which is why the control removes
-   it rather than writing a third value. */
+/* Set on <html> by the sidebar control. On <html> not <body> deliberately:
+   colours.html rewrites classes on <body> every rotation. No attribute means
+   "follow the OS", which is why the control removes it rather than writing a
+   third value. */
 :root[data-theme="light"] { color-scheme: only light; }
 :root[data-theme="dark"]  { color-scheme: only dark; }

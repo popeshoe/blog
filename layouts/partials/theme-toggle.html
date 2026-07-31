@@ -29,20 +29,17 @@
   var root    = document.documentElement;
   var trigger = wrap.querySelector(".theme-switch-trigger");
   var options = Array.prototype.slice.call(wrap.querySelectorAll(".theme-switch-option"));
-  // Option glyphs are literals in the markup and the trigger's is fixed, so
-  // there's no icon map here any more - only the accessible names.
   var LABELS  = { light: "Light", dark: "Dark", system: "System" };
 
-  // "system" is the absence of the attribute, not a third stored value, so a
-  // visitor who has chosen once can still go back to following the OS.
+  // "system" is the absence of the attribute, so a visitor who has chosen once
+  // can still go back to following the OS.
   function current() {
     var t = root.dataset.theme;
     return t === "light" || t === "dark" ? t : "system";
   }
 
-  // The trigger glyph is fixed, so the only visual indication of the current
-  // scheme is the highlighted option once the menu is open. aria-label carries
-  // it for anyone who can't see that.
+  // The trigger glyph is fixed, so aria-label carries the current scheme for
+  // anyone who cannot see the highlighted option.
   function render() {
     var now = current();
     trigger.setAttribute("aria-label",
@@ -70,10 +67,8 @@
     trigger.focus();
   }
 
-  // Deliberately does NOT stop propagation: letting the click reach document
-  // is what closes any other corner widget that's open (the dev palette),
-  // since each one closes itself on an outside click. Our own document
-  // handler sees the target inside this wrapper and leaves us alone.
+  // No stopPropagation: letting the click reach document is what closes the
+  // other corner widget, since each closes itself on an outside click.
   trigger.addEventListener("click", function () {
     open(wrap.dataset.open !== "true");
   });
@@ -96,8 +91,7 @@
     }
   });
 
-  // Revealed only once the handlers are attached, so a no-JS visitor never
-  // sees a control that does nothing.
+  // Revealed only once handlers are attached, so no-JS never sees a dead control.
   wrap.hidden = false;
   render();
 })();

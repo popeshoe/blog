@@ -1,8 +1,7 @@
 {{ define "main" }}
 	<div class="content full">
-		{{/* The column is full-bleed so the card grid can use the width, but
-		     the page header reads like every other page - same measure, same
-		     centring - rather than running the whole way across. */}}
+		{{/* Full-bleed column for the grid, but the header keeps the same measure
+		     and centring as every other page. */}}
 		<div class="content-header">
 			<h1>{{ .Title }}</h1>
 			<div class="post-body">{{ .Content }}</div>

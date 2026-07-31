@@ -78,39 +78,20 @@ function currentEpoch() {
   return Math.floor(Date.now() / ROTATE_INTERVAL);
 }
 
-// HACK, Firefox-only bug workaround: this whole business of reaching into
-// the stylesheet and rewriting the @keyframes rule by hand only exists
-// because Firefox (confirmed on 152, whatever's current as of 2026-07)
-// won't smoothly animate a registered custom property (@property) when its
-// keyframe values are themselves indirected through var(). Concretely:
+// Firefox-only workaround (confirmed on 152, 2026-07). The natural way to
+// write this is var()-indirected keyframes:
 //
 //   @keyframes theme-cycle {
-//     from { --theme-color: var(--theme-color-from, #fff); }
-//     to   { --theme-color: var(--theme-color-to, #fff); }
+//     from { --theme-color: var(--theme-color-from); }
+//     to   { --theme-color: var(--theme-color-to); }
 //   }
 //
-// with --theme-color-from/-to set via body.style.setProperty(...) - is the
-// natural, obvious way to write this, and it works perfectly in Chrome: the
-// colour eases smoothly across the animation's duration. In Firefox it
-// doesn't ease at all - it holds --theme-color at the "from" value, then
-// snaps straight to "to" partway through (right around where the `ease`
-// timing function crosses 50% progress), i.e. Firefox is falling back to
-// discrete/non-interpolated animation instead of treating the var()
-// indirection as resolving to an animatable <color>. Verified this isn't an
-// inheritance thing either - even sampled directly on <body>, same snap.
+// Chrome eases that smoothly; Firefox won't interpolate it at all and snaps
+// partway through. So we write literal colours into the @keyframes rule via
+// CSSOM before every restart instead.
 //
-// The fix that actually works in Firefox is to skip the indirection
-// entirely and write literal colours straight into the @keyframes rule
-// before every restart, which is what findThemeCycleKeyframesRule() and the
-// loop in startTransition() below do.
-//
-// If Firefox ever fixes this (i.e. var()-indirected keyframe values on a
-// registered custom property animate smoothly, matching Chrome), this can
-// all be deleted and replaced with the simpler version above: set
-// --theme-color-from/-to as ordinary custom properties on body in
-// startTransition(), reference them via var() in the @keyframes rule in
-// hyde.css, and drop findThemeCycleKeyframesRule() and the CSSOM-mutation
-// loop entirely.
+// If Firefox ever fixes this, delete findThemeCycleKeyframesRule() and the
+// rewrite loop in startTransition(), and use the version above.
 var themeCycleKeyframesRule = null;
 function findThemeCycleKeyframesRule() {
   if (themeCycleKeyframesRule) return themeCycleKeyframesRule;
@@ -134,11 +115,8 @@ function findThemeCycleKeyframesRule() {
 
 function startTransition(fromColour, toColour, delayMs) {
   var body = document.querySelector("body");
-  // theme-base-XX used to be a base16 code (eg. "08"); now that COLOURS is
-  // just hex values, the label is the hex digits themselves instead. It
-  // carries no CSS - it exists so the current colour is identifiable in
-  // devtools - so we swap just that one class rather than reassigning
-  // className wholesale, which would clobber anything else on <body>.
+  // A devtools label carrying no CSS. Swap just that class rather than
+  // reassigning className, which would clobber anything else on <body>.
   Array.prototype.slice.call(body.classList).forEach(function (c) {
     if (c.indexOf("theme-base-") === 0) body.classList.remove(c);
   });
@@ -146,14 +124,9 @@ function startTransition(fromColour, toColour, delayMs) {
 
   var keyframesRule = findThemeCycleKeyframesRule();
 
-  // Degrade to a flat colour rather than taking the whole theme down. Reading
-  // .cssRules throws SecurityError on a cross-origin stylesheet, so the lookup
-  // returns null and this used to dereference it - a TypeError that killed the
-  // colour engine and left --theme-color at its #fff initial value: white
-  // sidebar, white headings, invisible links. That is exactly what canonifyURLs
-  // caused on www.porkcullis.com, where the stylesheet was pulled from the bare
-  // domain. The config no longer does that, but the failure was silent and
-  // total, so it is worth not being one null away from it again.
+  // Reading .cssRules throws on a cross-origin stylesheet, so the lookup can
+  // return null. Degrade to a flat colour rather than throwing and leaving
+  // --theme-color at #fff - a white sidebar and invisible links.
   if (!keyframesRule) {
     body.style.setProperty("--theme-color", toColour);
     body.style.animation = "none";
@@ -174,9 +147,8 @@ function startTransition(fromColour, toColour, delayMs) {
   body.style.animationName = "";
 }
 
-// On a fresh load, seek straight to wherever a page that had been open the
-// whole time would currently be, instead of always starting a fresh 70s
-// wait followed by a fresh 55s transition.
+// Seek to where a page open the whole time would be, rather than starting a
+// fresh cycle on every load.
 function applyInitialColour() {
 
   var epoch = currentEpoch();
@@ -184,14 +156,10 @@ function applyInitialColour() {
   startTransition(colourForEpoch(epoch - 1), colourForEpoch(epoch), -elapsed);
 }
 
-// Line the recurring rotation up on the same wall-clock boundaries for
-// every visitor, rather than starting a fresh 70s timer from load time.
-// One-shot timeouts recomputed against the next epoch boundary, not
-// setInterval: a fixed interval drifts (and throttled background tabs make
-// it fire late), whereas recomputing re-anchors to the wall clock every
-// tick. An earlier version called setInterval from inside rotate(), which
-// spawned a fresh interval on every tick - the live timers doubled every
-// 70s until the tab ground to a halt.
+// Anchored to wall-clock epoch boundaries so every visitor rotates together.
+// One-shot timeouts recomputed each tick, not setInterval: a fixed interval
+// drifts, and an earlier version called setInterval from inside rotate(),
+// doubling the live timers every tick.
 function scheduleRotation() {
   setTimeout(function rotate() {
     var epoch = currentEpoch();
@@ -200,46 +168,25 @@ function scheduleRotation() {
   }, (currentEpoch() + 1) * ROTATE_INTERVAL - Date.now());
 }
 
-// A permanent 55s colour animation is exactly what prefers-reduced-motion is
-// asking us not to do. Rather than falling back to a single hard-coded colour
-// (which would throw away the palette entirely), pick the colour the rest of
-// the world is currently on and just... stop there. No transition, no
-// rotation timer, no visibility re-seek. Navigating or refreshing may land on
-// the next colour, and that's the only change a reduced-motion visitor sees.
-//
-// The paired `body { animation: none }` lives in the reduced-motion block in
-// main.css. Without it the animation would keep overriding this inline value;
-// without this, turning the animation off would leave --theme-color at its
-// @property initial-value of #fff, i.e. an invisible white sidebar.
+// Pick the colour everyone else is on and stop there - no transition, no
+// rotation timer. Paired with `body { animation: none }` in main.css: without
+// that the animation overrides this, and without this the disabled animation
+// leaves --theme-color at its #fff initial value.
 if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
   document.body.style.setProperty("--theme-color", colourForEpoch(currentEpoch()));
 } else {
   applyInitialColour();
   scheduleRotation();
 
-  // Background tabs throttle setTimeout/setInterval, so the recurring
-  // rotate() call in scheduleRotation() can fire late (or in a backlogged
-  // burst) and hard-reset the animation via startTransition(..., 0), which
-  // doesn't account for elapsed time the way applyInitialColour() does. Redo
-  // the proper elapsed-time seek whenever the tab becomes visible again to
-  // correct for that instead of trusting the drifting timer.
+  // Background tabs throttle timers, so re-seek on becoming visible rather
+  // than trusting where the drifted timer left us.
   document.addEventListener("visibilitychange", function () {
     if (!document.hidden) applyInitialColour();
   });
 }
 
-// REMOVED: a dev-only MutationObserver that watched for LiveReload swapping
-// the <link rel="stylesheet"> tag in place on CSS-only changes. That left the
-// new stylesheet's @keyframes theme-cycle rule at its #fff placeholders with
-// nothing to repopulate them, so the whole page went white until a real
-// navigation - the observer redid the seek each time a swap landed.
-//
-// The stylesheet is fingerprinted now (see head.html), so its filename
-// changes whenever its contents do. LiveReload can only swap a <link> in
-// place when the URL is stable, so it falls back to a full page reload, which
-// re-runs this script from scratch. Verified: editing the CSS reloads the
-// page (a marker set on window does not survive) and the keyframes come back
-// populated. The observer could no longer fire.
-//
-// If fingerprinting is ever removed, this comes back - `git log` for it.
+// A dev-only MutationObserver used to re-seek after LiveReload swapped the
+// stylesheet in place, which reset the keyframes to their #fff placeholders.
+// Fingerprinting changes the filename on every edit, so LiveReload now does a
+// full reload and re-runs this script. If fingerprinting goes, check git log.
 </script>

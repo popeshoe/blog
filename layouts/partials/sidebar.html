@@ -21,9 +21,8 @@
     <p class="sidebar-copyright">{{ with .Site.Params.copyright }}{{.}}{{ else }}&copy; {{now.Format "2006"}} {{end}}</p>
   </div>
 
-  {{/* Outside .sidebar-sticky on purpose: that is position: absolute on
-       desktop, so a switch inside it would anchor to the sticky block rather
-       than to the sidebar's own bottom corner. */}}
+  {{/* Outside .sidebar-sticky: that is abspos on desktop, so a switch inside
+       it would anchor to the sticky block, not the sidebar corner. */}}
   {{ partial "theme-toggle.html" . }}
   {{ partial "dev-palette.html" . }}
 </div>
