@@ -34,7 +34,7 @@ evaluate() {
 }
 
 cd "$ROOT"
-hugo server --port "$PORT" --disableFastRender >/dev/null 2>&1 &
+hugo server -D --port "$PORT" --disableFastRender >/dev/null 2>&1 &
 HUGO_PID=$!
 
 for _ in $(seq 1 40); do
@@ -83,36 +83,67 @@ check "4 two loads agree on position" true "$(
 check "5 seek tracks wall-clock" true "$(evaluate "
   String(Math.abs(document.body.getAnimations()[0].currentTime - (Date.now() % $CYCLE_MS)) < 1000)")"
 
-echo "dev palette"
+echo "colour lab"
 
-check "6 pin freezes, resume restores" "paused,frozen,running,synced" "$(evaluate "
+playwright-cli -s=themetest goto "$URL/colour-lab/" >/dev/null 2>&1
+
+check "6 lab renders 20 baked entries" 40 "$(evaluate "
+  String(document.querySelectorAll('#lab-baked .lab-cell').length)")"
+
+# One column at a time: the dark fills all clamp to the same lightness, so a
+# few coincide across schemes and a combined count is not 40.
+check "7 swatches sampled from the palette" "20,20" "$(evaluate "
+  (() => {
+    const col = n => new Set([...document.querySelectorAll('#lab-baked .lab-row')]
+      .map(r => r.querySelectorAll('.lab-cell')[n])
+      .filter(Boolean).map(b => b.style.background)).size;
+    return col(0) + ',' + col(1);
+  })()")"
+
+check "8 clicking a swatch holds the page" "paused,frozen,running,synced" "$(evaluate "
   (async () => {
     const wait = ms => new Promise(r => setTimeout(r, ms));
     const anim = () => document.body.getAnimations().find(x => x.animationName === 'theme-cycle');
     const fill = () => getComputedStyle(document.body).getPropertyValue('--accent-fill').trim();
     const out = [];
-    document.querySelectorAll('.dev-palette-swatch')[7].click();
+    document.querySelectorAll('#lab-baked .lab-cell')[14].click();
     await wait(60);
     out.push(anim().playState);
     const before = fill();
     await wait(250);
     out.push(fill() === before ? 'frozen' : 'moving');
-    document.querySelector('[data-dev-palette-resume]').click();
+    document.getElementById('lab-resume').click();
     await wait(60);
     out.push(anim().playState);
     out.push(Math.abs(anim().currentTime - (Date.now() % $CYCLE_MS)) < 500 ? 'synced' : 'adrift');
     return out.join(',');
   })()")"
 
-check "7 swatches sampled from the palette" 20 "$(evaluate "
-  String(new Set([...document.querySelectorAll('.dev-palette-swatch')].map(b => b.style.background)).size)")"
+check "9 a custom colour overrides the cycle" changed "$(evaluate "
+  (async () => {
+    const wait = ms => new Promise(r => setTimeout(r, ms));
+    const fill = () => getComputedStyle(document.body).getPropertyValue('--accent-fill').trim();
+    const before = fill();
+    document.querySelectorAll('#lab-custom .lab-cell')[0].click();
+    await wait(80);
+    const held = fill();
+    document.getElementById('lab-resume').click();
+    await wait(80);
+    return held !== before && fill() !== held ? 'changed' : 'stuck';
+  })()")"
+
+check "10 every component renders" "1,1,2,1" "$(evaluate "
+  [document.querySelectorAll('.lab .post-title').length,
+   document.querySelectorAll('.lab .lead').length,
+   document.querySelectorAll('.lab .project-card').length,
+   document.querySelectorAll('.lab blockquote.alert-wat').length].join(',')")"
 
 echo "colour scheme"
 
 # The animation must be paused first: --accent-fill moves continuously, so
 # two samples taken moments apart differ whatever the scheme does, and the
 # check passes even with the colour-scheme wiring deleted.
-check "8 dark scheme changes the fill" different "$(evaluate "
+check "11 dark scheme changes the fill" different "$(evaluate "
   (async () => {
     const wait = ms => new Promise(r => setTimeout(r, ms));
     const anim = () => document.body.getAnimations().find(x => x.animationName === 'theme-cycle');
@@ -135,12 +166,6 @@ check "8 dark scheme changes the fill" different "$(evaluate "
     restored.play();
     return dark !== light ? 'different' : 'same';
   })()")"
-
-echo "colour lab"
-
-check "9 lab renders 20 baked entries" 40 "$(
-  playwright-cli -s=themetest goto "$URL/colour-lab/" >/dev/null 2>&1
-  evaluate "String(document.querySelectorAll('#lab-baked .lab-cell').length)")"
 
 printf '\n%d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]

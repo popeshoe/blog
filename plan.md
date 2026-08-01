@@ -315,3 +315,21 @@ site; stop and smoke-test there before touching dev tooling.
 - [x] Gitignore `.playwright-cli/` and `__pycache__/` — both leaked into the
       first `git add -A`
 - [ ] Merge to master  *(left for you)*
+
+## Phase 7 — Lab replaces the dev palette
+
+- [x] Baked swatches are buttons: click holds the whole page on that colour
+      (pause + `currentTime` on the hold segment)
+- [x] Custom colours pin too, but by cancelling the animation and setting the
+      properties inline — a running animation outranks inline style on the
+      property it animates, even while paused
+- [x] "Resume cycling" releases and re-seeks to wall-clock
+- [x] Delete `layouts/partials/dev-palette.html` and its call in `sidebar.html`
+- [x] Every component on the page: post index, lead, project cards, and the
+      whole style guide pulled in with `site.GetPage "/styleguide"` rather than
+      duplicated — headings, all six alert types, quotes, lists, code, tables
+- [x] Style guide is `draft: true`, so the lab needs `hugo server -D`; the page
+      says so in place when it isn't there, and `theme-test.sh` passes `-D`
+- [x] Contrast chips for `--accent-text` moved onto the page surface — they were
+      invisible whenever the text colour resolved close to the fill
+- [x] Tests rewritten against the lab: 11 checks, all green

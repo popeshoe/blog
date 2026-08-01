@@ -5,9 +5,15 @@
   <p class="lab-note">
     Dev server only. Baked entries are sampled from the live
     <code>theme-cycle</code> keyframes, so they are exactly what the site
-    paints. Custom colours run the same four clamps through
-    <code>oklch(from …)</code> live, without the generator's sRGB chroma
-    mapping, so they can read a shade more saturated than the baked result.
+    paints. Click any swatch to hold the whole page on it. Custom colours run
+    the same four clamps through <code>oklch(from …)</code> live, without the
+    generator's sRGB chroma mapping, so they can read a shade more saturated
+    than the baked result would.
+  </p>
+
+  <p class="lab-pinned">
+    <button type="button" id="lab-resume" disabled>Cycling</button>
+    <span id="lab-status"></span>
   </p>
 
   <h2>Try a colour</h2>
@@ -20,6 +26,72 @@
   <h2>Baked palette</h2>
   <div id="lab-baked"></div>
 
+  <h2>Every component</h2>
+  <p class="lab-note">
+    The sidebar beside this is the largest <code>--accent-fill</code> surface
+    on the site, and its nav links are the smallest text sitting on it — that
+    pairing is what the lightness cap exists for. Everything below is a real
+    component, not a mock.
+  </p>
+
+  <h3>Post index</h3>
+  <div class="posts">
+    <div class="post">
+      <h1 class="post-title"><a href="#">A post title, which is a link</a></h1>
+      <span class="post-date">Monday, January 2, 2006</span>
+      <div class="post-body">
+        <p class="lead">A lead paragraph, one step up in size.</p>
+        <p>Body copy with <a href="#">an inline link</a> to watch the growing
+           underline pick up <code>--accent-text</code>, some <code>inline
+           code</code>, <strong>strong</strong> and <em>emphasis</em>, plus an
+           <abbr title="an abbreviation">abbr</abbr>.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>Project cards</h3>
+  <ul class="project-list">
+    <li class="project-card">
+      <div class="project-card-header">
+        <h2><a href="#">A project</a></h2>
+        <div class="project-card-links">
+          <a href="#" aria-label="Read the blog post">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            <span class="icon-label">About</span>
+          </a>
+          <a href="#" aria-label="View the source on GitHub">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg>
+            <span class="icon-label">Source</span>
+          </a>
+        </div>
+      </div>
+      <a class="project-card-art" href="#">🎨</a>
+      <div class="project-card-body">
+        <p>Cards carry the tilt, the shadow and the accent-tinted hover.</p>
+      </div>
+    </li>
+    <li class="project-card">
+      <div class="project-card-header">
+        <h2><a href="#">A second card</a></h2>
+      </div>
+      <a class="project-card-art" href="#">🧪</a>
+      <div class="project-card-body">
+        <p>Two of them, so the alternating tilt is visible.</p>
+      </div>
+    </li>
+  </ul>
+
+  <h3>Prose, alerts and tables</h3>
+  {{ with site.GetPage "/styleguide" }}
+  <div class="post-body">{{ .Content }}</div>
+  {{ else }}
+  <p class="lab-note">
+    The style guide is a draft page, so it only exists when the server runs
+    with <code>hugo server -D</code>. Restart with that flag to get headings,
+    alerts, quotes, lists, code and tables here.
+  </p>
+  {{ end }}
+
   <div class="lab-scheme lab-scheme-light" data-scheme-probe="light"></div>
   <div class="lab-scheme lab-scheme-dark" data-scheme-probe="dark"></div>
 </div>
@@ -29,6 +101,26 @@
   .lab-note { font-size: .85rem; color: var(--text-muted); max-width: 34rem; }
   .lab-try { display: flex; gap: var(--space-2); align-items: center; }
   .lab-try input[type="text"] { font: inherit; padding: .3rem .5rem; }
+
+  .lab-pinned {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    font-size: .8rem;
+    color: var(--text-muted);
+  }
+
+  .lab-pinned button {
+    font: inherit;
+    padding: .3rem .7rem;
+    border: 1px solid var(--accent-text);
+    border-radius: 4px;
+    background: none;
+    color: var(--accent-text);
+    cursor: pointer;
+  }
+
+  .lab-pinned button[disabled] { opacity: .5; cursor: default; }
 
   .lab-row {
     display: grid;
@@ -47,10 +139,26 @@
 
   .lab-name { font: .75rem/1.2 ui-monospace, monospace; align-self: center; }
 
-  .lab-cell { padding: var(--space-2); border-radius: 4px; }
+  .lab-cell {
+    padding: var(--space-2);
+    border: 0;
+    border-radius: 4px;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
   .lab-cell b { display: block; font-size: .95rem; font-weight: 700; }
   .lab-cell span { display: block; font-size: .7rem; opacity: .85; }
   .lab-cell em { font-style: normal; font-weight: 700; }
+
+  .lab-on-page {
+    display: inline-block;
+    margin-top: 3px;
+    padding: 1px 5px;
+    border-radius: 2px;
+  }
+  .lab-cell[aria-pressed="true"] { outline: 3px solid var(--text-strong); outline-offset: 2px; }
   .lab-low { color: #ffd7d7; }
 
   .lab-scheme { position: absolute; left: -9999px; width: 0; height: 0; }
@@ -63,6 +171,7 @@
   var CYCLE_MS = 1400000, EPOCH_MS = 70000, TRANSITION_MS = 55000;
   var COUNT = CYCLE_MS / EPOCH_MS;
   var SURFACE = { light: "#ffffff", dark: "#14161a" };
+  var body = document.body;
 
   // Every colour question is answered by painting the value and reading the
   // pixel back, so no colour-space maths lives in this file.
@@ -103,6 +212,71 @@
     return i * EPOCH_MS + (EPOCH_MS + TRANSITION_MS) / 2;
   }
 
+  function animation(el) {
+    if (!el.getAnimations) return null;
+    var running = el.getAnimations();
+    for (var i = 0; i < running.length; i++) {
+      if (running[i].animationName === "theme-cycle") return running[i];
+    }
+    return null;
+  }
+
+  var pinned = null;
+
+  // Baked entries pin by parking the animation on the colour's hold segment.
+  function pinBaked(i) {
+    release();
+    var anim = animation(body);
+    if (!anim) return;
+    anim.pause();
+    anim.currentTime = holdPosition(i);
+    pinned = { kind: "baked", index: String(i) };
+    status();
+  }
+
+  // A custom colour is not in the cycle, so the animation has to be dropped
+  // outright: an animation outranks inline style on the property it animates,
+  // even while paused.
+  function pinCustom(fill, text) {
+    body.style.animation = "none";
+    body.style.setProperty("--accent-fill", fill);
+    body.style.setProperty("--accent-text", text);
+    pinned = { kind: "custom", index: "custom" };
+    status();
+  }
+
+  function release() {
+    body.style.removeProperty("--accent-fill");
+    body.style.removeProperty("--accent-text");
+    body.style.animation = "";
+  }
+
+  function resume() {
+    release();
+    var anim = animation(body);
+    if (anim) {
+      anim.currentTime = Date.now() % CYCLE_MS;
+      anim.play();
+    }
+    pinned = null;
+    status();
+  }
+
+  function status() {
+    var button = document.getElementById("lab-resume");
+    var label = document.getElementById("lab-status");
+    button.disabled = pinned === null;
+    button.textContent = pinned === null ? "Cycling" : "Resume cycling";
+    label.textContent = pinned === null ? "following wall-clock"
+      : pinned.kind === "custom" ? "held on a custom colour"
+      : "held on entry " + (Number(pinned.index) + 1);
+    Array.prototype.forEach.call(document.querySelectorAll(".lab-cell"), function (cell) {
+      var mine = pinned && pinned.index === cell.dataset.index &&
+        pinned.kind === cell.dataset.kind;
+      cell.setAttribute("aria-pressed", String(!!mine));
+    });
+  }
+
   function bakedFor(scheme) {
     var host = document.querySelector('[data-scheme-probe="' + scheme + '"]');
     var probe = document.createElement("div");
@@ -110,13 +284,7 @@
       "s ease infinite paused";
     host.appendChild(probe);
 
-    var anim = null;
-    if (probe.getAnimations) {
-      probe.getAnimations().forEach(function (a) {
-        if (a.animationName === "theme-cycle") anim = a;
-      });
-    }
-
+    var anim = animation(probe);
     var out = [];
     for (var i = 0; i < COUNT; i++) {
       if (anim) anim.currentTime = holdPosition(i);
@@ -139,22 +307,28 @@
     return "oklch(from " + source + " " + CLAMPS[token][scheme] + " c h)";
   }
 
-  function cell(scheme, fill, text) {
+  function cell(scheme, fill, text, kind, index) {
     var onFill = ratio("#ffffff", fill);
     var onSurface = ratio(text, SURFACE[scheme]);
     var flag = onFill < 4.5 ? ' class="lab-low"' : "";
-    return '<div class="lab-cell" style="background:' + fill + ';color:#fff">' +
+    return '<button type="button" class="lab-cell" aria-pressed="false"' +
+      ' data-kind="' + kind + '" data-index="' + index + '"' +
+      ' data-fill="' + fill + '" data-text="' + text + '"' +
+      ' style="background:' + fill + ';color:#fff">' +
       "<b>" + hex(fill) + "</b>" +
       "<span" + flag + ">white on fill <em>" + onFill.toFixed(2) + ":1</em></span>" +
-      '<span style="color:' + text + '">text ' + hex(text) +
-      " on page <em>" + onSurface.toFixed(2) + ":1</em></span>" +
-      "</div>";
+      // On the page surface, not on the fill: --accent-text often resolves
+      // close to --accent-fill, which made this line invisible against it.
+      '<span class="lab-on-page" style="background:' + SURFACE[scheme] +
+      ";color:" + text + '">' + hex(text) + " on page <em>" +
+      onSurface.toFixed(2) + ":1</em></span>" +
+      "</button>";
   }
 
-  function row(name, light, dark) {
+  function row(name, light, dark, kind, index) {
     return '<div class="lab-row"><div class="lab-name">' + name + "</div>" +
-      cell("light", light.fill, light.text) +
-      cell("dark", dark.fill, dark.text) + "</div>";
+      cell("light", light.fill, light.text, kind, index) +
+      cell("dark", dark.fill, dark.text, kind, index) + "</div>";
   }
 
   function header() {
@@ -162,26 +336,39 @@
       '<div class="lab-head">light</div><div class="lab-head">dark</div></div>';
   }
 
+  function bind(host) {
+    Array.prototype.forEach.call(host.querySelectorAll(".lab-cell"), function (cell) {
+      cell.addEventListener("click", function () {
+        if (this.dataset.kind === "baked") pinBaked(Number(this.dataset.index));
+        else pinCustom(this.dataset.fill, this.dataset.text);
+      });
+    });
+    status();
+  }
+
   function renderBaked() {
     var light = bakedFor("light"), dark = bakedFor("dark");
     var html = header();
-    for (var i = 0; i < COUNT; i++) html += row(i + 1, light[i], dark[i]);
-    document.getElementById("lab-baked").innerHTML = html;
+    for (var i = 0; i < COUNT; i++) html += row(i + 1, light[i], dark[i], "baked", i);
+    var host = document.getElementById("lab-baked");
+    host.innerHTML = html;
+    bind(host);
   }
 
   function renderCustom() {
     var source = document.getElementById("lab-input").value.trim();
+    var host = document.getElementById("lab-custom");
     if (!source || !CSS.supports("color", source)) {
-      document.getElementById("lab-custom").innerHTML =
-        '<p class="lab-note">Not a colour this browser understands.</p>';
+      host.innerHTML = '<p class="lab-note">Not a colour this browser understands.</p>';
       return;
     }
-    var pick = function (token, scheme) { return derive(source, token, scheme); };
-    document.getElementById("lab-custom").innerHTML = header() + row(
+    host.innerHTML = header() + row(
       hex(source),
-      { fill: pick("fill", "light"), text: pick("text", "light") },
-      { fill: pick("fill", "dark"), text: pick("text", "dark") }
+      { fill: derive(source, "fill", "light"), text: derive(source, "text", "light") },
+      { fill: derive(source, "fill", "dark"), text: derive(source, "text", "dark") },
+      "custom", "custom"
     );
+    bind(host);
   }
 
   var input = document.getElementById("lab-input");
@@ -191,12 +378,18 @@
     input.value = picker.value;
     renderCustom();
   });
+  document.getElementById("lab-resume").addEventListener("click", resume);
 
   renderBaked();
   renderCustom();
 
-  new MutationObserver(renderBaked).observe(document.documentElement,
-    { attributes: true, attributeFilter: ["data-theme"] });
+  // colours.html restarts the animation on a scheme change, which drops any
+  // pin and re-resolves every sampled swatch.
+  new MutationObserver(function () {
+    pinned = null;
+    renderBaked();
+    renderCustom();
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 })();
 </script>
 {{ end }}
