@@ -2,7 +2,7 @@
  * main.css
  *
  *   1. Config       @property declarations, design tokens
- *   2. Theme engine the animated --theme-color cycle
+ *   2. Theme engine the baked 20-colour animation cycle
  *   3. Reset & base element defaults
  *   4. Layout       sidebar, content column, breakpoints
  *   5. Components   sidebar nav, posts, post index, project cards, alerts
@@ -23,11 +23,18 @@
  * ========================================================================== */
 
 /* Inheritable so one animation on <body> drives the whole page. Registered as
-   a real <color> so it can be animated and used in color-mix(). */
-@property --theme-color {
+   real <color>s so they interpolate and can be used in color-mix(). These are
+   what everything paints from - no page style reads the palette entry itself. */
+@property --accent-fill {
   syntax: "<color>";
   inherits: true;
-  initial-value: #fff;
+  initial-value: #6a9fb5;
+}
+
+@property --accent-text {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #6a9fb5;
 }
 
 /* Drives the growing-underline effect on links (see section 5). Registered so
@@ -109,66 +116,129 @@
   --alert-wat:       light-dark(#ff1f8f, #ff6fb5);
 }
 
-/* Declared on <body>, NOT :root: the animation runs on <body>, so at :root
-   --theme-color is still its #fff initial value and anything derived from it
-   there computes to white and inherits down as white.
-
-   Both clamp the palette colour's lightness, keeping hue and chroma. Without
-   it the dark end of the palette (#330C2F, #2A2D34) sits at 1.0-1.8:1 on a
-   dark background - invisible, not merely low. */
-body {
-  /* Dimmed rather than a full-strength fill: every entry lands in the same
-     tonal band whatever its lightness, so the palette needs no curation, and
-     white-on-fill goes from 3.8-9.7:1 to 11.5-17:1. The cost is that the
-     panel sits only 1.06-1.58:1 against the page - hence --sidebar-edge. */
-  --accent-fill-dark: oklch(from var(--theme-color) clamp(0.22, l, 0.32) c h);
-
-  /* Caps lightness so white sidebar text clears the pale entries (#f4bf75
-     was 1.67:1). White-on-fill by cap: 0.655 -> 3:1, 0.62 -> 3.5-4.4:1,
-     0.552 -> 4.5:1. 0.62 is a deliberate middle - large text clears AA, the
-     ~18px nav links technically want 4.5:1, and tightening further visibly
-     darkens the sidebar across half the palette. */
-  --accent-fill: light-dark(
-                   oklch(from var(--theme-color) min(l, 0.62) c h),
-                   var(--accent-fill-dark));
-
-  --accent-text: light-dark(
-                   oklch(from var(--theme-color) clamp(0.35, l, 0.55) c h),
-                   oklch(from var(--theme-color) clamp(0.62, l, 0.85) c h));
-}
-
 
 /* =============================================================================
  * 2. Theme engine
  *
- * One animation on <body> drives an inherited custom property, so a single
- * animation covers the page. On load, JS points it at the current/next colour
- * and seeks it with a negative animation-delay derived from wall-clock time,
- * which also keeps every visitor on the same colour at the same moment. See
- * colours.html.
+ * One infinite animation on <body> walks the whole 20-colour palette, and an
+ * inherited custom property carries it to every element. colours.html only
+ * seeks it to the wall-clock position on load, so every visitor sits on the
+ * same colour at the same moment; there is no timer and nothing to restart.
  *
- * The theme-base-XX class JS puts on <body> carries no CSS - it's a devtools
- * label, kept out of the cascade so it can't fight the animation.
+ * The block below is generated - do not hand-edit it. The palette lives in
+ * scripts/bake_palette.py; change it there and re-run the script. Both
+ * lightness clamps are applied at bake time rather than by oklch(from ...) at
+ * runtime, and chroma is pulled into sRGB so no browser has to gamut-map:
+ *
+ *   --accent-fill  light  min(l, 0.62)          dark  clamp(0.22, l, 0.32)
+ *   --accent-text  light  clamp(0.35, l, 0.55)  dark  clamp(0.62, l, 0.85)
+ *
+ * The fill cap of 0.62 is a deliberate middle. White-on-fill by cap: 0.655
+ * -> 3:1, 0.62 -> 3.5-4.4:1, 0.552 -> 4.5:1. Large text clears AA, the ~18px
+ * nav links technically want 4.5:1, and tightening further visibly darkens
+ * the sidebar across half the palette. `--contrast` on the bake script prints
+ * where every entry lands; /colour-lab/ shows it in the browser.
+ *
+ * The dark clamp dims rather than fills: every entry lands in the same tonal
+ * band whatever its lightness, so the palette needs no curation. The cost is
+ * a panel only 1.06-1.58:1 against the page - hence --sidebar-edge.
+ *
+ * The static pair on <body> is the fallback for anything that can't animate a
+ * registered custom property: one real colour instead of an unthemed page.
  * ========================================================================== */
 
-/* The from/to colours here are placeholders, rewritten directly on this rule
-   (via CSSOM, see colours.html) before each restart. Firefox only animates a
-   registered custom property smoothly when its keyframe values are literal
-   colours - if a keyframe instead reads them indirectly through var(), it
-   falls back to a discrete jump partway through instead of easing. Chrome
-   doesn't have this limitation, but literal values work identically there. */
+/* BEGIN generated - scripts/bake_palette.py */
 @keyframes theme-cycle {
-  from { --theme-color: #fff; }
-  to   { --theme-color: #fff; }
+  0%          { --accent-fill: light-dark(oklch(0.5310 0.1282 155.23), oklch(0.3200 0.0790 155.23));
+                --accent-text: light-dark(oklch(0.5310 0.1282 155.23), oklch(0.6200 0.1282 155.23)); }
+  3.928571%   { --accent-fill: light-dark(oklch(0.5228 0.1408 22.78), oklch(0.3200 0.1294 22.78));
+                --accent-text: light-dark(oklch(0.5228 0.1408 22.78), oklch(0.6200 0.1408 22.78)); }
+  5%          { --accent-fill: light-dark(oklch(0.5228 0.1408 22.78), oklch(0.3200 0.1294 22.78));
+                --accent-text: light-dark(oklch(0.5228 0.1408 22.78), oklch(0.6200 0.1408 22.78)); }
+  8.928571%   { --accent-fill: light-dark(oklch(0.6200 0.1240 57.45), oklch(0.3200 0.0774 57.45));
+                --accent-text: light-dark(oklch(0.5500 0.1240 57.45), oklch(0.6832 0.1240 57.45)); }
+  10%         { --accent-fill: light-dark(oklch(0.6200 0.1240 57.45), oklch(0.3200 0.0774 57.45));
+                --accent-text: light-dark(oklch(0.5500 0.1240 57.45), oklch(0.6832 0.1240 57.45)); }
+  13.928571%  { --accent-fill: light-dark(oklch(0.6200 0.1101 74.56), oklch(0.3200 0.0679 74.56));
+                --accent-text: light-dark(oklch(0.5500 0.1101 74.56), oklch(0.8368 0.1101 74.56)); }
+  15%         { --accent-fill: light-dark(oklch(0.6200 0.1101 74.56), oklch(0.3200 0.0679 74.56));
+                --accent-text: light-dark(oklch(0.5500 0.1101 74.56), oklch(0.8368 0.1101 74.56)); }
+  18.928571%  { --accent-fill: light-dark(oklch(0.6200 0.1101 123.50), oklch(0.3200 0.0793 123.50));
+                --accent-text: light-dark(oklch(0.5500 0.1101 123.50), oklch(0.6973 0.1101 123.50)); }
+  20%         { --accent-fill: light-dark(oklch(0.6200 0.1101 123.50), oklch(0.3200 0.0793 123.50));
+                --accent-text: light-dark(oklch(0.5500 0.1101 123.50), oklch(0.6973 0.1101 123.50)); }
+  23.928571%  { --accent-fill: light-dark(oklch(0.6200 0.0678 182.33), oklch(0.3200 0.0574 182.33));
+                --accent-text: light-dark(oklch(0.5500 0.0678 182.33), oklch(0.7266 0.0678 182.33)); }
+  25%         { --accent-fill: light-dark(oklch(0.6200 0.0678 182.33), oklch(0.3200 0.0574 182.33));
+                --accent-text: light-dark(oklch(0.5500 0.0678 182.33), oklch(0.7266 0.0678 182.33)); }
+  28.928571%  { --accent-fill: light-dark(oklch(0.6200 0.0648 226.00), oklch(0.3200 0.0614 226.00));
+                --accent-text: light-dark(oklch(0.5500 0.0648 226.00), oklch(0.6735 0.0648 226.00)); }
+  30%         { --accent-fill: light-dark(oklch(0.6200 0.0648 226.00), oklch(0.3200 0.0614 226.00));
+                --accent-text: light-dark(oklch(0.5500 0.0648 226.00), oklch(0.6735 0.0648 226.00)); }
+  33.928571%  { --accent-fill: light-dark(oklch(0.6200 0.0875 334.25), oklch(0.3200 0.0875 334.25));
+                --accent-text: light-dark(oklch(0.5500 0.0875 334.25), oklch(0.6304 0.0875 334.25)); }
+  35%         { --accent-fill: light-dark(oklch(0.6200 0.0875 334.25), oklch(0.3200 0.0875 334.25));
+                --accent-text: light-dark(oklch(0.5500 0.0875 334.25), oklch(0.6304 0.0875 334.25)); }
+  38.928571%  { --accent-fill: light-dark(oklch(0.5092 0.0893 48.05), oklch(0.3200 0.0875 48.05));
+                --accent-text: light-dark(oklch(0.5092 0.0893 48.05), oklch(0.6200 0.0893 48.05)); }
+  40%         { --accent-fill: light-dark(oklch(0.5092 0.0893 48.05), oklch(0.3200 0.0875 48.05));
+                --accent-text: light-dark(oklch(0.5092 0.0893 48.05), oklch(0.6200 0.0893 48.05)); }
+  43.928571%  { --accent-fill: light-dark(oklch(0.5375 0.0926 269.13), oklch(0.3200 0.0926 269.13));
+                --accent-text: light-dark(oklch(0.5375 0.0926 269.13), oklch(0.6200 0.0926 269.13)); }
+  45%         { --accent-fill: light-dark(oklch(0.5375 0.0926 269.13), oklch(0.3200 0.0926 269.13));
+                --accent-text: light-dark(oklch(0.5375 0.0926 269.13), oklch(0.6200 0.0926 269.13)); }
+  48.928571%  { --accent-fill: light-dark(oklch(0.3949 0.0891 268.25), oklch(0.3200 0.0891 268.25));
+                --accent-text: light-dark(oklch(0.3949 0.0891 268.25), oklch(0.6200 0.0891 268.25)); }
+  50%         { --accent-fill: light-dark(oklch(0.3949 0.0891 268.25), oklch(0.3200 0.0891 268.25));
+                --accent-text: light-dark(oklch(0.3949 0.0891 268.25), oklch(0.6200 0.0891 268.25)); }
+  53.928571%  { --accent-fill: light-dark(oklch(0.6200 0.1408 44.39), oklch(0.3200 0.0929 44.39));
+                --accent-text: light-dark(oklch(0.5500 0.1408 44.39), oklch(0.7486 0.1408 44.39)); }
+  55%         { --accent-fill: light-dark(oklch(0.6200 0.1408 44.39), oklch(0.3200 0.0929 44.39));
+                --accent-text: light-dark(oklch(0.5500 0.1408 44.39), oklch(0.7486 0.1408 44.39)); }
+  58.928571%  { --accent-fill: light-dark(oklch(0.6200 0.1734 28.12), oklch(0.3200 0.1312 28.12));
+                --accent-text: light-dark(oklch(0.5500 0.1734 28.12), oklch(0.6990 0.1734 28.12)); }
+  60%         { --accent-fill: light-dark(oklch(0.6200 0.1734 28.12), oklch(0.3200 0.1312 28.12));
+                --accent-text: light-dark(oklch(0.5500 0.1734 28.12), oklch(0.6990 0.1734 28.12)); }
+  63.928571%  { --accent-fill: light-dark(oklch(0.2977 0.0416 172.54), oklch(0.2977 0.0416 172.54));
+                --accent-text: light-dark(oklch(0.3500 0.0416 172.54), oklch(0.6200 0.0416 172.54)); }
+  65%         { --accent-fill: light-dark(oklch(0.2977 0.0416 172.54), oklch(0.2977 0.0416 172.54));
+                --accent-text: light-dark(oklch(0.3500 0.0416 172.54), oklch(0.6200 0.0416 172.54)); }
+  68.928571%  { --accent-fill: light-dark(oklch(0.6128 0.0968 143.03), oklch(0.3200 0.0968 143.03));
+                --accent-text: light-dark(oklch(0.5500 0.0968 143.03), oklch(0.6200 0.0968 143.03)); }
+  70%         { --accent-fill: light-dark(oklch(0.6128 0.0968 143.03), oklch(0.3200 0.0968 143.03));
+                --accent-text: light-dark(oklch(0.5500 0.0968 143.03), oklch(0.6200 0.0968 143.03)); }
+  73.928571%  { --accent-fill: light-dark(oklch(0.6200 0.2119 357.70), oklch(0.3200 0.1308 357.70));
+                --accent-text: light-dark(oklch(0.5500 0.2119 357.70), oklch(0.7015 0.2119 357.70)); }
+  75%         { --accent-fill: light-dark(oklch(0.6200 0.2119 357.70), oklch(0.3200 0.1308 357.70));
+                --accent-text: light-dark(oklch(0.5500 0.2119 357.70), oklch(0.7015 0.2119 357.70)); }
+  78.928571%  { --accent-fill: light-dark(oklch(0.2376 0.0800 332.09), oklch(0.2376 0.0800 332.09));
+                --accent-text: light-dark(oklch(0.3500 0.0800 332.09), oklch(0.6200 0.0800 332.09)); }
+  80%         { --accent-fill: light-dark(oklch(0.2376 0.0800 332.09), oklch(0.2376 0.0800 332.09));
+                --accent-text: light-dark(oklch(0.3500 0.0800 332.09), oklch(0.6200 0.0800 332.09)); }
+  83.928571%  { --accent-fill: light-dark(oklch(0.3272 0.0219 304.12), oklch(0.3200 0.0219 304.12));
+                --accent-text: light-dark(oklch(0.3500 0.0219 304.12), oklch(0.6200 0.0219 304.12)); }
+  85%         { --accent-fill: light-dark(oklch(0.3272 0.0219 304.12), oklch(0.3200 0.0219 304.12));
+                --accent-text: light-dark(oklch(0.3500 0.0219 304.12), oklch(0.6200 0.0219 304.12)); }
+  88.928571%  { --accent-fill: light-dark(oklch(0.5308 0.0174 298.27), oklch(0.3200 0.0174 298.27));
+                --accent-text: light-dark(oklch(0.5308 0.0174 298.27), oklch(0.6200 0.0174 298.27)); }
+  90%         { --accent-fill: light-dark(oklch(0.5308 0.0174 298.27), oklch(0.3200 0.0174 298.27));
+                --accent-text: light-dark(oklch(0.5308 0.0174 298.27), oklch(0.6200 0.0174 298.27)); }
+  93.928571%  { --accent-fill: light-dark(oklch(0.2970 0.0134 267.10), oklch(0.2970 0.0134 267.10));
+                --accent-text: light-dark(oklch(0.3500 0.0134 267.10), oklch(0.6200 0.0134 267.10)); }
+  95%         { --accent-fill: light-dark(oklch(0.2970 0.0134 267.10), oklch(0.2970 0.0134 267.10));
+                --accent-text: light-dark(oklch(0.3500 0.0134 267.10), oklch(0.6200 0.0134 267.10)); }
+  98.928571%  { --accent-fill: light-dark(oklch(0.5310 0.1282 155.23), oklch(0.3200 0.0790 155.23));
+                --accent-text: light-dark(oklch(0.5310 0.1282 155.23), oklch(0.6200 0.1282 155.23)); }
+  100%        { --accent-fill: light-dark(oklch(0.5310 0.1282 155.23), oklch(0.3200 0.0790 155.23));
+                --accent-text: light-dark(oklch(0.5310 0.1282 155.23), oklch(0.6200 0.1282 155.23)); }
 }
 
 body {
-  animation-name: theme-cycle;
-  animation-duration: var(--theme-anim-duration, 55s);
-  animation-delay: var(--theme-anim-delay, 0s);
-  animation-timing-function: ease;
-  animation-fill-mode: forwards;
+  animation: theme-cycle 1400s ease infinite;
+  --accent-fill: light-dark(oklch(0.5228 0.1408 22.78), oklch(0.3200 0.1294 22.78));
+  --accent-text: light-dark(oklch(0.5228 0.1408 22.78), oklch(0.6200 0.1408 22.78));
 }
+/* END generated */
 
 
 /* =============================================================================
@@ -1164,13 +1234,13 @@ blockquote.alert-wat       { border-color: var(--alert-wat); }
  * 6. Motion & preferences
  * ========================================================================== */
 
-/* Turning the animation off leaves --theme-color at its #fff initial value, so
-   colours.html pairs this by setting the current epoch's colour inline.
-   Reduced-motion visitors keep the full palette and stay in sync - they just
-   get one fixed colour per page load. */
+/* Paused, not `animation: none`: the seek in colours.html still positions it,
+   so reduced-motion visitors land on the same colour as everyone else and it
+   still changes between page loads. Disabling the animation outright would
+   pin them to the static fallback colour forever. */
 @media (prefers-reduced-motion: reduce) {
   body {
-    animation: none;
+    animation-play-state: paused;
   }
 
   .post a,

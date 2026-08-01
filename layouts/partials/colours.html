@@ -1,188 +1,45 @@
 <script>
-// var COLOURS = ["08","09","0a","0b","0c","0d","0e","0f"];
-// var THEME_HEX = {
-//   "08": "#ac4142",
-//   "09": "#d28445",
-//   "0a": "#f4bf75",
-//   "0b": "#90a959",
-//   "0c": "#75b5aa",
-//   "0d": "#6a9fb5",
-//   "0e": "#aa759f",
-//   "0f": "#8f5536"
-// };
-var COLOURS = [
-    "#ac4142",
-    "#d28445",
-    "#f4bf75",
-    "#90a959",
-    "#75b5aa",
-    "#6a9fb5",
-    "#aa759f",
-    "#8f5536",
-    "#586ba4",
-    "#324376",
-    "#f68e5f",
-    "#f76c5e",
-    "#14342b",
-    "#60935d",
-    "#ff579f",
-    "#330C2F",
-    "#37323E",
-    "#6D6A75",
-    "#2A2D34",
-    "#09814A"
-]
+(function () {
+  // The whole theme engine. main.css holds a 1400s @keyframes rule walking all
+  // 20 colours; this only points it at where wall-clock says the loop should
+  // be, so every visitor sits on the same colour at the same moment.
+  var CYCLE_MS = 1400000;
+  var body = document.body;
 
-var ROTATE_INTERVAL = 1000 * 70;
-
-var TRANSITION_DURATION = 1000 * 55;
-
-// Deterministic pseudo-random value in [0,1) for a given integer seed, so
-// every page load/tab computes the identical value for the same epoch.
-function seededRandom(seed) {
-  var x = Math.sin(seed) * 10000;
-  return x - Math.floor(x);
-}
-
-function permutationForRound(round) {
-  var perm = COLOURS.slice();
-  for (var i = perm.length - 1; i > 0; i--) {
-    var j = Math.floor(seededRandom(round * 1000 + i) * (i + 1));
-    var tmp = perm[i];
-    perm[i] = perm[j];
-    perm[j] = tmp;
-  }
-  return perm;
-}
-
-function correctedPermutationForRound(round) {
-  var perm = permutationForRound(round);
-  // Every entry in a shuffle is unique, so perm[1] is guaranteed not to be
-  // the previous round's last colour too.
-  var prevLast = permutationForRound(round - 1)[COLOURS.length - 1];
-  if (perm[0] === prevLast) {
-    var tmp = perm[0];
-    perm[0] = perm[1];
-    perm[1] = tmp;
-  }
-  return perm;
-}
-
-function colourForEpoch(epoch) {
-  var round = Math.floor(epoch / COLOURS.length);
-  var pos = epoch % COLOURS.length;
-  return correctedPermutationForRound(round)[pos];
-}
-
-function currentEpoch() {
-  return Math.floor(Date.now() / ROTATE_INTERVAL);
-}
-
-// Firefox-only workaround (confirmed on 152, 2026-07). The natural way to
-// write this is var()-indirected keyframes:
-//
-//   @keyframes theme-cycle {
-//     from { --theme-color: var(--theme-color-from); }
-//     to   { --theme-color: var(--theme-color-to); }
-//   }
-//
-// Chrome eases that smoothly; Firefox won't interpolate it at all and snaps
-// partway through. So we write literal colours into the @keyframes rule via
-// CSSOM before every restart instead.
-//
-// If Firefox ever fixes this, delete findThemeCycleKeyframesRule() and the
-// rewrite loop in startTransition(), and use the version above.
-var themeCycleKeyframesRule = null;
-function findThemeCycleKeyframesRule() {
-  if (themeCycleKeyframesRule) return themeCycleKeyframesRule;
-  for (var i = 0; i < document.styleSheets.length; i++) {
-    var rules;
-    try {
-      rules = document.styleSheets[i].cssRules;
-    } catch (e) {
-      continue;
+  function animation() {
+    if (!body.getAnimations) return null;
+    var running = body.getAnimations();
+    for (var i = 0; i < running.length; i++) {
+      if (running[i].animationName === "theme-cycle") return running[i];
     }
-    if (!rules) continue;
-    for (var j = 0; j < rules.length; j++) {
-      if (rules[j] instanceof CSSKeyframesRule && rules[j].name === "theme-cycle") {
-        themeCycleKeyframesRule = rules[j];
-        return themeCycleKeyframesRule;
-      }
-    }
+    return null;
   }
-  return null;
-}
 
-function startTransition(fromColour, toColour, delayMs) {
-  var body = document.querySelector("body");
-  // A devtools label carrying no CSS. Swap just that class rather than
-  // reassigning className, which would clobber anything else on <body>.
-  Array.prototype.slice.call(body.classList).forEach(function (c) {
-    if (c.indexOf("theme-base-") === 0) body.classList.remove(c);
-  });
-  body.classList.add("theme-base-" + toColour.slice(1));
-
-  var keyframesRule = findThemeCycleKeyframesRule();
-
-  // Reading .cssRules throws on a cross-origin stylesheet, so the lookup can
-  // return null. Degrade to a flat colour rather than throwing and leaving
-  // --theme-color at #fff - a white sidebar and invisible links.
-  if (!keyframesRule) {
-    body.style.setProperty("--theme-color", toColour);
+  // Restarting re-resolves the light-dark() pairs in the keyframes against the
+  // current color-scheme. Chromium gets there on its own a few frames after a
+  // scheme change; this is insurance for engines that might not, since the
+  // failure mode is a theme toggle that silently stops changing the accent.
+  // It also makes the no-getAnimations fallback's negative delay absolute,
+  // because the start time becomes now.
+  function apply() {
     body.style.animation = "none";
-    return;
+    body.offsetHeight;
+    body.style.animation = "";
+
+    var position = Date.now() % CYCLE_MS;
+    var anim = animation();
+    // currentTime, not animation-delay: delay is measured from the animation's
+    // own start time, so it drifts by however long the page has been open.
+    if (anim) anim.currentTime = position;
+    else body.style.animationDelay = -position + "ms";
   }
 
-  for (var i = 0; i < keyframesRule.cssRules.length; i++) {
-    var keyframe = keyframesRule.cssRules[i];
-    if (keyframe.keyText === "0%") keyframe.style.setProperty("--theme-color", fromColour);
-    if (keyframe.keyText === "100%") keyframe.style.setProperty("--theme-color", toColour);
-  }
-  body.style.setProperty("--theme-anim-duration", TRANSITION_DURATION + "ms");
-  body.style.setProperty("--theme-anim-delay", delayMs + "ms");
-  // Restarting animation-name (rather than the whole shorthand) forces the
-  // browser to re-read the delay/duration/colours we just set.
-  body.style.animationName = "none";
-  body.offsetHeight;
-  body.style.animationName = "";
-}
+  apply();
 
-// Seek to where a page open the whole time would be, rather than starting a
-// fresh cycle on every load.
-function applyInitialColour() {
+  new MutationObserver(apply).observe(document.documentElement,
+    { attributes: true, attributeFilter: ["data-theme"] });
 
-  var epoch = currentEpoch();
-  var elapsed = Date.now() - epoch * ROTATE_INTERVAL;
-  startTransition(colourForEpoch(epoch - 1), colourForEpoch(epoch), -elapsed);
-}
-
-// Anchored to wall-clock epoch boundaries so every visitor rotates together.
-// One-shot timeouts recomputed each tick, not setInterval: a fixed interval
-// drifts, and an earlier version called setInterval from inside rotate(),
-// doubling the live timers every tick.
-function scheduleRotation() {
-  setTimeout(function rotate() {
-    var epoch = currentEpoch();
-    startTransition(colourForEpoch(epoch - 1), colourForEpoch(epoch), 0);
-    setTimeout(rotate, (currentEpoch() + 1) * ROTATE_INTERVAL - Date.now());
-  }, (currentEpoch() + 1) * ROTATE_INTERVAL - Date.now());
-}
-
-// Pick the colour everyone else is on and stop there - no transition, no
-// rotation timer. Paired with `body { animation: none }` in main.css: without
-// that the animation overrides this, and without this the disabled animation
-// leaves --theme-color at its #fff initial value.
-if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-  document.body.style.setProperty("--theme-color", colourForEpoch(currentEpoch()));
-} else {
-  applyInitialColour();
-  scheduleRotation();
-
-  // Background tabs throttle timers, so re-seek on becoming visible rather
-  // than trusting where the drifted timer left us.
-  document.addEventListener("visibilitychange", function () {
-    if (!document.hidden) applyInitialColour();
-  });
-}
-
+  var os = matchMedia("(prefers-color-scheme: dark)");
+  if (os.addEventListener) os.addEventListener("change", apply);
+})();
 </script>

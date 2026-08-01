@@ -6,7 +6,7 @@
 		"tag": "tags"
 	},
 	"params": {
-		"themeColor": "theme-base-0f layout-reverse",
+		"themeColor": "layout-reverse",
 		"description": "Semioccasional scientist, incessant procrastinator, frequent eater",
 		"mainSections": [
 			"post"

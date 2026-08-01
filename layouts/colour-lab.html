@@ -1,0 +1,203 @@
+{{ define "main" }}
+{{ if hugo.IsServer }}
+<div class="content lab">
+  <h1>Colour lab</h1>
+  <p class="lab-note">
+    Dev server only. Baked entries are sampled from the live
+    <code>theme-cycle</code> keyframes, so they are exactly what the site
+    paints. Custom colours run the same four clamps through
+    <code>oklch(from …)</code> live, without the generator's sRGB chroma
+    mapping, so they can read a shade more saturated than the baked result.
+  </p>
+
+  <h2>Try a colour</h2>
+  <p class="lab-try">
+    <input type="text" id="lab-input" value="#ac4142" size="12" spellcheck="false">
+    <input type="color" id="lab-picker" value="#ac4142">
+  </p>
+  <div id="lab-custom"></div>
+
+  <h2>Baked palette</h2>
+  <div id="lab-baked"></div>
+
+  <div class="lab-scheme lab-scheme-light" data-scheme-probe="light"></div>
+  <div class="lab-scheme lab-scheme-dark" data-scheme-probe="dark"></div>
+</div>
+
+<style>
+  .lab { max-width: 60rem; }
+  .lab-note { font-size: .85rem; color: var(--text-muted); max-width: 34rem; }
+  .lab-try { display: flex; gap: var(--space-2); align-items: center; }
+  .lab-try input[type="text"] { font: inherit; padding: .3rem .5rem; }
+
+  .lab-row {
+    display: grid;
+    grid-template-columns: 5.5rem repeat(2, 1fr);
+    gap: var(--space-2);
+    align-items: stretch;
+    margin-bottom: var(--space-2);
+  }
+
+  .lab-head {
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--text-muted);
+  }
+
+  .lab-name { font: .75rem/1.2 ui-monospace, monospace; align-self: center; }
+
+  .lab-cell { padding: var(--space-2); border-radius: 4px; }
+  .lab-cell b { display: block; font-size: .95rem; font-weight: 700; }
+  .lab-cell span { display: block; font-size: .7rem; opacity: .85; }
+  .lab-cell em { font-style: normal; font-weight: 700; }
+  .lab-low { color: #ffd7d7; }
+
+  .lab-scheme { position: absolute; left: -9999px; width: 0; height: 0; }
+  .lab-scheme-light { color-scheme: only light; }
+  .lab-scheme-dark { color-scheme: only dark; }
+</style>
+
+<script>
+(function () {
+  var CYCLE_MS = 1400000, EPOCH_MS = 70000, TRANSITION_MS = 55000;
+  var COUNT = CYCLE_MS / EPOCH_MS;
+  var SURFACE = { light: "#ffffff", dark: "#14161a" };
+
+  // Every colour question is answered by painting the value and reading the
+  // pixel back, so no colour-space maths lives in this file.
+  var canvas = document.createElement("canvas");
+  canvas.width = canvas.height = 1;
+  var ctx = canvas.getContext("2d", { willReadFrequently: true });
+
+  function rgb(css) {
+    ctx.clearRect(0, 0, 1, 1);
+    ctx.fillStyle = "#000";
+    ctx.fillStyle = css;
+    ctx.fillRect(0, 0, 1, 1);
+    var d = ctx.getImageData(0, 0, 1, 1).data;
+    return [d[0], d[1], d[2]];
+  }
+
+  function luminance(c) {
+    var v = c.map(function (x) {
+      x /= 255;
+      return x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2];
+  }
+
+  function ratio(a, b) {
+    var la = luminance(rgb(a)), lb = luminance(rgb(b));
+    if (la < lb) { var t = la; la = lb; lb = t; }
+    return (la + 0.05) / (lb + 0.05);
+  }
+
+  function hex(css) {
+    return "#" + rgb(css).map(function (x) {
+      return ("0" + x.toString(16)).slice(-2);
+    }).join("");
+  }
+
+  function holdPosition(i) {
+    return i * EPOCH_MS + (EPOCH_MS + TRANSITION_MS) / 2;
+  }
+
+  function bakedFor(scheme) {
+    var host = document.querySelector('[data-scheme-probe="' + scheme + '"]');
+    var probe = document.createElement("div");
+    probe.style.cssText = "animation: theme-cycle " + (CYCLE_MS / 1000) +
+      "s ease infinite paused";
+    host.appendChild(probe);
+
+    var anim = null;
+    if (probe.getAnimations) {
+      probe.getAnimations().forEach(function (a) {
+        if (a.animationName === "theme-cycle") anim = a;
+      });
+    }
+
+    var out = [];
+    for (var i = 0; i < COUNT; i++) {
+      if (anim) anim.currentTime = holdPosition(i);
+      var cs = getComputedStyle(probe);
+      out.push({
+        fill: cs.getPropertyValue("--accent-fill").trim(),
+        text: cs.getPropertyValue("--accent-text").trim()
+      });
+    }
+    host.removeChild(probe);
+    return out;
+  }
+
+  var CLAMPS = {
+    fill: { light: "min(l, 0.62)", dark: "clamp(0.22, l, 0.32)" },
+    text: { light: "clamp(0.35, l, 0.55)", dark: "clamp(0.62, l, 0.85)" }
+  };
+
+  function derive(source, token, scheme) {
+    return "oklch(from " + source + " " + CLAMPS[token][scheme] + " c h)";
+  }
+
+  function cell(scheme, fill, text) {
+    var onFill = ratio("#ffffff", fill);
+    var onSurface = ratio(text, SURFACE[scheme]);
+    var flag = onFill < 4.5 ? ' class="lab-low"' : "";
+    return '<div class="lab-cell" style="background:' + fill + ';color:#fff">' +
+      "<b>" + hex(fill) + "</b>" +
+      "<span" + flag + ">white on fill <em>" + onFill.toFixed(2) + ":1</em></span>" +
+      '<span style="color:' + text + '">text ' + hex(text) +
+      " on page <em>" + onSurface.toFixed(2) + ":1</em></span>" +
+      "</div>";
+  }
+
+  function row(name, light, dark) {
+    return '<div class="lab-row"><div class="lab-name">' + name + "</div>" +
+      cell("light", light.fill, light.text) +
+      cell("dark", dark.fill, dark.text) + "</div>";
+  }
+
+  function header() {
+    return '<div class="lab-row"><div></div>' +
+      '<div class="lab-head">light</div><div class="lab-head">dark</div></div>';
+  }
+
+  function renderBaked() {
+    var light = bakedFor("light"), dark = bakedFor("dark");
+    var html = header();
+    for (var i = 0; i < COUNT; i++) html += row(i + 1, light[i], dark[i]);
+    document.getElementById("lab-baked").innerHTML = html;
+  }
+
+  function renderCustom() {
+    var source = document.getElementById("lab-input").value.trim();
+    if (!source || !CSS.supports("color", source)) {
+      document.getElementById("lab-custom").innerHTML =
+        '<p class="lab-note">Not a colour this browser understands.</p>';
+      return;
+    }
+    var pick = function (token, scheme) { return derive(source, token, scheme); };
+    document.getElementById("lab-custom").innerHTML = header() + row(
+      hex(source),
+      { fill: pick("fill", "light"), text: pick("text", "light") },
+      { fill: pick("fill", "dark"), text: pick("text", "dark") }
+    );
+  }
+
+  var input = document.getElementById("lab-input");
+  var picker = document.getElementById("lab-picker");
+  input.addEventListener("input", renderCustom);
+  picker.addEventListener("input", function () {
+    input.value = picker.value;
+    renderCustom();
+  });
+
+  renderBaked();
+  renderCustom();
+
+  new MutationObserver(renderBaked).observe(document.documentElement,
+    { attributes: true, attributeFilter: ["data-theme"] });
+})();
+</script>
+{{ end }}
+{{ end }}

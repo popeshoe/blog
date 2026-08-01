@@ -160,65 +160,103 @@
 <script>
 (function () {
   var wrap = document.querySelector("[data-dev-palette]");
-  if (!wrap || typeof COLOURS === "undefined") return;
+  if (!wrap) return;
 
   var grid    = wrap.querySelector("[data-dev-palette-grid]");
   var trigger = wrap.querySelector(".dev-palette-trigger");
   var resume  = wrap.querySelector("[data-dev-palette-resume]");
   var body    = document.body;
 
-  // Pinning has to neutralise these, not just set --theme-color: the rotation
-  // timer and visibilitychange re-seek would restart the animation over it
-  // within a minute. Both resolve by global name at call time, so swapping
-  // them out keeps colours.html free of dev-only branches.
-  var realStart  = startTransition;
-  var realSeek   = applyInitialColour;
-  var pinned     = null;
+  var CYCLE_MS      = 1400000;
+  var EPOCH_MS      = 70000;
+  var TRANSITION_MS = 55000;
+  var COUNT         = CYCLE_MS / EPOCH_MS;
 
-  function pin(hex) {
-    startTransition = function () {};
-    applyInitialColour = function () {};
-    body.style.animation = "none";
-    body.style.setProperty("--theme-color", hex);
-    pinned = hex;
+  var pinned = null;
+
+  function animation(el) {
+    if (!el.getAnimations) return null;
+    var running = el.getAnimations();
+    for (var i = 0; i < running.length; i++) {
+      if (running[i].animationName === "theme-cycle") return running[i];
+    }
+    return null;
+  }
+
+  // Middle of colour i's hold segment: the value has finished arriving and has
+  // not started leaving.
+  function holdPosition(i) {
+    return i * EPOCH_MS + (EPOCH_MS + TRANSITION_MS) / 2;
+  }
+
+  // Pausing is the whole of it now. The old version had to monkeypatch
+  // colours.html's rotation timer and re-seek, both of which are gone.
+  function pin(i) {
+    var anim = animation(body);
+    if (!anim) return;
+    anim.pause();
+    anim.currentTime = holdPosition(i);
+    pinned = i;
     render();
   }
 
   function unpin() {
-    startTransition = realStart;
-    applyInitialColour = realSeek;
-    body.style.removeProperty("--theme-color");
-    body.style.animation = "";
+    var anim = animation(body);
+    if (!anim) return;
     pinned = null;
-    applyInitialColour();   // re-seek to wall-clock position
+    anim.currentTime = Date.now() % CYCLE_MS;
+    anim.play();
     render();
   }
 
+  // Sampled from a hidden copy of the animation rather than a hardcoded list,
+  // so the swatches always match what the page paints in the current scheme.
+  function sample() {
+    var probe = document.createElement("div");
+    probe.style.cssText = "position:absolute;left:-9999px;width:0;height:0;" +
+      "animation: theme-cycle " + (CYCLE_MS / 1000) + "s ease infinite paused";
+    body.appendChild(probe);
+
+    var anim = animation(probe);
+    var out = [], seen = {};
+    for (var i = 0; i < COUNT; i++) {
+      if (anim) anim.currentTime = holdPosition(i);
+      var c = getComputedStyle(probe).getPropertyValue("--accent-fill").trim();
+      out.push(c);
+      seen[c] = true;
+    }
+    probe.parentNode.removeChild(probe);
+    return Object.keys(seen).length === COUNT ? out : null;
+  }
+
   function render() {
-    Array.prototype.forEach.call(grid.children, function (b) {
-      b.setAttribute("aria-pressed", String(b.dataset.colour === pinned));
+    Array.prototype.forEach.call(grid.children, function (b, i) {
+      b.setAttribute("aria-pressed", String(i === pinned));
     });
     resume.disabled = pinned === null;
     resume.textContent = pinned === null ? "Cycling" : "Resume cycle";
   }
 
-  // From the COLOURS global, so it cannot drift out of sync with the palette.
-  COLOURS.forEach(function (hex) {
-    var b = document.createElement("button");
-    b.type = "button";
-    b.className = "dev-palette-swatch";
-    b.style.background = hex;
-    b.dataset.colour = hex;
-    b.title = hex;
-    b.setAttribute("aria-label", "Pin theme colour " + hex);
-    b.addEventListener("click", function (e) {
-      e.stopPropagation();
-      pin(hex);
-    });
-    grid.appendChild(b);
-  });
+  function build() {
+    var colours = sample();
+    grid.innerHTML = "";
+    for (var i = 0; i < COUNT; i++) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "dev-palette-swatch";
+      b.style.background = colours ? colours[i] : "";
+      b.dataset.index = String(i);
+      b.title = colours ? colours[i] : "sampling failed";
+      b.setAttribute("aria-label", "Pin theme colour " + (i + 1));
+      b.addEventListener("click", function (e) {
+        e.stopPropagation();
+        pin(Number(this.dataset.index));
+      });
+      grid.appendChild(b);
+    }
+    render();
+  }
 
-  // No stopPropagation, so opening this closes the theme switch and vice versa.
   trigger.addEventListener("click", function () {
     var open = wrap.dataset.open !== "true";
     wrap.dataset.open = String(open);
@@ -245,7 +283,14 @@
     }
   });
 
-  render();
+  // colours.html restarts the animation on a scheme change, which drops the
+  // pin and re-resolves every swatch.
+  new MutationObserver(function () {
+    pinned = null;
+    build();
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+  build();
 })();
 </script>
 {{ end }}

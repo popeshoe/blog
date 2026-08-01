@@ -51,3 +51,10 @@ Temporary Items
 
 # Hugo build lock
 .hugo_build.lock
+
+# Browser automation artifacts
+.playwright-cli/
+
+# Python
+__pycache__/
+*.pyc

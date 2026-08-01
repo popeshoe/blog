@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__firefox-devtools__click_by_uid",
+      "mcp__firefox-devtools__navigate_history",
+      "mcp__firefox-devtools__select_page",
+      "mcp__firefox-devtools__hover_by_uid",
+      "mcp__firefox-devtools__close_page",
+      "Bash(disown)",
+      "Bash(pkill -f \"hugo server\")",
+      "Bash(git log *)",
+      "Skill(playwright-cli)",
+      "Skill(playwright-cli:*)",
+      "Bash(playwright-cli:*)",
+      "Bash(hugo:*)",
+      "Bash(python3 scripts/*)",
+      "Bash(curl:*)",
+      "Bash(./scripts/theme-test.sh)",
+      "Bash(echo \"exit $?\")"
+    ]
+  }
+}
