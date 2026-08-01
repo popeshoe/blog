@@ -16,7 +16,8 @@
       "Bash(python3 scripts/*)",
       "Bash(curl:*)",
       "Bash(./scripts/theme-test.sh)",
-      "Bash(echo \"exit $?\")"
+      "Bash(echo \"exit $?\")",
+      "Bash(bash -n scripts/theme-test.sh)"
     ]
   }
 }

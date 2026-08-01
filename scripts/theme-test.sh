@@ -34,7 +34,7 @@ evaluate() {
 }
 
 cd "$ROOT"
-hugo server -D --port "$PORT" --disableFastRender >/dev/null 2>&1 &
+hugo server --port "$PORT" --disableFastRender >/dev/null 2>&1 &
 HUGO_PID=$!
 
 for _ in $(seq 1 40); do
@@ -87,18 +87,12 @@ echo "colour lab"
 
 playwright-cli -s=themetest goto "$URL/colour-lab/" >/dev/null 2>&1
 
-check "6 lab renders 20 baked entries" 40 "$(evaluate "
-  String(document.querySelectorAll('#lab-baked .lab-cell').length)")"
+check "6 timeline renders 20 swatches" 20 "$(evaluate "
+  String(document.querySelectorAll('.lab-swatch').length)")"
 
-# One column at a time: the dark fills all clamp to the same lightness, so a
-# few coincide across schemes and a combined count is not 40.
-check "7 swatches sampled from the palette" "20,20" "$(evaluate "
-  (() => {
-    const col = n => new Set([...document.querySelectorAll('#lab-baked .lab-row')]
-      .map(r => r.querySelectorAll('.lab-cell')[n])
-      .filter(Boolean).map(b => b.style.background)).size;
-    return col(0) + ',' + col(1);
-  })()")"
+check "7 swatches sampled from the palette" 20 "$(evaluate "
+  String(new Set([...document.querySelectorAll('.lab-swatch')]
+    .map(b => b.style.background)).size)")"
 
 check "8 clicking a swatch holds the page" "paused,frozen,running,synced" "$(evaluate "
   (async () => {
@@ -106,7 +100,7 @@ check "8 clicking a swatch holds the page" "paused,frozen,running,synced" "$(eva
     const anim = () => document.body.getAnimations().find(x => x.animationName === 'theme-cycle');
     const fill = () => getComputedStyle(document.body).getPropertyValue('--accent-fill').trim();
     const out = [];
-    document.querySelectorAll('#lab-baked .lab-cell')[14].click();
+    document.querySelectorAll('.lab-swatch')[14].click();
     await wait(60);
     out.push(anim().playState);
     const before = fill();
@@ -119,12 +113,38 @@ check "8 clicking a swatch holds the page" "paused,frozen,running,synced" "$(eva
     return out.join(',');
   })()")"
 
-check "9 a custom colour overrides the cycle" changed "$(evaluate "
+check "9 hovering a swatch reveals both schemes" "2,true" "$(evaluate "
+  (async () => {
+    const wait = ms => new Promise(r => setTimeout(r, ms));
+    const d = document.getElementById('lab-detail');
+    const at = async i => {
+      const sw = document.querySelectorAll('.lab-swatch')[i];
+      sw.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
+      await wait(60);
+      return { left: parseFloat(d.style.left), hex: d.querySelector('b').textContent };
+    };
+    const a = await at(2), b = await at(15);
+    return d.querySelectorAll('.lab-cell').length + ',' +
+      String(a.left !== b.left && a.hex !== b.hex);
+  })()")"
+
+check "10 the scrub bar follows the animation" true "$(evaluate "
+  (async () => {
+    const wait = ms => new Promise(r => setTimeout(r, ms));
+    const s = document.getElementById('lab-scrub');
+    const before = Number(s.value);
+    await wait(700);
+    return String(Number(s.value) !== before && s.max === '$CYCLE_MS');
+  })()")"
+
+check "11 a custom colour overrides the cycle" changed "$(evaluate "
   (async () => {
     const wait = ms => new Promise(r => setTimeout(r, ms));
     const fill = () => getComputedStyle(document.body).getPropertyValue('--accent-fill').trim();
     const before = fill();
-    document.querySelectorAll('#lab-custom .lab-cell')[0].click();
+    const input = document.getElementById('lab-input');
+    input.value = '#00ff88';
+    input.dispatchEvent(new Event('change'));
     await wait(80);
     const held = fill();
     document.getElementById('lab-resume').click();
@@ -132,18 +152,22 @@ check "9 a custom colour overrides the cycle" changed "$(evaluate "
     return held !== before && fill() !== held ? 'changed' : 'stuck';
   })()")"
 
-check "10 every component renders" "1,1,2,1" "$(evaluate "
+# The style guide is render:never, so this also proves site.GetPage still
+# reaches it without the server needing -D.
+check "12 every component renders" "1,1,2,6,1,1" "$(evaluate "
   [document.querySelectorAll('.lab .post-title').length,
    document.querySelectorAll('.lab .lead').length,
    document.querySelectorAll('.lab .project-card').length,
-   document.querySelectorAll('.lab blockquote.alert-wat').length].join(',')")"
+   document.querySelectorAll('.lab blockquote.alert').length,
+   document.querySelectorAll('.lab table').length,
+   document.querySelectorAll('.lab figure').length].join(',')")"
 
 echo "colour scheme"
 
 # The animation must be paused first: --accent-fill moves continuously, so
 # two samples taken moments apart differ whatever the scheme does, and the
 # check passes even with the colour-scheme wiring deleted.
-check "11 dark scheme changes the fill" different "$(evaluate "
+check "13 dark scheme changes the fill" different "$(evaluate "
   (async () => {
     const wait = ms => new Promise(r => setTimeout(r, ms));
     const anim = () => document.body.getAnimations().find(x => x.animationName === 'theme-cycle');

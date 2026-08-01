@@ -1,13 +1,15 @@
 {
     "title": "Style guide",
-    "description": "Internal reference for every styled element. Draft - never published.",
+    "description": "Internal reference for every styled element. Never published.",
     "date": "2026-07-31",
-    "draft": true
+    "build": { "list": "never", "render": "never" }
 }
 
-A draft page exercising every element the stylesheet handles, so the styles can be
-reviewed in both colour schemes without hunting for a real post that happens to use
-them. Never published — `buildDrafts` is false, so this only renders with `hugo -D`.
+A source of every element the stylesheet handles, so the styles can be reviewed in
+both colour schemes without hunting for a real post that happens to use them. Not a
+page: `render: never` means it has no URL of its own, and /colour-lab/ pulls this
+content in with `site.GetPage`. It was a draft before, which made it invisible to
+templates unless the server ran with `-D`.
 
 ## Headings
 

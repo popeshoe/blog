@@ -333,3 +333,19 @@ site; stop and smoke-test there before touching dev tooling.
 - [x] Contrast chips for `--accent-text` moved onto the page surface — they were
       invisible whenever the text colour resolved close to the fill
 - [x] Tests rewritten against the lab: 11 checks, all green
+
+## Phase 8 — Timeline redesign
+
+- [x] Style guide switched from `draft: true` to
+      `build: { list: never, render: never }` — headless, so `site.GetPage`
+      reaches it with a plain `hugo server` and it still has no public URL.
+      The `-D` requirement is gone, including from `theme-test.sh`.
+- [x] Palette grid replaced by a fixed bottom bar: 20 mini swatches showing the
+      light fill, a native range input scrubbing the 1400s cycle, custom colour
+      input and Resume
+- [x] Scrub tracks the animation via rAF, and dragging it pins
+- [x] Hover, focus or touch a swatch to reveal the full light + dark cells with
+      contrast, positioned over that swatch
+- [x] Content is the page again: post index, cards, and the whole style guide
+      are read without scrolling past a colour grid
+- [x] Tests updated to the new UI — 13 checks, all green
