@@ -5,7 +5,8 @@
     Dev server only. Scrub the timeline at the bottom to move through the
     1400s cycle, or click a swatch to hold the page on it. Hover a swatch for
     its baked values and contrast, then click either half to adopt that colour
-    <em>and</em> its scheme. Everything below is a real component.
+    <em>and</em> its scheme. The popup stays until you click elsewhere or press
+    Escape. Everything below is a real component.
   </p>
 
   <h2>Post index</h2>
@@ -186,9 +187,7 @@
     white-space: nowrap;
   }
 
-  /* Flush against the bar, not floating above it: the cells are clickable, so
-     a gap would be a dead zone the pointer crosses on the way up, firing
-     pointerleave and closing the popup before it can be reached. */
+  /* Flush against the bar so the popup reads as attached to the strip. */
   .lab-detail {
     position: absolute;
     bottom: 100%;
@@ -357,17 +356,15 @@
 
   function hideDetail() { detail.hidden = true; }
 
-  // Leaving the strip, not each swatch: sliding between neighbours would
-  // otherwise fire leave-then-enter and flicker. Guarded to mouse and pen
-  // because touch fires pointerleave as soon as the finger lifts, which would
-  // dismiss the popup in the same gesture that opened it. Touch dismisses by
-  // tapping elsewhere, below.
-  document.querySelector(".lab-bar").addEventListener("pointerleave", function (e) {
-    if (e.pointerType !== "touch") hideDetail();
-  });
-
+  // Sticky once shown. Anything that hides it on pointer-out makes the cells
+  // unreachable: moving toward the popup crosses neighbouring swatches, which
+  // re-anchor it somewhere else. So it stays until dismissed deliberately.
   document.addEventListener("pointerdown", function (e) {
     if (!track.contains(e.target) && !detail.contains(e.target)) hideDetail();
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") hideDetail();
   });
 
   // Clicking a cell adopts both the colour and the scheme it was shown in.
@@ -381,12 +378,6 @@
     document.documentElement.dataset.theme = target.dataset.scheme;
     setTimeout(function () { pinBaked(index); }, 0);
   });
-
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") hideDetail();
-  });
-
-  window.addEventListener("scroll", hideDetail, { passive: true });
 
   function pinBaked(i) {
     release();
@@ -461,7 +452,6 @@
       sw.addEventListener("pointerenter", reveal);
       sw.addEventListener("pointerdown", reveal);
       sw.addEventListener("focus", reveal);
-      sw.addEventListener("blur", hideDetail);
       track.appendChild(sw);
     }
     status();

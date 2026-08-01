@@ -367,6 +367,10 @@ site; stop and smoke-test there before touching dev tooling.
       it was shown in. The pin is applied on the next tick, since changing
       `data-theme` restarts the animation and rebuilds the strip, both of which
       would otherwise drop it.
-- [x] Popup sits flush against the bar and dismissal moved from the strip to
-      the whole bar — with clickable cells, a gap would be a dead zone that
-      closed the popup before the pointer could reach it
+- [x] Popup is sticky: it stays until you click elsewhere or press Escape.
+      Every pointer-out rule made the cells unreachable, because moving toward
+      the popup crosses neighbouring swatches, which re-anchor it elsewhere.
+- [x] **Tests rewritten to drive a real pointer.** The synthetic
+      `PointerEvent` versions skipped hit-testing and passed while the popup
+      was genuinely unusable — they proved the handlers ran, not that a person
+      could reach it. Now 18 checks, using mousemove/mousedown/mouseup.

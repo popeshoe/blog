@@ -154,54 +154,70 @@ check "11 a custom colour overrides the cycle" changed "$(evaluate "
 
 # The style guide is render:never, so this also proves site.GetPage still
 # reaches it without the server needing -D.
-check "12 popup dismissal and scheme adoption" "true,true,true,true,dark,light" "$(evaluate "
+# Real pointer events from here, not dispatched PointerEvents: synthetic ones
+# skip hit-testing and passed while the popup was genuinely unreachable.
+centre() {
+  evaluate "(() => {
+    const el = $1;
+    if (!el) return '';
+    const r = el.getBoundingClientRect();
+    return Math.round(r.x + r.width / 2) + ' ' + Math.round(r.y + r.height / 2);
+  })()"
+}
+
+tap() {
+  playwright-cli -s=themetest mousemove $1 >/dev/null 2>&1
+  playwright-cli -s=themetest mousedown >/dev/null 2>&1
+  playwright-cli -s=themetest mouseup >/dev/null 2>&1
+  sleep 0.4
+}
+
+playwright-cli -s=themetest mousemove $(centre "document.querySelectorAll('.lab-swatch')[9]") >/dev/null 2>&1
+sleep 0.3
+
+check "12 hovering a swatch opens the popup" true "$(evaluate "
+  String(!document.getElementById('lab-detail').hidden)")"
+
+DARK_CELL=$(centre "[...document.querySelectorAll('#lab-detail .lab-cell')].find(c => c.dataset.scheme === 'dark')")
+playwright-cli -s=themetest mousemove $DARK_CELL >/dev/null 2>&1
+sleep 0.3
+
+check "13 the popup survives moving onto it" true "$(evaluate "
+  String(!document.getElementById('lab-detail').hidden)")"
+
+tap "$DARK_CELL"
+
+check "14 clicking a cell adopts colour and scheme" "dark,paused,true" "$(evaluate "
+  document.documentElement.dataset.theme + ',' +
+  document.body.getAnimations()[0].playState + ',' +
+  /held on entry/.test(document.getElementById('lab-status').textContent)")"
+
+tap "400 300"
+
+check "15 clicking elsewhere dismisses the popup" "true,dark" "$(evaluate "
+  String(document.getElementById('lab-detail').hidden) + ',' +
+  document.documentElement.dataset.theme")"
+
+playwright-cli -s=themetest mousemove $(centre "document.querySelectorAll('.lab-swatch')[4]") >/dev/null 2>&1
+sleep 0.3
+
+check "16 Escape dismisses the popup" "false,true" "$(evaluate "
   (async () => {
     const wait = ms => new Promise(r => setTimeout(r, ms));
     const d = document.getElementById('lab-detail');
-    const bar = document.querySelector('.lab-bar');
-    const open = async type => {
-      document.querySelectorAll('.lab-swatch')[9]
-        .dispatchEvent(new PointerEvent('pointerenter', { bubbles: true, pointerType: type }));
-      await wait(60);
-    };
-    const out = [];
-
-    // Must survive the trip from the strip into the popup, or the cells are
-    // unreachable.
-    await open('mouse');
-    d.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true, pointerType: 'mouse' }));
+    const before = d.hidden;
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     await wait(60);
-    out.push(!d.hidden);
-
-    bar.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true, pointerType: 'mouse' }));
-    await wait(60);
-    out.push(d.hidden);
-
-    // Touch fires pointerleave on lift, which must not close it.
-    await open('touch');
-    bar.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true, pointerType: 'touch' }));
-    await wait(60);
-    out.push(!d.hidden);
-
-    document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
-    await wait(60);
-    out.push(d.hidden);
-
-    await open('mouse');
-    d.querySelectorAll('.lab-cell')[1].click();
-    await wait(200);
-    out.push(document.documentElement.dataset.theme);
-    await open('mouse');
-    d.querySelectorAll('.lab-cell')[0].click();
-    await wait(200);
-    out.push(document.documentElement.dataset.theme);
+    // Read before cleanup: rebuilding the strip replaces the element under a
+    // stationary cursor, which fires pointerenter and reopens the popup.
+    const after = d.hidden;
     delete document.documentElement.dataset.theme;
     await wait(120);
     document.getElementById('lab-resume').click();
-    return out.join(',');
+    return before + ',' + after;
   })()")"
 
-check "13 every component renders" "1,1,2,6,1,1" "$(evaluate "
+check "17 every component renders" "1,1,2,6,1,1" "$(evaluate "
   [document.querySelectorAll('.lab .post-title').length,
    document.querySelectorAll('.lab .lead').length,
    document.querySelectorAll('.lab .project-card').length,
@@ -214,7 +230,7 @@ echo "colour scheme"
 # The animation must be paused first: --accent-fill moves continuously, so
 # two samples taken moments apart differ whatever the scheme does, and the
 # check passes even with the colour-scheme wiring deleted.
-check "14 dark scheme changes the fill" different "$(evaluate "
+check "18 dark scheme changes the fill" different "$(evaluate "
   (async () => {
     const wait = ms => new Promise(r => setTimeout(r, ms));
     const anim = () => document.body.getAnimations().find(x => x.animationName === 'theme-cycle');
