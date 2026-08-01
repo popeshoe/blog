@@ -356,11 +356,13 @@
 
   function hideDetail() { detail.hidden = true; }
 
-  // Sticky once shown. Anything that hides it on pointer-out makes the cells
-  // unreachable: moving toward the popup crosses neighbouring swatches, which
-  // re-anchor it somewhere else. So it stays until dismissed deliberately.
+  // Sticky once shown, because anything that hides it on pointer-out makes the
+  // cells unreachable: moving toward the popup crosses neighbouring swatches,
+  // which re-anchor it somewhere else. Any click that is not on the popup
+  // dismisses it, including a click on the strip - the swatch's own handler
+  // runs first at target phase, so it still pins before this closes it.
   document.addEventListener("pointerdown", function (e) {
-    if (!track.contains(e.target) && !detail.contains(e.target)) hideDetail();
+    if (!detail.contains(e.target)) hideDetail();
   });
 
   document.addEventListener("keydown", function (e) {
@@ -451,7 +453,12 @@
       };
       sw.addEventListener("pointerenter", reveal);
       sw.addEventListener("pointerdown", reveal);
-      sw.addEventListener("focus", reveal);
+      // Only keyboard focus: a mouse click focuses the button too, and that
+      // focus event lands after the document handler has closed the popup,
+      // reopening it every time.
+      sw.addEventListener("focus", function () {
+        if (this.matches(":focus-visible")) reveal.call(this);
+      });
       track.appendChild(sw);
     }
     status();

@@ -373,4 +373,9 @@ site; stop and smoke-test there before touching dev tooling.
 - [x] **Tests rewritten to drive a real pointer.** The synthetic
       `PointerEvent` versions skipped hit-testing and passed while the popup
       was genuinely unusable — they proved the handlers ran, not that a person
-      could reach it. Now 18 checks, using mousemove/mousedown/mouseup.
+      could reach it. Now 19 checks, using mousemove/mousedown/mouseup.
+- [x] Any click that is not on the popup dismisses it, the strip included.
+      A click also *focuses* the button, and that focus event lands after the
+      document handler has closed the popup — it reopened it every time until
+      the focus listener was narrowed to `:focus-visible`, which keeps the
+      keyboard path working.

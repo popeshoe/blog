@@ -175,47 +175,48 @@ tap() {
 playwright-cli -s=themetest mousemove $(centre "document.querySelectorAll('.lab-swatch')[9]") >/dev/null 2>&1
 sleep 0.3
 
-check "12 hovering a swatch opens the popup" true "$(evaluate "
-  String(!document.getElementById('lab-detail').hidden)")"
+SWATCH=$(centre "document.querySelectorAll('.lab-swatch')[9]")
 
+away() { playwright-cli -s=themetest mousemove 400 200 >/dev/null 2>&1; sleep 0.3; }
+hover() { away; playwright-cli -s=themetest mousemove $1 >/dev/null 2>&1; sleep 0.4; }
+hidden() { evaluate "String(document.getElementById('lab-detail').hidden)"; }
+
+hover "$SWATCH"
+check "12 hovering a swatch opens the popup" false "$(hidden)"
+
+# A click also focuses the button, and that focus event lands after the
+# document handler has closed the popup - it reopened it every time until the
+# focus listener was narrowed to :focus-visible.
+tap "$SWATCH"
+check "13 clicking a swatch dismisses but still pins" "true,true" "$(evaluate "
+  String(document.getElementById('lab-detail').hidden) + ',' +
+  /held on entry/.test(document.getElementById('lab-status').textContent)")"
+
+hover "$SWATCH"
 DARK_CELL=$(centre "[...document.querySelectorAll('#lab-detail .lab-cell')].find(c => c.dataset.scheme === 'dark')")
 playwright-cli -s=themetest mousemove $DARK_CELL >/dev/null 2>&1
 sleep 0.3
 
-check "13 the popup survives moving onto it" true "$(evaluate "
-  String(!document.getElementById('lab-detail').hidden)")"
+check "14 the popup survives moving onto it" false "$(hidden)"
 
 tap "$DARK_CELL"
 
-check "14 clicking a cell adopts colour and scheme" "dark,paused,true" "$(evaluate "
-  document.documentElement.dataset.theme + ',' +
-  document.body.getAnimations()[0].playState + ',' +
-  /held on entry/.test(document.getElementById('lab-status').textContent)")"
-
-tap "400 300"
-
-check "15 clicking elsewhere dismisses the popup" "true,dark" "$(evaluate "
+check "15 clicking a cell adopts colour and scheme, stays open" "false,dark" "$(evaluate "
   String(document.getElementById('lab-detail').hidden) + ',' +
   document.documentElement.dataset.theme")"
 
-playwright-cli -s=themetest mousemove $(centre "document.querySelectorAll('.lab-swatch')[4]") >/dev/null 2>&1
-sleep 0.3
+away
+tap "400 300"
+check "16 clicking anywhere else dismisses" true "$(hidden)"
 
-check "16 Escape dismisses the popup" "false,true" "$(evaluate "
-  (async () => {
-    const wait = ms => new Promise(r => setTimeout(r, ms));
-    const d = document.getElementById('lab-detail');
-    const before = d.hidden;
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-    await wait(60);
-    // Read before cleanup: rebuilding the strip replaces the element under a
-    // stationary cursor, which fires pointerenter and reopens the popup.
-    const after = d.hidden;
-    delete document.documentElement.dataset.theme;
-    await wait(120);
-    document.getElementById('lab-resume').click();
-    return before + ',' + after;
-  })()")"
+hover "$SWATCH"
+playwright-cli -s=themetest press Escape >/dev/null 2>&1
+sleep 0.3
+check "16b Escape dismisses" true "$(hidden)"
+
+evaluate "delete document.documentElement.dataset.theme;
+  setTimeout(function () { document.getElementById('lab-resume').click(); }, 80); 'reset'" >/dev/null
+sleep 0.4
 
 check "17 every component renders" "1,1,2,6,1,1" "$(evaluate "
   [document.querySelectorAll('.lab .post-title').length,
@@ -235,6 +236,13 @@ check "18 dark scheme changes the fill" different "$(evaluate "
     const wait = ms => new Promise(r => setTimeout(r, ms));
     const anim = () => document.body.getAnimations().find(x => x.animationName === 'theme-cycle');
     const fill = () => getComputedStyle(document.body).getPropertyValue('--accent-fill').trim();
+    // Start from a known state: earlier checks leave a pin and a scheme set,
+    // and setting data-theme to what it already is changes nothing.
+    delete document.documentElement.dataset.theme;
+    document.body.style.removeProperty('--accent-fill');
+    document.body.style.removeProperty('--accent-text');
+    document.body.style.animation = '';
+    await wait(150);
     anim().pause();
     anim().currentTime = 45000;
     await wait(60);
