@@ -34,7 +34,7 @@ evaluate() {
 }
 
 cd "$ROOT"
-hugo server --port "$PORT" --disableFastRender >/dev/null 2>&1 &
+hugo server -D --port "$PORT" --disableFastRender >/dev/null 2>&1 &
 HUGO_PID=$!
 
 for _ in $(seq 1 40); do
@@ -154,7 +154,38 @@ check "11 a custom colour overrides the cycle" changed "$(evaluate "
 
 # The style guide is render:never, so this also proves site.GetPage still
 # reaches it without the server needing -D.
-check "12 every component renders" "1,1,2,6,1,1" "$(evaluate "
+check "12 the popup can be dismissed" "true,true,true,true" "$(evaluate "
+  (async () => {
+    const wait = ms => new Promise(r => setTimeout(r, ms));
+    const d = document.getElementById('lab-detail');
+    const track = document.getElementById('lab-track');
+    const open = async type => {
+      document.querySelectorAll('.lab-swatch')[5]
+        .dispatchEvent(new PointerEvent('pointerenter', { bubbles: true, pointerType: type }));
+      await wait(50);
+    };
+    const out = [];
+    await open('mouse');
+    track.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true, pointerType: 'mouse' }));
+    await wait(50);
+    out.push(d.hidden);
+    // Touch must survive its own pointerleave, or the popup closes in the
+    // same gesture that opened it.
+    await open('touch');
+    track.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true, pointerType: 'touch' }));
+    await wait(50);
+    out.push(!d.hidden);
+    document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    await wait(50);
+    out.push(d.hidden);
+    await open('mouse');
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await wait(50);
+    out.push(d.hidden);
+    return out.join(',');
+  })()")"
+
+check "13 every component renders" "1,1,2,6,1,1" "$(evaluate "
   [document.querySelectorAll('.lab .post-title').length,
    document.querySelectorAll('.lab .lead').length,
    document.querySelectorAll('.lab .project-card').length,
@@ -167,7 +198,7 @@ echo "colour scheme"
 # The animation must be paused first: --accent-fill moves continuously, so
 # two samples taken moments apart differ whatever the scheme does, and the
 # check passes even with the colour-scheme wiring deleted.
-check "13 dark scheme changes the fill" different "$(evaluate "
+check "14 dark scheme changes the fill" different "$(evaluate "
   (async () => {
     const wait = ms => new Promise(r => setTimeout(r, ms));
     const anim = () => document.body.getAnimations().find(x => x.animationName === 'theme-cycle');

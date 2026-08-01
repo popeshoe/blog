@@ -271,11 +271,13 @@ site; stop and smoke-test there before touching dev tooling.
 - [x] Resume = seek to wall-clock + `play()`
 - [x] Delete the `realStart` / `realSeek` monkeypatch
 - [x] Swatches sampled from a hidden paused probe, not the `COLOURS` global
-- [x] `content/colour-lab.md` with `build: { list: never }` (`_build` was
-      removed in Hugo 0.145)
-- [x] `layouts/colour-lab.html` wrapped in `{{ if hugo.IsServer }}` — root
-      level, not `_default/`: Hugo 0.164 resolves the `layout` front matter
-      there, and `_default/single.html` wins otherwise
+- [x] `content/colour-lab.md` is `draft: true`, so the lab needs
+      `hugo server -D`
+- [x] `layouts/colour-lab.html` at root level, not `_default/`: Hugo 0.164
+      resolves the `layout` front matter there, and `_default/single.html`
+      wins otherwise. Guarded by `draft: true` on the content file rather than
+      `hugo.IsServer` in the template — the page then doesn't exist at all in
+      production instead of existing as a blank shell.
 - [x] Render all 20 baked entries, sampled from the CSS
 - [x] WCAG ratios in JS from resolved rgb, flagged not gated
 - [x] Custom-colour input previewed through `oklch(from ...)`
@@ -349,3 +351,15 @@ site; stop and smoke-test there before touching dev tooling.
 - [x] Content is the page again: post index, cards, and the whole style guide
       are read without scrolling past a colour grid
 - [x] Tests updated to the new UI — 13 checks, all green
+
+## Phase 9 — Polish
+
+- [x] Popup dismissal: leaving the strip (mouse and pen only — touch fires
+      `pointerleave` on lift, which would close it in the same gesture that
+      opened it), tapping outside, Escape, or scrolling
+- [x] Fixed the bar resizing when a swatch is clicked — the status text and
+      button label both change length, so both now have a min-width floor
+- [x] `hugo.IsServer` dropped: `content/colour-lab.md` is `draft: true`, so
+      the page is absent from production rather than rendered blank.
+      `theme-test.sh` runs the server with `-D`.
+- [x] 14 checks, all green

@@ -1,5 +1,5 @@
+{{/* Draft, so it only exists under `hugo server -D` and never ships. */}}
 {{ define "main" }}
-{{ if hugo.IsServer }}
 <div class="content lab">
   <h1>Colour lab</h1>
   <p class="lab-note">
@@ -176,6 +176,16 @@
 
   .lab-controls button[disabled] { opacity: .5; cursor: default; }
 
+  /* Both strings change on pin, and without a floor the flex row reflows and
+     the timeline visibly resizes under the pointer. Sized for the longest
+     each can hold: "Cycling" and "held on a custom colour". */
+  .lab-controls button { min-width: 5rem; }
+
+  #lab-status {
+    min-width: 11rem;
+    white-space: nowrap;
+  }
+
   .lab-detail {
     position: absolute;
     bottom: calc(100% + var(--space-2));
@@ -333,6 +343,25 @@
 
   function hideDetail() { detail.hidden = true; }
 
+  // Leaving the strip, not each swatch: sliding between neighbours would
+  // otherwise fire leave-then-enter and flicker. Guarded to mouse and pen
+  // because touch fires pointerleave as soon as the finger lifts, which would
+  // dismiss the popup in the same gesture that opened it. Touch dismisses by
+  // tapping elsewhere, below.
+  track.addEventListener("pointerleave", function (e) {
+    if (e.pointerType !== "touch") hideDetail();
+  });
+
+  document.addEventListener("pointerdown", function (e) {
+    if (!track.contains(e.target)) hideDetail();
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") hideDetail();
+  });
+
+  window.addEventListener("scroll", hideDetail, { passive: true });
+
   function pinBaked(i) {
     release();
     var anim = animation(body);
@@ -406,7 +435,6 @@
       sw.addEventListener("pointerenter", reveal);
       sw.addEventListener("pointerdown", reveal);
       sw.addEventListener("focus", reveal);
-      sw.addEventListener("pointerleave", hideDetail);
       sw.addEventListener("blur", hideDetail);
       track.appendChild(sw);
     }
@@ -470,5 +498,4 @@
   }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 })();
 </script>
-{{ end }}
 {{ end }}
