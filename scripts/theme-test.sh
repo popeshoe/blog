@@ -85,16 +85,28 @@ check "5 seek tracks wall-clock" true "$(evaluate "
 
 echo "colour lab"
 
-playwright-cli -s=themetest goto "$URL/colour-lab/" >/dev/null 2>&1
+# Measures the box, not the .hidden property. Asserting the property we set
+# ourselves is a tautology: it passed for four rounds while an author
+# `display: flex` was overriding [hidden] and the popup never left the screen.
+hidden() { evaluate "(() => {
+  const r = document.getElementById('lab-detail').getBoundingClientRect();
+  return String(!(r.width > 0 && r.height > 0));
+})()"; }
 
-check "6 timeline renders 20 swatches" 20 "$(evaluate "
+playwright-cli -s=themetest goto "$URL/colour-lab/" >/dev/null 2>&1
+sleep 0.3
+
+check "6 the popup starts off screen" true "$(hidden)"
+
+
+check "7 timeline renders 20 swatches" 20 "$(evaluate "
   String(document.querySelectorAll('.lab-swatch').length)")"
 
-check "7 swatches sampled from the palette" 20 "$(evaluate "
+check "8 swatches sampled from the palette" 20 "$(evaluate "
   String(new Set([...document.querySelectorAll('.lab-swatch')]
     .map(b => b.style.background)).size)")"
 
-check "8 clicking a swatch holds the page" "paused,frozen,running,synced" "$(evaluate "
+check "9 clicking a swatch holds the page" "paused,frozen,running,synced" "$(evaluate "
   (async () => {
     const wait = ms => new Promise(r => setTimeout(r, ms));
     const anim = () => document.body.getAnimations().find(x => x.animationName === 'theme-cycle');
@@ -113,7 +125,7 @@ check "8 clicking a swatch holds the page" "paused,frozen,running,synced" "$(eva
     return out.join(',');
   })()")"
 
-check "9 hovering a swatch reveals both schemes" "2,true" "$(evaluate "
+check "10 hovering a swatch reveals both schemes" "2,true" "$(evaluate "
   (async () => {
     const wait = ms => new Promise(r => setTimeout(r, ms));
     const d = document.getElementById('lab-detail');
@@ -128,7 +140,7 @@ check "9 hovering a swatch reveals both schemes" "2,true" "$(evaluate "
       String(a.left !== b.left && a.hex !== b.hex);
   })()")"
 
-check "10 the scrub bar follows the animation" true "$(evaluate "
+check "11 the scrub bar follows the animation" true "$(evaluate "
   (async () => {
     const wait = ms => new Promise(r => setTimeout(r, ms));
     const s = document.getElementById('lab-scrub');
@@ -137,7 +149,7 @@ check "10 the scrub bar follows the animation" true "$(evaluate "
     return String(Number(s.value) !== before && s.max === '$CYCLE_MS');
   })()")"
 
-check "11 a custom colour overrides the cycle" changed "$(evaluate "
+check "12 a custom colour overrides the cycle" changed "$(evaluate "
   (async () => {
     const wait = ms => new Promise(r => setTimeout(r, ms));
     const fill = () => getComputedStyle(document.body).getPropertyValue('--accent-fill').trim();
@@ -179,46 +191,44 @@ SWATCH=$(centre "document.querySelectorAll('.lab-swatch')[9]")
 
 away() { playwright-cli -s=themetest mousemove 400 200 >/dev/null 2>&1; sleep 0.3; }
 hover() { away; playwright-cli -s=themetest mousemove $1 >/dev/null 2>&1; sleep 0.4; }
-hidden() { evaluate "String(document.getElementById('lab-detail').hidden)"; }
 
 hover "$SWATCH"
-check "12 hovering a swatch opens the popup" false "$(hidden)"
+check "13 hovering a swatch opens the popup" false "$(hidden)"
 
 # A click also focuses the button, and that focus event lands after the
 # document handler has closed the popup - it reopened it every time until the
 # focus listener was narrowed to :focus-visible.
 tap "$SWATCH"
-check "13 clicking a swatch dismisses but still pins" "true,true" "$(evaluate "
-  String(document.getElementById('lab-detail').hidden) + ',' +
-  /held on entry/.test(document.getElementById('lab-status').textContent)")"
+check "14 clicking a swatch dismisses but still pins" "true,true" "$(
+  printf '%s,%s' "$(hidden)" \
+    "$(evaluate "String(/held on entry/.test(document.getElementById('lab-status').textContent))")")"
 
 hover "$SWATCH"
 DARK_CELL=$(centre "[...document.querySelectorAll('#lab-detail .lab-cell')].find(c => c.dataset.scheme === 'dark')")
 playwright-cli -s=themetest mousemove $DARK_CELL >/dev/null 2>&1
 sleep 0.3
 
-check "14 the popup survives moving onto it" false "$(hidden)"
+check "15 the popup survives moving onto it" false "$(hidden)"
 
 tap "$DARK_CELL"
 
-check "15 clicking a cell adopts colour and scheme, stays open" "false,dark" "$(evaluate "
-  String(document.getElementById('lab-detail').hidden) + ',' +
-  document.documentElement.dataset.theme")"
+check "16 clicking a cell adopts colour and scheme, stays open" "false,dark" "$(
+  printf '%s,%s' "$(hidden)" "$(evaluate "document.documentElement.dataset.theme")")"
 
 away
 tap "400 300"
-check "16 clicking anywhere else dismisses" true "$(hidden)"
+check "17 clicking anywhere else dismisses" true "$(hidden)"
 
 hover "$SWATCH"
 playwright-cli -s=themetest press Escape >/dev/null 2>&1
 sleep 0.3
-check "16b Escape dismisses" true "$(hidden)"
+check "18 Escape dismisses" true "$(hidden)"
 
 evaluate "delete document.documentElement.dataset.theme;
   setTimeout(function () { document.getElementById('lab-resume').click(); }, 80); 'reset'" >/dev/null
 sleep 0.4
 
-check "17 every component renders" "1,1,2,6,1,1" "$(evaluate "
+check "19 every component renders" "1,1,2,6,1,1" "$(evaluate "
   [document.querySelectorAll('.lab .post-title').length,
    document.querySelectorAll('.lab .lead').length,
    document.querySelectorAll('.lab .project-card').length,
@@ -231,7 +241,7 @@ echo "colour scheme"
 # The animation must be paused first: --accent-fill moves continuously, so
 # two samples taken moments apart differ whatever the scheme does, and the
 # check passes even with the colour-scheme wiring deleted.
-check "18 dark scheme changes the fill" different "$(evaluate "
+check "20 dark scheme changes the fill" different "$(evaluate "
   (async () => {
     const wait = ms => new Promise(r => setTimeout(r, ms));
     const anim = () => document.body.getAnimations().find(x => x.animationName === 'theme-cycle');

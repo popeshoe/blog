@@ -379,3 +379,11 @@ site; stop and smoke-test there before touching dev tooling.
       document handler has closed the popup — it reopened it every time until
       the focus listener was narrowed to `:focus-visible`, which keeps the
       keyboard path working.
+- [x] **The popup was never actually hidden.** `.lab-detail { display: flex }`
+      is an author style, so it beat the UA stylesheet's
+      `[hidden] { display: none }` and the element stayed on screen no matter
+      what the JS did. Every dismissal fix before this one was correct in JS
+      and invisible in effect. Fixed with `.lab-detail[hidden] { display: none }`.
+- [x] Tests now measure the bounding box instead of reading back the `.hidden`
+      property they set themselves — that tautology is what let this survive
+      four rounds of "fixed". 20 checks.

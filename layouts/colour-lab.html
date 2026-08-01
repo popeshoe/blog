@@ -187,6 +187,10 @@
     white-space: nowrap;
   }
 
+  /* Any author `display` beats the UA stylesheet's [hidden] { display: none },
+     so setting .hidden alone left this on screen permanently. */
+  .lab-detail[hidden] { display: none; }
+
   /* Flush against the bar so the popup reads as attached to the strip. */
   .lab-detail {
     position: absolute;
