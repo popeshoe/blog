@@ -363,3 +363,10 @@ site; stop and smoke-test there before touching dev tooling.
       the page is absent from production rather than rendered blank.
       `theme-test.sh` runs the server with `-D`.
 - [x] 14 checks, all green
+- [x] Popup cells are buttons: clicking one adopts that colour *and* the scheme
+      it was shown in. The pin is applied on the next tick, since changing
+      `data-theme` restarts the animation and rebuilds the strip, both of which
+      would otherwise drop it.
+- [x] Popup sits flush against the bar and dismissal moved from the strip to
+      the whole bar — with clickable cells, a gap would be a dead zone that
+      closed the popup before the pointer could reach it

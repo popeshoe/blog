@@ -154,34 +154,50 @@ check "11 a custom colour overrides the cycle" changed "$(evaluate "
 
 # The style guide is render:never, so this also proves site.GetPage still
 # reaches it without the server needing -D.
-check "12 the popup can be dismissed" "true,true,true,true" "$(evaluate "
+check "12 popup dismissal and scheme adoption" "true,true,true,true,dark,light" "$(evaluate "
   (async () => {
     const wait = ms => new Promise(r => setTimeout(r, ms));
     const d = document.getElementById('lab-detail');
-    const track = document.getElementById('lab-track');
+    const bar = document.querySelector('.lab-bar');
     const open = async type => {
-      document.querySelectorAll('.lab-swatch')[5]
+      document.querySelectorAll('.lab-swatch')[9]
         .dispatchEvent(new PointerEvent('pointerenter', { bubbles: true, pointerType: type }));
-      await wait(50);
+      await wait(60);
     };
     const out = [];
+
+    // Must survive the trip from the strip into the popup, or the cells are
+    // unreachable.
     await open('mouse');
-    track.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true, pointerType: 'mouse' }));
-    await wait(50);
-    out.push(d.hidden);
-    // Touch must survive its own pointerleave, or the popup closes in the
-    // same gesture that opened it.
-    await open('touch');
-    track.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true, pointerType: 'touch' }));
-    await wait(50);
+    d.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true, pointerType: 'mouse' }));
+    await wait(60);
     out.push(!d.hidden);
+
+    bar.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true, pointerType: 'mouse' }));
+    await wait(60);
+    out.push(d.hidden);
+
+    // Touch fires pointerleave on lift, which must not close it.
+    await open('touch');
+    bar.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true, pointerType: 'touch' }));
+    await wait(60);
+    out.push(!d.hidden);
+
     document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
-    await wait(50);
+    await wait(60);
     out.push(d.hidden);
+
     await open('mouse');
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-    await wait(50);
-    out.push(d.hidden);
+    d.querySelectorAll('.lab-cell')[1].click();
+    await wait(200);
+    out.push(document.documentElement.dataset.theme);
+    await open('mouse');
+    d.querySelectorAll('.lab-cell')[0].click();
+    await wait(200);
+    out.push(document.documentElement.dataset.theme);
+    delete document.documentElement.dataset.theme;
+    await wait(120);
+    document.getElementById('lab-resume').click();
     return out.join(',');
   })()")"
 

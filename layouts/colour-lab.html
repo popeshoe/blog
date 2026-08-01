@@ -1,11 +1,11 @@
-{{/* Draft, so it only exists under `hugo server -D` and never ships. */}}
 {{ define "main" }}
 <div class="content lab">
   <h1>Colour lab</h1>
   <p class="lab-note">
     Dev server only. Scrub the timeline at the bottom to move through the
     1400s cycle, or click a swatch to hold the page on it. Hover a swatch for
-    its baked values and contrast. Everything below is a real component.
+    its baked values and contrast, then click either half to adopt that colour
+    <em>and</em> its scheme. Everything below is a real component.
   </p>
 
   <h2>Post index</h2>
@@ -186,21 +186,33 @@
     white-space: nowrap;
   }
 
+  /* Flush against the bar, not floating above it: the cells are clickable, so
+     a gap would be a dead zone the pointer crosses on the way up, firing
+     pointerleave and closing the popup before it can be reached. */
   .lab-detail {
     position: absolute;
-    bottom: calc(100% + var(--space-2));
+    bottom: 100%;
     width: max-content;
     max-width: 22rem;
     display: flex;
     gap: 2px;
-    border-radius: 4px;
+    border-radius: 4px 4px 0 0;
     overflow: hidden;
-    box-shadow: 0 2px 14px var(--shadow-lifted);
-    pointer-events: none;
+    box-shadow: 0 -2px 14px var(--shadow-lifted);
     transform: translateX(-50%);
   }
 
-  .lab-cell { padding: var(--space-2); min-width: 9.5rem; }
+  .lab-cell {
+    padding: var(--space-2);
+    min-width: 9.5rem;
+    border: 0;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .lab-cell:hover,
+  .lab-cell:focus-visible { filter: brightness(1.15); }
   .lab-cell b { display: block; font-size: .85rem; }
   .lab-cell span { display: block; font-size: .65rem; opacity: .9; }
   .lab-cell em { font-style: normal; font-weight: 700; }
@@ -304,11 +316,13 @@
     return "oklch(from " + source + " " + CLAMPS[token][scheme] + " c h)";
   }
 
-  function cell(scheme, fill, text) {
+  function cell(scheme, fill, text, index) {
     var onFill = ratio("#ffffff", fill);
     var onSurface = ratio(text, SURFACE[scheme]);
     var flag = onFill < 4.5 ? ' class="lab-low"' : "";
-    return '<div class="lab-cell" style="background:' + fill + ';color:#fff">' +
+    return '<button type="button" class="lab-cell" data-scheme="' + scheme +
+      '" data-index="' + index + '" title="Hold this colour in ' + scheme +
+      ' mode" style="background:' + fill + ';color:#fff">' +
       '<span class="lab-scheme-tag">' + scheme + "</span>" +
       "<b>" + hex(fill) + "</b>" +
       "<span" + flag + ">white on fill <em>" + onFill.toFixed(2) + ":1</em></span>" +
@@ -317,7 +331,7 @@
       '<span class="lab-on-page" style="background:' + SURFACE[scheme] +
       ";color:" + text + '">' + hex(text) + " on page <em>" +
       onSurface.toFixed(2) + ":1</em></span>" +
-      "</div>";
+      "</button>";
   }
 
   var baked = { light: [], dark: [] };
@@ -332,9 +346,9 @@
   var input = document.getElementById("lab-input");
   var picker = document.getElementById("lab-picker");
 
-  function showDetail(target, light, dark) {
-    detail.innerHTML = cell("light", light.fill, light.text) +
-                       cell("dark", dark.fill, dark.text);
+  function showDetail(target, light, dark, index) {
+    detail.innerHTML = cell("light", light.fill, light.text, index) +
+                       cell("dark", dark.fill, dark.text, index);
     var box = target.getBoundingClientRect();
     var bar = document.querySelector(".lab-bar").getBoundingClientRect();
     detail.style.left = (box.left + box.width / 2 - bar.left) + "px";
@@ -348,12 +362,24 @@
   // because touch fires pointerleave as soon as the finger lifts, which would
   // dismiss the popup in the same gesture that opened it. Touch dismisses by
   // tapping elsewhere, below.
-  track.addEventListener("pointerleave", function (e) {
+  document.querySelector(".lab-bar").addEventListener("pointerleave", function (e) {
     if (e.pointerType !== "touch") hideDetail();
   });
 
   document.addEventListener("pointerdown", function (e) {
-    if (!track.contains(e.target)) hideDetail();
+    if (!track.contains(e.target) && !detail.contains(e.target)) hideDetail();
+  });
+
+  // Clicking a cell adopts both the colour and the scheme it was shown in.
+  // colours.html restarts the animation when data-theme changes and the strip
+  // rebuilds, either of which would drop a pin applied in the same tick, so
+  // the pin lands after those have run.
+  detail.addEventListener("click", function (e) {
+    var target = e.target.closest(".lab-cell");
+    if (!target) return;
+    var index = Number(target.dataset.index);
+    document.documentElement.dataset.theme = target.dataset.scheme;
+    setTimeout(function () { pinBaked(index); }, 0);
   });
 
   document.addEventListener("keydown", function (e) {
@@ -430,7 +456,7 @@
       });
       var reveal = function () {
         var n = Number(this.dataset.index);
-        showDetail(this, baked.light[n], baked.dark[n]);
+        showDetail(this, baked.light[n], baked.dark[n], n);
       };
       sw.addEventListener("pointerenter", reveal);
       sw.addEventListener("pointerdown", reveal);
